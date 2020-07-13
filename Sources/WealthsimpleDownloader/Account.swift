@@ -1,0 +1,122 @@
+//
+//  Account.swift
+//
+//
+//  Created by Steffen Kötte on 2020-07-12.
+//
+
+import Foundation
+
+/// An Account at Wealthsimple
+public struct Account {
+
+    /// Errors which can happen when retrieving an Account
+    public enum AccountError: Error {
+        case noDataReceived
+        case httpError(error: String)
+        case invalidJson(error: String)
+        case invalidJsonType(json: Any)
+        case missingResultParamenter(json: [String: Any])
+        case invalidResultParamenter(json: [String: Any])
+        case tokenError(_ error: TokenError)
+    }
+
+    /// Type of the account
+    ///
+    /// Note: Currently only Canadian Accounts are supported
+    public enum AccountType: String {
+        case tfsa = "ca_tfsa"
+        case chequing = "ca_cash"
+        case rrsp = "ca_rrsp"
+        case nonRegistered = "ca_non_registered"
+        case nonRegisteredCrypto = "ca_non_registered_crypto"
+        case lira = "ca_lira"
+        case joint = "ca_joint"
+        case rrif = "ca_rrif"
+        case lif = "ca_lif"
+    }
+
+    private static let url = URL(string: "https://api.production.wealthsimple.com/v1/accounts")!
+
+    /// Type of the account
+    public let accountType: AccountType
+    /// Operating currency of the account
+    public let currency: String
+
+    let id: String
+
+    private init(json: [String: Any]) throws {
+        guard let id = json["id"] as? String,
+              let typeString = json["type"] as? String,
+              let object = json["object"] as? String,
+              let currency = json["base_currency"] as? String else {
+            throw AccountError.missingResultParamenter(json: json)
+        }
+        guard let type = AccountType(rawValue: typeString), object == "account" else {
+            throw AccountError.invalidResultParamenter(json: json)
+        }
+        self.id = id
+        self.accountType = type
+        self.currency = currency
+    }
+
+    static func getAccounts(token: Token, completion: @escaping (Result<[Account], AccountError>) -> Void) {
+        var request = URLRequest(url: url)
+        let session = URLSession.shared
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        token.authenticateRequest(request) {
+            switch $0 {
+            case let .failure(error):
+                completion(.failure(.tokenError(error)))
+            case let .success(request):
+                let task = session.dataTask(with: request) { data, response, error in
+                    handleResponse(data: data, response: response, error: error, completion: completion)
+                }
+                task.resume()
+            }
+        }
+    }
+
+    private static func handleResponse(data: Data?, response: URLResponse?, error: Error?, completion: @escaping (Result<[Account], AccountError>) -> Void) {
+        guard let data = data else {
+            if let error = error {
+                completion(.failure(AccountError.httpError(error: error.localizedDescription)))
+            } else {
+                completion(.failure(AccountError.noDataReceived))
+            }
+            return
+        }
+        guard let httpResponse = response as? HTTPURLResponse else {
+            completion(.failure(AccountError.httpError(error: "No HTTPURLResponse")))
+            return
+        }
+        guard httpResponse.statusCode == 200 else {
+            completion(.failure(AccountError.httpError(error: "Status code \(httpResponse.statusCode)")))
+            return
+        }
+        do {
+            guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+                completion(.failure(AccountError.invalidJsonType(json: try JSONSerialization.jsonObject(with: data, options: []))))
+                return
+            }
+            do {
+                guard let results = json["results"] as? [[String: Any]], let object = json["object"] as? String else {
+                    throw AccountError.missingResultParamenter(json: json)
+                }
+                guard object == "account" else {
+                    throw AccountError.invalidResultParamenter(json: json)
+                }
+                var accounts = [Account]()
+                for result in results {
+                    accounts.append(try Account(json: result))
+                }
+                completion(.success(accounts))
+            } catch {
+                completion(.failure(error as! AccountError)) // swiftlint:disable:this force_cast
+            }
+        } catch {
+            completion(.failure(AccountError.invalidJson(error: error.localizedDescription)))
+            return
+        }
+    }
+}
