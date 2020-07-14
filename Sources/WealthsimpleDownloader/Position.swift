@@ -6,6 +6,9 @@
 //
 
 import Foundation
+ #if canImport(FoundationNetworking)
+ import FoundationNetworking
+ #endif
 
 /// A Position, like certain amount of a stock or a currency held in an account
 public struct Position {

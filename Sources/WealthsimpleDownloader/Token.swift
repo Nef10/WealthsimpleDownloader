@@ -6,6 +6,9 @@
 //
 
 import Foundation
+ #if canImport(FoundationNetworking)
+ import FoundationNetworking
+ #endif
 
 /// Errors which can happen when getting a Token
 public enum TokenError: Error {
