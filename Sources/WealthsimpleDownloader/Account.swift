@@ -6,6 +6,9 @@
 //
 
 import Foundation
+ #if canImport(FoundationNetworking)
+ import FoundationNetworking
+ #endif
 
 /// An Account at Wealthsimple
 public struct Account {
