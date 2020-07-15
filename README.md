@@ -8,7 +8,29 @@ This is a small library to download data from Wealthsimple. It does not support 
 
 ## How
 
-1) Implement a `CredentialStore`, e.g. using the [KeychainAccess](https://github.com/kishikawakatsumi/KeychainAccess) library.
+1) Implement a `CredentialStore` 
+<details>
+  <summary>Example using the KeychainAccess library</summary>
+  
+  ```swift
+import KeychainAccess
+    
+class KeyChainCredentialStorage: CredentialStorage {
+
+    let keychain = Keychain(service: "XYZ")
+
+    func save(_ value: String, for key: String) {
+        keychain[key] = value
+    }
+
+    func read(_ key: String) -> String? {
+        keychain[key]
+    }
+
+}
+  ```
+</details>
+
 2) Implement an `AuthenticationCallback` which will ask the user for their username, password and one time password.
 3) Initialize `WealthsimpleDownloader` with you two implementations: `let wealthsimpleDownloader = WealthsimpleDownloader(authenticationCallback: myAuthenticationCallback, credentialStorage: myCredentialStorage)`
 4) Call `wealthsimpleDownloader.authenticate() { }` and wait for the callback
