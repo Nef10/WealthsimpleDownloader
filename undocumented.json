@@ -1,0 +1,271 @@
+{
+  "warnings": [
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
+      "line": 18,
+      "symbol": "Account.AccountError.noDataReceived",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
+      "line": 19,
+      "symbol": "Account.AccountError.httpError(error:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
+      "line": 20,
+      "symbol": "Account.AccountError.invalidJson(error:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
+      "line": 21,
+      "symbol": "Account.AccountError.invalidJsonType(json:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
+      "line": 22,
+      "symbol": "Account.AccountError.missingResultParamenter(json:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
+      "line": 23,
+      "symbol": "Account.AccountError.invalidResultParamenter(json:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
+      "line": 24,
+      "symbol": "Account.AccountError.tokenError(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
+      "line": 31,
+      "symbol": "Account.AccountType.tfsa",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
+      "line": 32,
+      "symbol": "Account.AccountType.chequing",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
+      "line": 33,
+      "symbol": "Account.AccountType.rrsp",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
+      "line": 34,
+      "symbol": "Account.AccountType.nonRegistered",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
+      "line": 35,
+      "symbol": "Account.AccountType.nonRegisteredCrypto",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
+      "line": 36,
+      "symbol": "Account.AccountType.lira",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
+      "line": 37,
+      "symbol": "Account.AccountType.joint",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
+      "line": 38,
+      "symbol": "Account.AccountType.rrif",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
+      "line": 39,
+      "symbol": "Account.AccountType.lif",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Asset.swift",
+      "line": 15,
+      "symbol": "Asset.AssetError.missingResultParamenter(json:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Asset.swift",
+      "line": 16,
+      "symbol": "Asset.AssetError.invalidResultParamenter(json:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Asset.swift",
+      "line": 21,
+      "symbol": "Asset.AssetType.currency",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Asset.swift",
+      "line": 22,
+      "symbol": "Asset.AssetType.equity",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Asset.swift",
+      "line": 23,
+      "symbol": "Asset.AssetType.mutualFund",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Asset.swift",
+      "line": 24,
+      "symbol": "Asset.AssetType.bond",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Asset.swift",
+      "line": 25,
+      "symbol": "Asset.AssetType.exchangeTradedFund",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Position.swift",
+      "line": 18,
+      "symbol": "Position.PositionError.noDataReceived",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Position.swift",
+      "line": 19,
+      "symbol": "Position.PositionError.httpError(error:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Position.swift",
+      "line": 20,
+      "symbol": "Position.PositionError.invalidJson(error:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Position.swift",
+      "line": 21,
+      "symbol": "Position.PositionError.invalidJsonType(json:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Position.swift",
+      "line": 22,
+      "symbol": "Position.PositionError.missingResultParamenter(json:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Position.swift",
+      "line": 23,
+      "symbol": "Position.PositionError.invalidResultParamenter(json:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Position.swift",
+      "line": 24,
+      "symbol": "Position.PositionError.assetError(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Position.swift",
+      "line": 25,
+      "symbol": "Position.PositionError.tokenError(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Token.swift",
+      "line": 15,
+      "symbol": "TokenError.noToken",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Token.swift",
+      "line": 16,
+      "symbol": "TokenError.invalidJson(error:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Token.swift",
+      "line": 17,
+      "symbol": "TokenError.invalidJsonType(json:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Token.swift",
+      "line": 18,
+      "symbol": "TokenError.invalidParameters(parameters:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Token.swift",
+      "line": 19,
+      "symbol": "TokenError.missingResultParamenter(json:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Token.swift",
+      "line": 20,
+      "symbol": "TokenError.httpError(error:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Token.swift",
+      "line": 21,
+      "symbol": "TokenError.noDataReceived",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    }
+  ],
+  "source_directory": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader"
+}
