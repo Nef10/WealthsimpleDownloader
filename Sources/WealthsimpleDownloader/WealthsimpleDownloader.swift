@@ -30,7 +30,7 @@ public protocol CredentialStorage {
 public final class WealthsimpleDownloader {
 
     /// Callback which is called in case the user needs to authenticate. Needs to return username, password, and one time password
-    public typealias AuthenticationCallback = ((String, String, String) -> Void) -> Void
+    public typealias AuthenticationCallback = (@escaping (String, String, String) -> Void) -> Void
 
     private let authenticationCallback: AuthenticationCallback
     private let credentialStorage: CredentialStorage
@@ -97,7 +97,7 @@ public final class WealthsimpleDownloader {
 
     private func getNewToken(completion: @escaping (Error?) -> Void) {
         authenticationCallback { username, password, otp in
-            Token.getToken(username: username, password: password, otp: otp, credentialStorage: credentialStorage) {
+            Token.getToken(username: username, password: password, otp: otp, credentialStorage: self.credentialStorage) {
                 switch $0 {
                 case let .failure(error):
                     completion(error)
