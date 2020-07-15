@@ -69,8 +69,9 @@ public final class WealthsimpleDownloader {
                     return
                 }
             }
+        } else {
+            getNewToken(completion: completion)
         }
-        getNewToken(completion: completion)
     }
 
     /// Get all Accounts the user has access to
