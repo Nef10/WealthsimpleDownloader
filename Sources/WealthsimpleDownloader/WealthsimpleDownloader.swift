@@ -81,7 +81,14 @@ public final class WealthsimpleDownloader {
             completion(.failure(.tokenError(.noToken)))
             return
         }
-        Account.getAccounts(token: token, completion: completion)
+        Account.getAccounts(token: token) {
+            if case let .failure(error) = $0 {
+                if case .tokenError = error {
+                    self.token = nil
+                }
+            }
+            completion($0)
+        }
     }
 
     /// Get all `Position`s from one `Account`
@@ -93,7 +100,14 @@ public final class WealthsimpleDownloader {
             completion(.failure(.tokenError(.noToken)))
             return
         }
-        Position.getPositions(token: token, account: account, completion: completion)
+        Position.getPositions(token: token, account: account) {
+            if case let .failure(error) = $0 {
+                if case .tokenError = error {
+                    self.token = nil
+                }
+            }
+            completion($0)
+        }
     }
 
     private func getNewToken(completion: @escaping (Error?) -> Void) {
