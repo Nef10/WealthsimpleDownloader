@@ -27,9 +27,9 @@ public struct Position {
         case missingResultParamenter(json: [String: Any])
         /// When the received JSON does have an unexpected value
         case invalidResultParamenter(json: [String: Any])
-        // An error with the assets occured
+        /// An error with the assets occured
         case assetError(_ error: Asset.AssetError)
-        // An error with the token occured
+        /// An error with the token occured
         case tokenError(_ error: TokenError)
     }
 
