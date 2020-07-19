@@ -20,13 +20,13 @@ public struct Asset {
 
     /// Type of the asset
     public enum AssetType: String {
-        // Cash
+        /// Cash
         case currency
-        // Equity
+        /// Equity
         case equity
-        // Mutal Funds
+        /// Mutal Funds
         case mutualFund = "mutual_fund"
-        // Bonds
+        /// Bonds
         case bond
         /// ETFs
         case exchangeTradedFund = "exchange_traded_fund"
