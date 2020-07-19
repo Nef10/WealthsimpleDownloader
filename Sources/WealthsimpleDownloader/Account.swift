@@ -27,7 +27,7 @@ public struct Account {
         case missingResultParamenter(json: [String: Any])
         /// When the received JSON does have an unexpected value
         case invalidResultParamenter(json: [String: Any])
-        // An error with the token occured
+        /// An error with the token occured
         case tokenError(_ error: TokenError)
     }
 
