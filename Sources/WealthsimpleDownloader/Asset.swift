@@ -12,16 +12,23 @@ public struct Asset {
 
     /// Errors which can happen when retrieving an Asset
     public enum AssetError: Error {
+        /// When the received JSON does not have all expected values
         case missingResultParamenter(json: [String: Any])
+        /// When the received JSON does have an unexpected value
         case invalidResultParamenter(json: [String: Any])
     }
 
     /// Type of the asset
     public enum AssetType: String {
+        // Cash
         case currency
+        // Equity
         case equity
+        // Mutal Funds
         case mutualFund = "mutual_fund"
+        // Bonds
         case bond
+        /// ETFs
         case exchangeTradedFund = "exchange_traded_fund"
     }
 

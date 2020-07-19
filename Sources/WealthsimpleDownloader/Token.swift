@@ -12,12 +12,19 @@ import Foundation
 
 /// Errors which can happen when getting a Token
 public enum TokenError: Error {
+    /// When no token is found
     case noToken
+    /// When the received data is not valid JSON
     case invalidJson(error: String)
+    /// When the received JSON does not have the right type
     case invalidJsonType(json: Any)
+    /// When the paramters could not be converted to JSON
     case invalidParameters(parameters: [String: String])
+    /// When the received JSON does not have all expected values
     case missingResultParamenter(json: [String: Any])
+    /// When an HTTP error occurs
     case httpError(error: String)
+    /// When no data is received from the HTTP request
     case noDataReceived
 }
 

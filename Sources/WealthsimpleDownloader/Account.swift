@@ -15,12 +15,19 @@ public struct Account {
 
     /// Errors which can happen when retrieving an Account
     public enum AccountError: Error {
+        /// When no data is received from the HTTP request
         case noDataReceived
+        /// When an HTTP error occurs
         case httpError(error: String)
+        /// When the received data is not valid JSON
         case invalidJson(error: String)
+        /// When the received JSON does not have the right type
         case invalidJsonType(json: Any)
+        /// When the received JSON does not have all expected values
         case missingResultParamenter(json: [String: Any])
+        /// When the received JSON does have an unexpected value
         case invalidResultParamenter(json: [String: Any])
+        // An error with the token occured
         case tokenError(_ error: TokenError)
     }
 
@@ -28,14 +35,23 @@ public struct Account {
     ///
     /// Note: Currently only Canadian Accounts are supported
     public enum AccountType: String {
+        /// Tax free savings account (CA)
         case tfsa = "ca_tfsa"
+        /// Cash (chequing) account (CA)
         case chequing = "ca_cash"
+        /// Registered Retirement Savings Plan (CA)
         case rrsp = "ca_rrsp"
+        /// Non-registered account (CA)
         case nonRegistered = "ca_non_registered"
+        /// Non-registered crypto currency account (CA)
         case nonRegisteredCrypto = "ca_non_registered_crypto"
+        /// Locked-in retirement account (CA)
         case lira = "ca_lira"
+        /// Joint account (CA)
         case joint = "ca_joint"
+        /// Registered Retirement Income Fund (CA)
         case rrif = "ca_rrif"
+        /// Life Income Fund (CA)
         case lif = "ca_lif"
     }
 
