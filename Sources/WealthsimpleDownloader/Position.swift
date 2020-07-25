@@ -49,7 +49,7 @@ public struct Position {
     public let priceAmount: String
     /// Currency of the price
     public let priceCurrency: String
-    /// Dafe of the price
+    /// Date of the price
     public let priceDate: Date
 
     private init(json: [String: Any]) throws {
