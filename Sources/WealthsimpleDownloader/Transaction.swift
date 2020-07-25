@@ -116,6 +116,7 @@ public struct Transaction {
     /// Date when the trade was processed
     public let processDate: Date
 
+    // swiftlint:disable:next function_body_length
     private init(json: [String: Any]) throws {
         guard let description = json["description"] as? String,
               let symobl = json["symobl"] as? String,
