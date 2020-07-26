@@ -142,7 +142,7 @@ public struct Transaction {
         }
         guard let processDate = Self.dateFormatter.date(from: processDateString),
               let effectiveDate = Self.dateFormatter.date(from: effectiveDateString),
-              let type = TransactionType(rawValue: typeString),
+              let type = TransactionType(rawValue: typeString.lowercased()),
               object == "transaction" else {
             throw TransactionError.invalidResultParamenter(json: json)
         }
