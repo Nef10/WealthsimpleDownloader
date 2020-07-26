@@ -110,6 +110,25 @@ public final class WealthsimpleDownloader {
         }
     }
 
+    /// Get all `Transactions`s from one `Account`
+    /// - Parameters:
+    ///   - account: Account to retreive transactions from
+    ///   - completion: Result with an array of `Transactions`s or an `Transactions.TransactionsError`
+    public func getTransactions(in account: Account, completion: @escaping (Result<[Transaction], Transaction.TransactionError>) -> Void) {
+        guard let token = token else {
+            completion(.failure(.tokenError(.noToken)))
+            return
+        }
+        Transaction.getTransactions(token: token, account: account) {
+            if case let .failure(error) = $0 {
+                if case .tokenError = error {
+                    self.token = nil
+                }
+            }
+            completion($0)
+        }
+    }
+
     private func getNewToken(completion: @escaping (Error?) -> Void) {
         authenticationCallback { username, password, otp in
             Token.getToken(username: username, password: password, otp: otp, credentialStorage: self.credentialStorage) {
