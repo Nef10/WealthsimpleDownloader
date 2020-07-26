@@ -112,7 +112,7 @@ public struct Transaction {
     /// Currency of the net cash change
     public let netCashCurrency: String
     /// Foreign exchange rate applied
-    public let fxRate: Double
+    public let fxRate: String
     /// Date when the trade was settled
     public let effectiveDate: Date
     /// Date when the trade was processed
@@ -135,7 +135,7 @@ public struct Transaction {
               let netCashCurrency = netCashDict["currency"] as? String,
               let processDateString = json["process_date"] as? String,
               let effectiveDateString = json["effective_date"] as? String,
-              let fxRate = json["fx_rate"] as? Double,
+              let fxRate = json["fx_rate"] as? String,
               let object = json["object"] as? String
         else {
             throw TransactionError.missingResultParamenter(json: json)
