@@ -58,7 +58,7 @@ public struct Transaction {
         /// journal
         case journal
         /// non resident withholding tax
-        case nonResidentWithholdingTax = "non_resident_withholding_tax"
+        case nonResidentWithholdingTax = "non resident withholding tax"
         /// redemption
         case redemption
         /// risk exposure fee
