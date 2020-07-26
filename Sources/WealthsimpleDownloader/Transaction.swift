@@ -91,6 +91,8 @@ public struct Transaction {
         return dateFormatter
     }()
 
+    /// type of the transaction, like buy or sell
+    public let transactionType: TransactionType
     /// description of the transaction
     public let description: String
     /// symbol of the asset which is brought, sold, ...
@@ -119,6 +121,7 @@ public struct Transaction {
     // swiftlint:disable:next function_body_length
     private init(json: [String: Any]) throws {
         guard let description = json["description"] as? String,
+              let typeString = json["type"] as? String,
               let symobl = json["symobl"] as? String,
               let quantity = json["quantity"] as? String,
               let marketPriceDict = json["market_price"] as? [String: Any],
@@ -139,10 +142,12 @@ public struct Transaction {
         }
         guard let processDate = Self.dateFormatter.date(from: processDateString),
               let effectiveDate = Self.dateFormatter.date(from: effectiveDateString),
+              let type = TransactionType(rawValue: typeString),
               object == "transaction" else {
             throw TransactionError.invalidResultParamenter(json: json)
         }
         self.description = description
+        self.transactionType = type
         self.symobl = symobl
         self.quantity = quantity
         self.marketPriceAmount = marketPriceAmount
