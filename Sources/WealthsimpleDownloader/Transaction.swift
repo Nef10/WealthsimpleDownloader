@@ -96,7 +96,7 @@ public struct Transaction {
     /// description of the transaction
     public let description: String
     /// symbol of the asset which is brought, sold, ...
-    public let symobl: String
+    public let symbol: String
     /// Number of units of the asset brought, sold, ...
     public let quantity: String
     /// market pice of the asset
@@ -122,7 +122,7 @@ public struct Transaction {
     private init(json: [String: Any]) throws {
         guard let description = json["description"] as? String,
               let typeString = json["type"] as? String,
-              let symobl = json["symobl"] as? String,
+              let symbol = json["symbol"] as? String,
               let quantity = json["quantity"] as? String,
               let marketPriceDict = json["market_price"] as? [String: Any],
               let marketValueDict = json["market_value"] as? [String: Any],
@@ -148,7 +148,7 @@ public struct Transaction {
         }
         self.description = description
         self.transactionType = type
-        self.symobl = symobl
+        self.symbol = symbol
         self.quantity = quantity
         self.marketPriceAmount = marketPriceAmount
         self.marketPriceCurrency = marketPriceCurrency
