@@ -6,7 +6,7 @@ let package = Package(
     name: "WealthsimpleDownloader",
     products: [
         .library(
-            name: "WealthsimpleDownloader",
+            name: "WealthsimpleDownloaderLibrary",
             targets: ["WealthsimpleDownloader"]),
     ],
     dependencies: [
