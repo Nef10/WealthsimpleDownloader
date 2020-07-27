@@ -1,4 +1,4 @@
-@testable import WealthsimpleDownloader
+@testable import Wealthsimple
 import XCTest
 
 final class WealthsimpleDownloaderTests: XCTestCase {
