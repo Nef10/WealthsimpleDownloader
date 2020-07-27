@@ -41,6 +41,8 @@ public struct Position {
         return dateFormatter
     }()
 
+    /// Wealthsimple identifier of the account in which this position is held
+    public let accountId: String
     /// Asset which is held
     public let asset: Asset
     /// Number of units of the asset held
@@ -54,6 +56,7 @@ public struct Position {
 
     private init(json: [String: Any]) throws {
         guard let quantity = json["quantity"] as? String,
+              let accountId = json["account_id"] as? String,
               let assetDict = json["asset"] as? [String: Any],
               let price = json["market_price"] as? [String: Any],
               let dateString = json["position_date"] as? String,
@@ -72,6 +75,7 @@ public struct Position {
         } catch {
             throw PositionError.assetError(error as! Asset.AssetError) // swiftlint:disable:this force_cast
         }
+        self.accountId = accountId
         self.quantity = quantity
         self.priceAmount = priceAmount
         self.priceCurrency = priceCurrency
