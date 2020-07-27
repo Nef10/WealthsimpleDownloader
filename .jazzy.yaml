@@ -1,4 +1,4 @@
-module: WealthsimpleDownloader
+module: Wealthsimple
 readme: README.md
 clean: true
 disable_search: true
