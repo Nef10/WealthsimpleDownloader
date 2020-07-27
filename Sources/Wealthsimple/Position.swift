@@ -82,10 +82,14 @@ public struct Position {
         self.priceDate = date
     }
 
-    static func getPositions(token: Token, account: Account, completion: @escaping (Result<[Position], PositionError>) -> Void) {
+    static func getPositions(token: Token, account: Account, date: Date?, completion: @escaping (Result<[Position], PositionError>) -> Void) {
         url.queryItems = [
-            URLQueryItem(name: "account_id", value: account.id)
+            URLQueryItem(name: "account_id", value: account.id),
+            URLQueryItem(name: "limit", value: "250")
         ]
+        if let date = date {
+            url.queryItems?.append(URLQueryItem(name: "date", value: dateFormatter.string(from: date)))
+        }
         var request = URLRequest(url: url.url!)
         let session = URLSession.shared
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
