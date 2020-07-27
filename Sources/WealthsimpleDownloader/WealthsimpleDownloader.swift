@@ -95,21 +95,18 @@ public final class WealthsimpleDownloader {
     /// - Parameters:
     ///   - account: Account to retreive positions for
     ///   - completion: Result with an array of `Position`s or an `Position.PositionError`
-    public func getPositions(in account: Account, completion: @escaping (Result<(Account, [Position]), Position.PositionError>) -> Void) {
+    public func getPositions(in account: Account, completion: @escaping (Result<[Position], Position.PositionError>) -> Void) {
         guard let token = token else {
             completion(.failure(.tokenError(.noToken)))
             return
         }
         Position.getPositions(token: token, account: account) {
-            switch $0 {
-            case let .failure(error):
+            if case let .failure(error) = $0 {
                 if case .tokenError = error {
                     self.token = nil
                 }
-                completion(.failure(error))
-            case let .success(value):
-                completion(.success((account, value)))
             }
+            completion($0)
         }
     }
 
@@ -117,21 +114,18 @@ public final class WealthsimpleDownloader {
     /// - Parameters:
     ///   - account: Account to retreive transactions from
     ///   - completion: Result with an array of `Transactions`s or an `Transactions.TransactionsError`
-    public func getTransactions(in account: Account, completion: @escaping (Result<(Account, [Transaction]), Transaction.TransactionError>) -> Void) {
+    public func getTransactions(in account: Account, completion: @escaping (Result<[Transaction], Transaction.TransactionError>) -> Void) {
         guard let token = token else {
             completion(.failure(.tokenError(.noToken)))
             return
         }
         Transaction.getTransactions(token: token, account: account) {
-            switch $0 {
-            case let .failure(error):
+            if case let .failure(error) = $0 {
                 if case .tokenError = error {
                     self.token = nil
                 }
-                completion(.failure(error))
-            case let .success(value):
-                completion(.success((account, value)))
             }
+            completion($0)
         }
     }
 
