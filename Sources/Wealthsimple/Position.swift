@@ -51,8 +51,8 @@ public struct Position {
     public let priceAmount: String
     /// Currency of the price
     public let priceCurrency: String
-    /// Date of the price
-    public let priceDate: Date
+    /// Date of the positon
+    public let positionDate: Date
 
     private init(json: [String: Any]) throws {
         guard let quantity = json["quantity"] as? String,
@@ -79,7 +79,7 @@ public struct Position {
         self.quantity = quantity
         self.priceAmount = priceAmount
         self.priceCurrency = priceCurrency
-        self.priceDate = date
+        self.positionDate = date
     }
 
     static func getPositions(token: Token, account: Account, date: Date?, completion: @escaping (Result<[Position], PositionError>) -> Void) {
