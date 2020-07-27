@@ -93,6 +93,8 @@ public struct Transaction {
 
     /// Wealthsimples identifier of this transaction
     public let id: String
+    /// Wealthsimple identifier of the account in which this transaction happend
+    public let accountId: String
     /// type of the transaction, like buy or sell
     public let transactionType: TransactionType
     /// description of the transaction
@@ -124,6 +126,7 @@ public struct Transaction {
     private init(json: [String: Any]) throws {
         guard let description = json["description"] as? String,
               let id = json["id"] as? String,
+              let accountId = json["account_id"] as? String,
               let typeString = json["type"] as? String,
               let symbol = json["symbol"] as? String,
               let quantity = json["quantity"] as? String,
@@ -150,6 +153,7 @@ public struct Transaction {
             throw TransactionError.invalidResultParamenter(json: json)
         }
         self.id = id
+        self.accountId = accountId
         self.description = description
         self.transactionType = type
         self.symbol = symbol
