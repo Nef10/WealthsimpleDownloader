@@ -1,12 +1,6 @@
 {
   "warnings": [
-    {
-      "file": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader/Sources/WealthsimpleDownloader/Account.swift",
-      "line": 31,
-      "symbol": "Account.AccountError.tokenError(_:)",
-      "symbol_kind": "source.lang.swift.decl.enumelement",
-      "warning": "undocumented"
-    }
+
   ],
   "source_directory": "/Users/runner/work/WealthsimpleDownloader/WealthsimpleDownloader"
 }
