@@ -32,7 +32,7 @@ class KeyChainCredentialStorage: CredentialStorage {
 </details>
 
 2) Implement an `AuthenticationCallback` which will ask the user for their username, password and one time password.
-3) Initialize `WealthsimpleDownloader` with you two implementations: `let wealthsimpleDownloader = WealthsimpleDownloader(authenticationCallback: myAuthenticationCallback, credentialStorage: myCredentialStorage)`
+3) Initialize `WealthsimpleDownloader` with your two implementations: `let wealthsimpleDownloader = WealthsimpleDownloader(authenticationCallback: myAuthenticationCallback, credentialStorage: myCredentialStorage)`
 4) Call `wealthsimpleDownloader.authenticate() { }` and wait for the callback
 5) Now you can start retreiving data with the other methods provided on `WealthsimpleDownloader` like `getAccounts` or `getPositions`
 
