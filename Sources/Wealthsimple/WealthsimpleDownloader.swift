@@ -94,6 +94,7 @@ public final class WealthsimpleDownloader {
     /// Get all `Position`s from one `Account`
     /// - Parameters:
     ///   - account: Account to retreive positions for
+    ///   - date: Date of which the positions should be downloaded. If not date is provided, not date is sent to the API. The API falls back to the current date.
     ///   - completion: Result with an array of `Position`s or an `Position.PositionError`
     public func getPositions(in account: Account, date: Date?, completion: @escaping (Result<[Position], Position.PositionError>) -> Void) {
         guard let token = token else {
@@ -113,6 +114,7 @@ public final class WealthsimpleDownloader {
     /// Get all `Transactions`s from one `Account`
     /// - Parameters:
     ///   - account: Account to retreive transactions from
+    ///   - startDate: Date from which the transactions are downloaded. If not date is provided, not date is sent to the API. The API falls back to 30 days ago from today.
     ///   - completion: Result with an array of `Transactions`s or an `Transactions.TransactionsError`
     public func getTransactions(in account: Account, startDate: Date?, completion: @escaping (Result<[Transaction], Transaction.TransactionError>) -> Void) {
         guard let token = token else {
