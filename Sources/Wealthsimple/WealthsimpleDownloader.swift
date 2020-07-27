@@ -95,12 +95,12 @@ public final class WealthsimpleDownloader {
     /// - Parameters:
     ///   - account: Account to retreive positions for
     ///   - completion: Result with an array of `Position`s or an `Position.PositionError`
-    public func getPositions(in account: Account, completion: @escaping (Result<[Position], Position.PositionError>) -> Void) {
+    public func getPositions(in account: Account, date: Date?, completion: @escaping (Result<[Position], Position.PositionError>) -> Void) {
         guard let token = token else {
             completion(.failure(.tokenError(.noToken)))
             return
         }
-        Position.getPositions(token: token, account: account) {
+        Position.getPositions(token: token, account: account, date: date) {
             if case let .failure(error) = $0 {
                 if case .tokenError = error {
                     self.token = nil
@@ -114,12 +114,12 @@ public final class WealthsimpleDownloader {
     /// - Parameters:
     ///   - account: Account to retreive transactions from
     ///   - completion: Result with an array of `Transactions`s or an `Transactions.TransactionsError`
-    public func getTransactions(in account: Account, completion: @escaping (Result<[Transaction], Transaction.TransactionError>) -> Void) {
+    public func getTransactions(in account: Account, startDate: Date?, completion: @escaping (Result<[Transaction], Transaction.TransactionError>) -> Void) {
         guard let token = token else {
             completion(.failure(.tokenError(.noToken)))
             return
         }
-        Transaction.getTransactions(token: token, account: account) {
+        Transaction.getTransactions(token: token, account: account, startDate: startDate) {
             if case let .failure(error) = $0 {
                 if case .tokenError = error {
                     self.token = nil

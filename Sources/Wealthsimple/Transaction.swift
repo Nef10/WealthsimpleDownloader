@@ -169,11 +169,15 @@ public struct Transaction {
         self.processDate = processDate
     }
 
-    static func getTransactions(token: Token, account: Account, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
+    static func getTransactions(token: Token, account: Account, startDate: Date?, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
         url.queryItems = [
             URLQueryItem(name: "account_id", value: account.id),
             URLQueryItem(name: "limit", value: "250")
         ]
+        if let date = startDate {
+            url.queryItems?.append(URLQueryItem(name: "effective_date_start", value: dateFormatter.string(from: date)))
+            url.queryItems?.append(URLQueryItem(name: "process_date_start", value: dateFormatter.string(from: date)))
+        }
         var request = URLRequest(url: url.url!)
         let session = URLSession.shared
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
