@@ -91,6 +91,8 @@ public struct Transaction {
         return dateFormatter
     }()
 
+    /// Wealthsimples identifier of this transaction
+    public let id: String
     /// type of the transaction, like buy or sell
     public let transactionType: TransactionType
     /// description of the transaction
@@ -121,6 +123,7 @@ public struct Transaction {
     // swiftlint:disable:next function_body_length
     private init(json: [String: Any]) throws {
         guard let description = json["description"] as? String,
+              let id = json["id"] as? String,
               let typeString = json["type"] as? String,
               let symbol = json["symbol"] as? String,
               let quantity = json["quantity"] as? String,
@@ -146,6 +149,7 @@ public struct Transaction {
               object == "transaction" else {
             throw TransactionError.invalidResultParamenter(json: json)
         }
+        self.id = id
         self.description = description
         self.transactionType = type
         self.symbol = symbol
