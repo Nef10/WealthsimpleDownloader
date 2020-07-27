@@ -7,16 +7,16 @@ let package = Package(
     products: [
         .library(
             name: "WealthsimpleDownloaderLibrary",
-            targets: ["WealthsimpleDownloader"]),
+            targets: ["WealthsimpleDownloaderLibrary"]),
     ],
     dependencies: [
     ],
     targets: [
         .target(
-            name: "WealthsimpleDownloader",
+            name: "WealthsimpleDownloaderLibrary",
             dependencies: []),
         .testTarget(
             name: "WealthsimpleDownloaderTests",
-            dependencies: ["WealthsimpleDownloader"]),
+            dependencies: ["WealthsimpleDownloaderLibrary"]),
     ]
 )
