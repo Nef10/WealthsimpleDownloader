@@ -61,8 +61,8 @@ public struct Account {
     public let accountType: AccountType
     /// Operating currency of the account
     public let currency: String
-
-    let id: String
+    /// Wealthsimple id for the account
+    public let id: String
 
     private init(json: [String: Any]) throws {
         guard let id = json["id"] as? String,
