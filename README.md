@@ -43,10 +43,8 @@ Please check out the complete documentation [here](https://nef10.github.io/Wealt
 The library supports the Swift Package Manger, so simply add a dependency in your `Package.swift`:
 
 ```
-.package(url: "https://github.com/Nef10/WealthsimpleDownloader.git", .exact("X.Y.Z")),
+.package(url: "https://github.com/Nef10/WealthsimpleDownloader.git", .upToNextMajor("1.0.0")),
 ```
-
-*Note: as per semantic versioning all versions changes < 1.0.0 can be breaking, so please use `.exact` for now*
 
 ## Limitations
 
