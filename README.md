@@ -48,6 +48,15 @@ The library supports the Swift Package Manger, so simply add a dependency in you
 
 *Note: as per semantic versioning all versions changes < 1.0.0 can be breaking, so please use `.exact` for now*
 
+## Limitations
+
+Please note that I developed this library for my own needs and there may be bugs. It currently only accesses a very limited scope of the API. Even for the endpoints it implements, there are further limitations:
+
+* Paging is not supported 
+* Only works on Accounts with 2FA enabled
+
+Pull requests to extend the scope or remove limitations are very welcome.
+
 ## Copyright
 
 While my code is licensed under the [MIT License](https://github.com/Nef10/WealthsimpleDownloader/blob/main/LICENSE), the source repository may include names or other trademarks of Wealthsimple or other entities; potential usage restrictions for these elements still apply and are not touched by the software license. Same applies for the API design. I am in no way affilliated with Wealthsimple other than beeing customer.
