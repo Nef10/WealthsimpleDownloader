@@ -4,7 +4,7 @@
 
 ## What
 
-This is a small library to download data from Wealthsimple. It does not support Wealthsimple Trade and currently only supports downloading positions. The documentation of the Wealthsimple API I am using can be found at https://developers.wealthsimple.com/. To authenticate I am using the same client id as their web site, which uses the same API as backend.
+This is a small library to download data from Wealthsimple. It does not support Wealthsimple Trade and currently only supports downloading accounts, positions and transactions. The documentation of the Wealthsimple API I am using can be found at https://developers.wealthsimple.com/. To authenticate I am using the same client id as their web site, which uses the same API as backend.
 
 ## How
 
