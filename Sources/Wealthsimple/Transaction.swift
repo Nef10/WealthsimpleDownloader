@@ -13,24 +13,6 @@ import FoundationNetworking
 /// A Transaction, like buying or selling stock
 public struct Transaction {
 
-    /// Errors which can happen when retrieving a Transaction
-    public enum TransactionError: Error {
-        /// When no data is received from the HTTP request
-        case noDataReceived
-        /// When an HTTP error occurs
-        case httpError(error: String)
-        /// When the received data is not valid JSON
-        case invalidJson(error: String)
-        /// When the received JSON does not have the right type
-        case invalidJsonType(json: Any)
-        /// When the received JSON does not have all expected values
-        case missingResultParamenter(json: [String: Any])
-        /// When the received JSON does have an unexpected value
-        case invalidResultParamenter(json: [String: Any])
-        /// An error with the token occured
-        case tokenError(_ error: TokenError)
-    }
-
     /// Type for the transaction, e.g. buying or selling
     public enum TransactionType: String {
         /// buying a Stock, ETF, ...
