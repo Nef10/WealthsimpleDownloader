@@ -103,10 +103,10 @@
                 <a class="nav-group-task-link" href="../../Structs/Transaction.html">Transaction</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../../Structs/Transaction/TransactionError.html">– TransactionError</a>
+                <a class="nav-group-task-link" href="../../Structs/Transaction/TransactionType.html">– TransactionType</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../../Structs/Transaction/TransactionType.html">– TransactionType</a>
+                <a class="nav-group-task-link" href="../../Structs/Transaction/TransactionError.html">– TransactionError</a>
               </li>
             </ul>
           </li>
@@ -121,13 +121,14 @@
                 <div class="language">
                   
                   <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">TransactionError</span> <span class="p">:</span> <span class="kt">Error</span></code></pre>
+<pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt"><a href="../../Structs/Transaction.html">Transaction</a></span><span class="o">.</span><span class="kt">TransactionError</span><span class="p">:</span> <span class="kt">LocalizedError</span></code></pre>
 
                 </div>
               </div>
             <p>Errors which can happen when retrieving a Transaction</p>
 
               <div class="slightly-smaller">
-                <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Transaction.swift#L17-L32">Show on GitHub</a>
+                <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/TransactionError.swift#L13-L28">Show on GitHub</a>
               </div>
           </div>
         </section>
@@ -161,7 +162,7 @@
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Transaction.swift#L19">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/TransactionError.swift#L15">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -191,7 +192,7 @@
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Transaction.swift#L21">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/TransactionError.swift#L17">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -221,7 +222,7 @@
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Transaction.swift#L23">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/TransactionError.swift#L19">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -251,7 +252,7 @@
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Transaction.swift#L25">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/TransactionError.swift#L21">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -281,7 +282,7 @@
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Transaction.swift#L27">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/TransactionError.swift#L23">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -311,7 +312,7 @@
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Transaction.swift#L29">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/TransactionError.swift#L25">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -341,7 +342,36 @@
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Transaction.swift#L31">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/TransactionError.swift#L27">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:10Foundation14LocalizedErrorP16errorDescriptionSSSgvp"></a>
+                    <a name="//apple_ref/swift/Property/errorDescription" class="dashAnchor"></a>
+                    <a class="token" href="#/s:10Foundation14LocalizedErrorP16errorDescriptionSSSgvp">errorDescription</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">errorDescription</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/TransactionError.swift#L33-L50">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -354,8 +384,8 @@
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2020 <a class="link" href="https://github.com/Nef10" target="_blank" rel="external">Nef10</a>. All rights reserved. (Last updated: 2020-08-01)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.5</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2021 <a class="link" href="https://github.com/Nef10" target="_blank" rel="external">Nef10</a>. All rights reserved. (Last updated: 2021-06-02)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.7</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>
