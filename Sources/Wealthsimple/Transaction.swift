@@ -67,6 +67,8 @@ public struct Transaction {
         case paymentTransferIn = "wealthsimple payments transfer in"
         /// Weathsimple Payments Transfer Out
         case paymentTransferOut = "wealthsimple payments transfer out"
+        /// Referral Bonus
+        case referralBonus = "referral bonus"
     }
 
     private static var url = URLComponents(string: "https://api.production.wealthsimple.com/v1/transactions")!
