@@ -81,6 +81,10 @@ public struct Transaction {
         case withholdingTax = "withholding_tax"
         /// withdrawal
         case withdrawal
+        /// Wealthsimple Payments Transfer in
+        case paymentTransferIn = "wealthsimple payments transfer in"
+        /// Weathsimple Payments Transfer Out
+        case paymentTransferOut = "wealthsimple payments transfer out"
     }
 
     private static var url = URLComponents(string: "https://api.production.wealthsimple.com/v1/transactions")!
