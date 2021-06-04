@@ -92,7 +92,7 @@ struct Token {
             case .failure:
                 completion(nil)
             case let .success(newToken):
-                token.testIfValid {
+                newToken.testIfValid {
                     if $0 {
                         completion(newToken)
                     } else {
