@@ -71,7 +71,7 @@ public struct Transaction {
         case referralBonus = "referral bonus"
     }
 
-    private static var url = URLComponents(string: "https://api.production.wealthsimple.com/v1/transactions")!
+    private static let baseUrl = URLComponents(string: "https://api.production.wealthsimple.com/v1/transactions")!
 
     private static var dateFormatter: DateFormatter = {
         var dateFormatter = DateFormatter()
@@ -158,6 +158,7 @@ public struct Transaction {
     }
 
     static func getTransactions(token: Token, account: Account, startDate: Date?, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
+        var url = baseUrl
         url.queryItems = [
             URLQueryItem(name: "account_id", value: account.id),
             URLQueryItem(name: "limit", value: "250")

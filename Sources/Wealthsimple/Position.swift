@@ -33,7 +33,7 @@ public struct Position {
         case tokenError(_ error: TokenError)
     }
 
-    private static var url = URLComponents(string: "https://api.production.wealthsimple.com/v1/positions")!
+    private static let baseUrl = URLComponents(string: "https://api.production.wealthsimple.com/v1/positions")!
 
     private static var dateFormatter: DateFormatter = {
         var dateFormatter = DateFormatter()
@@ -83,6 +83,7 @@ public struct Position {
     }
 
     static func getPositions(token: Token, account: Account, date: Date?, completion: @escaping (Result<[Position], PositionError>) -> Void) {
+        var url = baseUrl
         url.queryItems = [
             URLQueryItem(name: "account_id", value: account.id),
             URLQueryItem(name: "limit", value: "250")
