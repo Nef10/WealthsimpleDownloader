@@ -51,16 +51,23 @@ public final class WealthsimpleDownloader {
     }
 
     /// Authneticates against the API. Call before calling any other method.
-    /// - Parameter completion: Get an error in case soemthing went wrong, otherwise nil
+    /// - Parameter completion: Gets an error in case something went wrong, otherwise nil
     public func authenticate(completion: @escaping (Error?) -> Void) {
-        guard token == nil else {
-            completion(nil)
-            return
-        }
-        token = Token.getToken(from: credentialStorage)
         if let token = token {
-            token.testIfValid {
-                if $0 {
+            token.refreshIfNeeded {
+                switch $0 {
+                case .failure:
+                    self.getNewToken(completion: completion)
+                case let .success(newToken):
+                    self.token = newToken
+                    completion(nil)
+                }
+            }
+            return
+        } else {
+            Token.getToken(from: credentialStorage) {
+                if let token = $0 {
+                    self.token = token
                     completion(nil)
                     return
                 } else {
@@ -69,8 +76,6 @@ public final class WealthsimpleDownloader {
                     return
                 }
             }
-        } else {
-            getNewToken(completion: completion)
         }
     }
 
