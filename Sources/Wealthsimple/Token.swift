@@ -78,14 +78,29 @@ struct Token {
         sendTokenRequest(parameters: json, request: request, credentialStorage: credentialStorage, completion: completion)
     }
 
-    static func getToken(from credentialStorage: CredentialStorage) -> Self? {
+    static func getToken(from credentialStorage: CredentialStorage, completion: @escaping (Self?) -> Void) {
         guard let accessToken = credentialStorage.read(credentialStorageKeyAccessToken),
               let refreshToken = credentialStorage.read(credentialStorageKeyRefreshToken),
               let expiryString = credentialStorage.read(credentialStorageKeyExpiry),
               let expiryDouble = Double(expiryString) else {
-            return nil
+            completion(nil)
+            return
         }
-        return Self(accessToken: accessToken, refreshToken: refreshToken, expiry: Date(timeIntervalSince1970: expiryDouble), credentialStorage: credentialStorage)
+        let token = Self(accessToken: accessToken, refreshToken: refreshToken, expiry: Date(timeIntervalSince1970: expiryDouble), credentialStorage: credentialStorage)
+        token.refreshIfNeeded {
+            switch $0 {
+            case .failure:
+                completion(nil)
+            case let .success(newToken):
+                token.testIfValid {
+                    if $0 {
+                        completion(newToken)
+                    } else {
+                        completion(nil)
+                    }
+                }
+            }
+        }
     }
 
     private static func sendTokenRequest(
@@ -150,7 +165,7 @@ struct Token {
         }
     }
 
-    func testIfValid(completion: @escaping (Bool) -> Void) {
+    private func testIfValid(completion: @escaping (Bool) -> Void) {
         var request = URLRequest(url: Self.testUrl)
         let session = URLSession.shared
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -177,18 +192,11 @@ struct Token {
 
     func authenticateRequest(_ request: URLRequest, completion: @escaping (Result<URLRequest, TokenError>) -> Void) {
         var requestCopy = request
-        refreshIfNeeded {
-            switch $0 {
-            case let .failure(error):
-                completion(.failure(error))
-            case let .success(token):
-                requestCopy.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
-                completion(.success(requestCopy))
-            }
-        }
+        requestCopy.setValue("Bearer \(self.accessToken)", forHTTPHeaderField: "Authorization")
+        completion(.success(requestCopy))
     }
 
-    private func refreshIfNeeded(completion: @escaping (Result<Self, TokenError>) -> Void) {
+    func refreshIfNeeded(completion: @escaping (Result<Self, TokenError>) -> Void) {
         if needsRefresh() {
             refresh(completion: completion)
         } else {
