@@ -169,6 +169,7 @@ public struct Transaction {
             url.queryItems?.append(URLQueryItem(name: "effective_date_start", value: dateFormatter.string(from: date)))
             url.queryItems?.append(URLQueryItem(name: "process_date_start", value: dateFormatter.string(from: date)))
         }
+        url.queryItems?.append(URLQueryItem(name: "effective_date_end", value: dateFormatter.string(from: Calendar.current.date(byAdding: .day, value: 7, to: Date())!)))
         var request = URLRequest(url: url.url!)
         let session = URLSession.shared
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
