@@ -38,7 +38,9 @@ public struct Account {
         /// Tax free savings account (CA)
         case tfsa = "ca_tfsa"
         /// Cash (chequing) account (CA)
-        case chequing = "ca_cash"
+        case chequing = "ca_cash_msb"
+        /// Saving (CA)
+        case saving = "ca_cash"
         /// Registered Retirement Savings Plan (CA)
         case rrsp = "ca_rrsp"
         /// Non-registered account (CA)

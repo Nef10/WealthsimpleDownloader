@@ -56,9 +56,9 @@ public struct Transaction {
         /// stock dividend
         case stockDividend = "stock_dividend"
         /// transfer in
-        case transferIn = "transfer_in"
+        case transferIn = "transfer in"
         /// transfer out
-        case transferOut = "transfer_out"
+        case transferOut = "transfer out"
         /// withholding tax
         case withholdingTax = "withholding_tax"
         /// withdrawal
