@@ -43,7 +43,7 @@ Please check out the complete documentation [here](https://nef10.github.io/Wealt
 The library supports the Swift Package Manger, so simply add a dependency in your `Package.swift`:
 
 ```
-.package(url: "https://github.com/Nef10/WealthsimpleDownloader.git", .upToNextMajor(from: "1.0.0")),
+.package(url: "https://github.com/Nef10/WealthsimpleDownloader.git", .upToNextMajor(from: "X.Y.Z")),
 ```
 
 ## Limitations
