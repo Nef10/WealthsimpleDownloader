@@ -127,7 +127,7 @@
             <p>Type for the transaction, e.g. buying or selling</p>
 
               <div class="slightly-smaller">
-                <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Transaction.swift#L17-L74">Show on GitHub</a>
+                <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Transaction.swift#L17-L78">Show on GitHub</a>
               </div>
           </div>
         </section>
@@ -179,7 +179,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>depositing cash in the account</p>
+                        <p>depositing cash in a registered account</p>
 
                       </div>
                       <div class="declaration">
@@ -209,7 +209,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>receiving a dividend</p>
+                        <p>receiving a cash dividend</p>
 
                       </div>
                       <div class="declaration">
@@ -246,7 +246,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">custodianFee</span> <span class="o">=</span> <span class="s">"custodian_fee"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">custodianFee</span></code></pre>
 
                         </div>
                       </div>
@@ -269,7 +269,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>deposit</p>
+                        <p>depositing cash in an unregistered account</p>
 
                       </div>
                       <div class="declaration">
@@ -299,7 +299,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>fee</p>
+                        <p>wealthsimple management fee</p>
 
                       </div>
                       <div class="declaration">
@@ -396,7 +396,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">homeBuyersPlan</span> <span class="o">=</span> <span class="s">"home_buyers_plan"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">homeBuyersPlan</span></code></pre>
 
                         </div>
                       </div>
@@ -449,14 +449,14 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>charged tnterest</p>
+                        <p>charged interest</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">chargedInterest</span> <span class="o">=</span> <span class="s">"charged_interest"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">chargedInterest</span></code></pre>
 
                         </div>
                       </div>
@@ -509,14 +509,14 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>non resident withholding tax</p>
+                        <p>US non resident withholding tax on dividend payments</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">nonResidentWithholdingTax</span> <span class="o">=</span> <span class="s">"non resident withholding tax"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">nonResidentWithholdingTax</span></code></pre>
 
                         </div>
                       </div>
@@ -576,7 +576,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">riskExposureFee</span> <span class="o">=</span> <span class="s">"risk_exposure_fee"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">riskExposureFee</span></code></pre>
 
                         </div>
                       </div>
@@ -629,7 +629,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>reimbursement</p>
+                        <p>reimbursements, e.g. ETF Fee Rebates</p>
 
                       </div>
                       <div class="declaration">
@@ -659,7 +659,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>sell</p>
+                        <p>selling a Stock, ETF, &hellip;</p>
 
                       </div>
                       <div class="declaration">
@@ -696,7 +696,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">stockDistribution</span> <span class="o">=</span> <span class="s">"stock_distribution"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">stockDistribution</span></code></pre>
 
                         </div>
                       </div>
@@ -726,7 +726,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">stockDividend</span> <span class="o">=</span> <span class="s">"stock_dividend"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">stockDividend</span></code></pre>
 
                         </div>
                       </div>
@@ -756,7 +756,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">transferIn</span> <span class="o">=</span> <span class="s">"transfer in"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">transferIn</span></code></pre>
 
                         </div>
                       </div>
@@ -786,7 +786,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">transferOut</span> <span class="o">=</span> <span class="s">"transfer out"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">transferOut</span></code></pre>
 
                         </div>
                       </div>
@@ -816,7 +816,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">withholdingTax</span> <span class="o">=</span> <span class="s">"withholding_tax"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">withholdingTax</span></code></pre>
 
                         </div>
                       </div>
@@ -839,7 +839,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>withdrawal</p>
+                        <p>withdrawal of cash</p>
 
                       </div>
                       <div class="declaration">
@@ -869,14 +869,14 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Wealthsimple Payments Transfer in</p>
+                        <p>Cash transfer into cash account</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">paymentTransferIn</span> <span class="o">=</span> <span class="s">"wealthsimple payments transfer in"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">paymentTransferIn</span> <span class="o">=</span> <span class="s">"wealthsimplePaymentsTransferIn"</span></code></pre>
 
                         </div>
                       </div>
@@ -899,14 +899,14 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Weathsimple Payments Transfer Out</p>
+                        <p>Cash withdrawl from cash account</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">paymentTransferOut</span> <span class="o">=</span> <span class="s">"wealthsimple payments transfer out"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">paymentTransferOut</span> <span class="o">=</span> <span class="s">"wealthsimplePaymentsTransferOut"</span></code></pre>
 
                         </div>
                       </div>
@@ -936,7 +936,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">referralBonus</span> <span class="o">=</span> <span class="s">"referral bonus"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">referralBonus</span></code></pre>
 
                         </div>
                       </div>
@@ -959,7 +959,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Interest</p>
+                        <p>Interest paid in saving accounts</p>
 
                       </div>
                       <div class="declaration">
@@ -976,6 +976,66 @@
                     </section>
                   </div>
                 </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12Wealthsimple11TransactionV0B4TypeO12paymentSpendyA2EmF"></a>
+                    <a name="//apple_ref/swift/Element/paymentSpend" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple11TransactionV0B4TypeO12paymentSpendyA2EmF">paymentSpend</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Wealthsimple Cash Card payments</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">paymentSpend</span> <span class="o">=</span> <span class="s">"wealthsimplePaymentsSpend"</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Transaction.swift#L75">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12Wealthsimple11TransactionV0B4TypeO13giveawayBonusyA2EmF"></a>
+                    <a name="//apple_ref/swift/Element/giveawayBonus" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple11TransactionV0B4TypeO13giveawayBonusyA2EmF">giveawayBonus</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Wealthsimple Cash Cashback</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">giveawayBonus</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Transaction.swift#L77">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
               </ul>
             </div>
           </div>
@@ -984,8 +1044,8 @@
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2021 <a class="link" href="https://github.com/Nef10" target="_blank" rel="external">Nef10</a>. All rights reserved. (Last updated: 2021-08-08)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.7</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2021 <a class="link" href="https://github.com/Nef10" target="_blank" rel="noopener" rel="external">Nef10</a>. All rights reserved. (Last updated: 2021-09-16)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="noopener" rel="external">jazzy ♪♫ v0.14.0</a>, a <a class="link" href="https://realm.io" target="_blank" rel="noopener" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>
