@@ -17,15 +17,15 @@ public struct Transaction {
     public enum TransactionType: String {
         /// buying a Stock, ETF, ...
         case buy
-        /// depositing cash in the account
+        /// depositing cash in a registered account
         case contribution
-        /// receiving a dividend
+        /// receiving a cash dividend
         case dividend
         /// custodian fee
         case custodianFee
-        /// deposit
+        /// depositing cash in an unregistered account
         case deposit
-        /// fee
+        /// wealthsimple management fee
         case fee
         /// forex
         case forex
@@ -35,11 +35,11 @@ public struct Transaction {
         case homeBuyersPlan
         /// hst
         case hst
-        /// charged tnterest
+        /// charged interest
         case chargedInterest
         /// journal
         case journal
-        /// non resident withholding tax
+        /// US non resident withholding tax on dividend payments
         case nonResidentWithholdingTax
         /// redemption
         case redemption
@@ -47,9 +47,9 @@ public struct Transaction {
         case riskExposureFee
         /// refund
         case refund
-        /// reimbursement
+        /// reimbursements, e.g. ETF Fee Rebates
         case reimbursement
-        /// sell
+        /// selling a Stock, ETF, ...
         case sell
         /// stock distribution
         case stockDistribution
@@ -61,16 +61,20 @@ public struct Transaction {
         case transferOut
         /// withholding tax
         case withholdingTax
-        /// withdrawal
+        /// withdrawal of cash
         case withdrawal
-        /// Wealthsimple Payments Transfer in
-        case paymentTransferIn
-        /// Weathsimple Payments Transfer Out
-        case paymentTransferOut
+        /// Cash transfer into cash account
+        case paymentTransferIn = "wealthsimplePaymentsTransferIn"
+        /// Cash withdrawl from cash account
+        case paymentTransferOut = "wealthsimplePaymentsTransferOut"
         /// Referral Bonus
         case referralBonus
-        /// Interest
+        /// Interest paid in saving accounts
         case interest
+        /// Wealthsimple Cash Card payments
+        case paymentSpend = "wealthsimplePaymentsSpend"
+        /// Wealthsimple Cash Cashback
+        case giveawayBonus
     }
 
     private static let baseUrl = URLComponents(string: "https://api.production.wealthsimple.com/v1/transactions")!
@@ -157,6 +161,7 @@ public struct Transaction {
         self.fxRate = fxRate
         self.effectiveDate = effectiveDate
         self.processDate = processDate
+        dump(self)
     }
 
     static func getTransactions(token: Token, account: Account, startDate: Date?, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
