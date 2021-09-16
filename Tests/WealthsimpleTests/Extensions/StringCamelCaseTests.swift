@@ -12,6 +12,8 @@ import XCTest
 final class StringCamelCaseTests: XCTestCase {
 
     func testCamelCase() {
+        XCTAssertEqual("".camelCase, "")
+
         XCTAssertEqual("ABC".camelCase, "aBC")
         XCTAssertEqual("abc".camelCase, "abc")
         XCTAssertEqual("aBc".camelCase, "aBc")
