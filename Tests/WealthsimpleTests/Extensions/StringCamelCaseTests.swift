@@ -1,5 +1,5 @@
 //
-//  String+CamelCaseTests.swift
+//  StringCamelCaseTests.swift
 //
 //
 //  Created by Steffen Kötte on 2021-09-15.
