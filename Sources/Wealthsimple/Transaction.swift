@@ -161,7 +161,6 @@ public struct Transaction {
         self.fxRate = fxRate
         self.effectiveDate = effectiveDate
         self.processDate = processDate
-        dump(self)
     }
 
     static func getTransactions(token: Token, account: Account, startDate: Date?, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
