@@ -22,7 +22,7 @@ public struct Transaction {
         /// receiving a dividend
         case dividend
         /// custodian fee
-        case custodianFee = "custodian_fee"
+        case custodianFee
         /// deposit
         case deposit
         /// fee
@@ -32,19 +32,19 @@ public struct Transaction {
         /// grant
         case grant
         /// home buyers plan
-        case homeBuyersPlan = "home_buyers_plan"
+        case homeBuyersPlan
         /// hst
         case hst
         /// charged tnterest
-        case chargedInterest = "charged_interest"
+        case chargedInterest
         /// journal
         case journal
         /// non resident withholding tax
-        case nonResidentWithholdingTax = "non resident withholding tax"
+        case nonResidentWithholdingTax
         /// redemption
         case redemption
         /// risk exposure fee
-        case riskExposureFee = "risk_exposure_fee"
+        case riskExposureFee
         /// refund
         case refund
         /// reimbursement
@@ -52,23 +52,23 @@ public struct Transaction {
         /// sell
         case sell
         /// stock distribution
-        case stockDistribution = "stock_distribution"
+        case stockDistribution
         /// stock dividend
-        case stockDividend = "stock_dividend"
+        case stockDividend
         /// transfer in
-        case transferIn = "transfer in"
+        case transferIn
         /// transfer out
-        case transferOut = "transfer out"
+        case transferOut
         /// withholding tax
-        case withholdingTax = "withholding_tax"
+        case withholdingTax
         /// withdrawal
         case withdrawal
         /// Wealthsimple Payments Transfer in
-        case paymentTransferIn = "wealthsimple payments transfer in"
+        case paymentTransferIn
         /// Weathsimple Payments Transfer Out
-        case paymentTransferOut = "wealthsimple payments transfer out"
+        case paymentTransferOut
         /// Referral Bonus
-        case referralBonus = "referral bonus"
+        case referralBonus
         /// Interest
         case interest
     }
@@ -138,7 +138,7 @@ public struct Transaction {
         }
         guard let processDate = Self.dateFormatter.date(from: processDateString),
               let effectiveDate = Self.dateFormatter.date(from: effectiveDateString),
-              let type = TransactionType(rawValue: typeString.lowercased()),
+              let type = TransactionType(rawValue: typeString.camelCase),
               object == "transaction" else {
             throw TransactionError.invalidResultParamenter(json: json)
         }
