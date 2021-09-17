@@ -65,12 +65,15 @@ public struct Account {
     public let currency: String
     /// Wealthsimple id for the account
     public let id: String
+    /// Number of the account
+    public let number: String
 
     private init(json: [String: Any]) throws {
         guard let id = json["id"] as? String,
               let typeString = json["type"] as? String,
               let object = json["object"] as? String,
-              let currency = json["base_currency"] as? String else {
+              let currency = json["base_currency"] as? String,
+              let number = json["custodian_account_number"] as? String else {
             throw AccountError.missingResultParamenter(json: json)
         }
         guard let type = AccountType(rawValue: typeString), object == "account" else {
@@ -79,6 +82,7 @@ public struct Account {
         self.id = id
         self.accountType = type
         self.currency = currency
+        self.number = number
     }
 
     static func getAccounts(token: Token, completion: @escaping (Result<[Account], AccountError>) -> Void) {
