@@ -60,7 +60,28 @@
             <a class="nav-group-name-link" href="Enums.html">Enumerations</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/AccountError.html">AccountError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/AccountType.html">AccountType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/AssetError.html">AssetError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/AssetType.html">AssetType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/PositionError.html">PositionError</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Enums/TokenError.html">TokenError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/TransactionError.html">TransactionError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/TransactionType.html">TransactionType</a>
               </li>
             </ul>
           </li>
@@ -68,45 +89,19 @@
             <a class="nav-group-name-link" href="Protocols.html">Protocols</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/Account.html">Account</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/Asset.html">Asset</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/CredentialStorage.html">CredentialStorage</a>
               </li>
-            </ul>
-          </li>
-          <li class="nav-group-name">
-            <a class="nav-group-name-link" href="Structs.html">Structures</a>
-            <ul class="nav-group-tasks">
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Structs/Account.html">Account</a>
+                <a class="nav-group-task-link" href="Protocols/Position.html">Position</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Structs/Account/AccountError.html">– AccountError</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Structs/Account/AccountType.html">– AccountType</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Structs/Asset.html">Asset</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Structs/Asset/AssetError.html">– AssetError</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Structs/Asset/AssetType.html">– AssetType</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Structs/Position.html">Position</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Structs/Position/PositionError.html">– PositionError</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Structs/Transaction.html">Transaction</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Structs/Transaction/TransactionType.html">– TransactionType</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Structs/Transaction/TransactionError.html">– TransactionError</a>
+                <a class="nav-group-task-link" href="Protocols/Transaction.html">Transaction</a>
               </li>
             </ul>
           </li>
@@ -157,6 +152,226 @@
                     </section>
                   </div>
                 </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12Wealthsimple16TransactionErrorO"></a>
+                    <a name="//apple_ref/swift/Enum/TransactionError" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple16TransactionErrorO">TransactionError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Errors which can happen when retrieving a Transaction</p>
+
+                        <a href="Enums/TransactionError.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">TransactionError</span> <span class="p">:</span> <span class="kt">Error</span></code></pre>
+<pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">TransactionError</span><span class="p">:</span> <span class="kt">LocalizedError</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/TransactionError.swift#L11-L26">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12Wealthsimple12AccountErrorO"></a>
+                    <a name="//apple_ref/swift/Enum/AccountError" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple12AccountErrorO">AccountError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Errors which can happen when retrieving an Account</p>
+
+                        <a href="Enums/AccountError.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">AccountError</span> <span class="p">:</span> <span class="kt">Error</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAccount.swift#L14-L29">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12Wealthsimple11AccountTypeO"></a>
+                    <a name="//apple_ref/swift/Enum/AccountType" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple11AccountTypeO">AccountType</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Type of the account</p>
+
+<p>Note: Currently only Canadian Accounts are supported</p>
+
+                        <a href="Enums/AccountType.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">AccountType</span> <span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAccount.swift#L34-L55">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12Wealthsimple10AssetErrorO"></a>
+                    <a name="//apple_ref/swift/Enum/AssetError" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple10AssetErrorO">AssetError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Errors which can happen when retrieving an Asset</p>
+
+                        <a href="Enums/AssetError.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">AssetError</span> <span class="p">:</span> <span class="kt">Error</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAsset.swift#L11-L16">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12Wealthsimple9AssetTypeO"></a>
+                    <a name="//apple_ref/swift/Enum/AssetType" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple9AssetTypeO">AssetType</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Type of the asset</p>
+
+                        <a href="Enums/AssetType.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">AssetType</span> <span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAsset.swift#L19-L30">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12Wealthsimple13PositionErrorO"></a>
+                    <a name="//apple_ref/swift/Enum/PositionError" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple13PositionErrorO">PositionError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Errors which can happen when retrieving a Position</p>
+
+                        <a href="Enums/PositionError.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">PositionError</span> <span class="p">:</span> <span class="kt">Error</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimplePosition.swift#L14-L31">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12Wealthsimple15TransactionTypeO"></a>
+                    <a name="//apple_ref/swift/Enum/TransactionType" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple15TransactionTypeO">TransactionType</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Type for the transaction, e.g. buying or selling</p>
+
+                        <a href="Enums/TransactionType.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">TransactionType</span> <span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleTransaction.swift#L14-L75">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
               </ul>
             </div>
           </div>
@@ -165,7 +380,7 @@
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2021 <a class="link" href="https://github.com/Nef10" target="_blank" rel="noopener" rel="external">Nef10</a>. All rights reserved. (Last updated: 2021-09-17)</p>
+      <p>&copy; 2021 <a class="link" href="https://github.com/Nef10" target="_blank" rel="noopener" rel="external">Nef10</a>. All rights reserved. (Last updated: 2021-09-22)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="noopener" rel="external">jazzy ♪♫ v0.14.0</a>, a <a class="link" href="https://realm.io" target="_blank" rel="noopener" rel="external">Realm</a> project.</p>
     </section>
   </body>

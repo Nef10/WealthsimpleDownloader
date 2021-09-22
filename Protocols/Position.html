@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Account Structure Reference</title>
+    <title>Position Protocol Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset="utf-8">
@@ -11,9 +11,9 @@
   </head>
   <body>
 
-    <a name="//apple_ref/swift/Struct/Account" class="dashAnchor"></a>
+    <a name="//apple_ref/swift/Protocol/Position" class="dashAnchor"></a>
 
-    <a title="Account Structure Reference"></a>
+    <a title="Position Protocol Reference"></a>
 
     <header class="header">
       <p class="header-col header-col--primary">
@@ -42,7 +42,7 @@
     <p class="breadcrumbs">
       <a class="breadcrumb" href="../index.html">Wealthsimple Reference</a>
       <img class="carat" src="../img/carat.png" />
-      Account Structure Reference
+      Position Protocol Reference
     </p>
 
     <div class="content-wrapper">
@@ -60,7 +60,28 @@
             <a class="nav-group-name-link" href="../Enums.html">Enumerations</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/AccountError.html">AccountError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/AccountType.html">AccountType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/AssetError.html">AssetError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/AssetType.html">AssetType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/PositionError.html">PositionError</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Enums/TokenError.html">TokenError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/TransactionError.html">TransactionError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/TransactionType.html">TransactionType</a>
               </li>
             </ul>
           </li>
@@ -68,45 +89,19 @@
             <a class="nav-group-name-link" href="../Protocols.html">Protocols</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/Account.html">Account</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/Asset.html">Asset</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Protocols/CredentialStorage.html">CredentialStorage</a>
               </li>
-            </ul>
-          </li>
-          <li class="nav-group-name">
-            <a class="nav-group-name-link" href="../Structs.html">Structures</a>
-            <ul class="nav-group-tasks">
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Structs/Account.html">Account</a>
+                <a class="nav-group-task-link" href="../Protocols/Position.html">Position</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Structs/Account/AccountError.html">– AccountError</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Structs/Account/AccountType.html">– AccountType</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Structs/Asset.html">Asset</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Structs/Asset/AssetError.html">– AssetError</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Structs/Asset/AssetType.html">– AssetType</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Structs/Position.html">Position</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Structs/Position/PositionError.html">– PositionError</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Structs/Transaction.html">Transaction</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Structs/Transaction/TransactionType.html">– TransactionType</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Structs/Transaction/TransactionError.html">– TransactionError</a>
+                <a class="nav-group-task-link" href="../Protocols/Transaction.html">Transaction</a>
               </li>
             </ul>
           </li>
@@ -116,18 +111,18 @@
 
         <section class="section">
           <div class="section-content top-matter">
-            <h1>Account</h1>
+            <h1>Position</h1>
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">Account</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">Position</span></code></pre>
 
                 </div>
               </div>
-            <p>An Account at Wealthsimple</p>
+            <p>A Position, like certain amount of a stock or a currency held in an account</p>
 
               <div class="slightly-smaller">
-                <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Account.swift#L14-L147">Show on GitHub</a>
+                <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimplePosition.swift#L34-L47">Show on GitHub</a>
               </div>
           </div>
         </section>
@@ -139,9 +134,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:12Wealthsimple7AccountV0B5ErrorO"></a>
-                    <a name="//apple_ref/swift/Enum/AccountError" class="dashAnchor"></a>
-                    <a class="token" href="#/s:12Wealthsimple7AccountV0B5ErrorO">AccountError</a>
+                    <a name="/s:12Wealthsimple8PositionP9accountIdSSvp"></a>
+                    <a name="//apple_ref/swift/Property/accountId" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple8PositionP9accountIdSSvp">accountId</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -149,20 +144,19 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Errors which can happen when retrieving an Account</p>
+                        <p>Wealthsimple identifier of the account in which this position is held</p>
 
-                        <a href="../Structs/Account/AccountError.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">AccountError</span> <span class="p">:</span> <span class="kt">Error</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">accountId</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Account.swift#L17-L32">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimplePosition.swift#L36">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -170,9 +164,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:12Wealthsimple7AccountV0B4TypeO"></a>
-                    <a name="//apple_ref/swift/Enum/AccountType" class="dashAnchor"></a>
-                    <a class="token" href="#/s:12Wealthsimple7AccountV0B4TypeO">AccountType</a>
+                    <a name="/s:12Wealthsimple8PositionP5assetAA5Asset_pvp"></a>
+                    <a name="//apple_ref/swift/Property/asset" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple8PositionP5assetAA5Asset_pvp">asset</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -180,22 +174,19 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Type of the account</p>
+                        <p>Asset which is held</p>
 
-<p>Note: Currently only Canadian Accounts are supported</p>
-
-                        <a href="../Structs/Account/AccountType.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">AccountType</span> <span class="p">:</span> <span class="kt">String</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">asset</span><span class="p">:</span> <span class="kt"><a href="../Protocols/Asset.html">Asset</a></span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Account.swift#L37-L58">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimplePosition.swift#L38">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -203,9 +194,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:12Wealthsimple7AccountV11accountTypeAC0bD0Ovp"></a>
-                    <a name="//apple_ref/swift/Property/accountType" class="dashAnchor"></a>
-                    <a class="token" href="#/s:12Wealthsimple7AccountV11accountTypeAC0bD0Ovp">accountType</a>
+                    <a name="/s:12Wealthsimple8PositionP8quantitySSvp"></a>
+                    <a name="//apple_ref/swift/Property/quantity" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple8PositionP8quantitySSvp">quantity</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -213,19 +204,19 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Type of the account</p>
+                        <p>Number of units of the asset held</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">accountType</span><span class="p">:</span> <span class="kt"><a href="../Structs/Account/AccountType.html">AccountType</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">quantity</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Account.swift#L63">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimplePosition.swift#L40">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -233,9 +224,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:12Wealthsimple7AccountV8currencySSvp"></a>
-                    <a name="//apple_ref/swift/Property/currency" class="dashAnchor"></a>
-                    <a class="token" href="#/s:12Wealthsimple7AccountV8currencySSvp">currency</a>
+                    <a name="/s:12Wealthsimple8PositionP11priceAmountSSvp"></a>
+                    <a name="//apple_ref/swift/Property/priceAmount" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple8PositionP11priceAmountSSvp">priceAmount</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -243,19 +234,19 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Operating currency of the account</p>
+                        <p>Price per pice of the asset on <code>priceDate</code></p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">currency</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">priceAmount</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Account.swift#L65">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimplePosition.swift#L42">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -263,9 +254,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:12Wealthsimple7AccountV2idSSvp"></a>
-                    <a name="//apple_ref/swift/Property/id" class="dashAnchor"></a>
-                    <a class="token" href="#/s:12Wealthsimple7AccountV2idSSvp">id</a>
+                    <a name="/s:12Wealthsimple8PositionP13priceCurrencySSvp"></a>
+                    <a name="//apple_ref/swift/Property/priceCurrency" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple8PositionP13priceCurrencySSvp">priceCurrency</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -273,19 +264,19 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Wealthsimple id for the account</p>
+                        <p>Currency of the price</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">id</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">priceCurrency</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Account.swift#L67">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimplePosition.swift#L44">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -293,9 +284,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:12Wealthsimple7AccountV6numberSSvp"></a>
-                    <a name="//apple_ref/swift/Property/number" class="dashAnchor"></a>
-                    <a class="token" href="#/s:12Wealthsimple7AccountV6numberSSvp">number</a>
+                    <a name="/s:12Wealthsimple8PositionP12positionDate10Foundation0D0Vvp"></a>
+                    <a name="//apple_ref/swift/Property/positionDate" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple8PositionP12positionDate10Foundation0D0Vvp">positionDate</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -303,19 +294,19 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Number of the account</p>
+                        <p>Date of the positon</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">number</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">positionDate</span><span class="p">:</span> <span class="kt">Date</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Account.swift#L69">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimplePosition.swift#L46">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -328,7 +319,7 @@
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2021 <a class="link" href="https://github.com/Nef10" target="_blank" rel="noopener" rel="external">Nef10</a>. All rights reserved. (Last updated: 2021-09-17)</p>
+      <p>&copy; 2021 <a class="link" href="https://github.com/Nef10" target="_blank" rel="noopener" rel="external">Nef10</a>. All rights reserved. (Last updated: 2021-09-22)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="noopener" rel="external">jazzy ♪♫ v0.14.0</a>, a <a class="link" href="https://realm.io" target="_blank" rel="noopener" rel="external">Realm</a> project.</p>
     </section>
   </body>
