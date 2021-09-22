@@ -81,12 +81,12 @@ public final class WealthsimpleDownloader {
 
     /// Get all Accounts the user has access to
     /// - Parameter completion: Result with an array of `Account`s or an `Account.AccountError`
-    public func getAccounts(completion: @escaping (Result<[Account], Account.AccountError>) -> Void) {
+    public func getAccounts(completion: @escaping (Result<[Account], AccountError>) -> Void) {
         guard let token = token else {
             completion(.failure(.tokenError(.noToken)))
             return
         }
-        Account.getAccounts(token: token) {
+        WealthsimpleAccount.getAccounts(token: token) {
             if case let .failure(error) = $0 {
                 if case .tokenError = error {
                     self.token = nil
@@ -101,12 +101,12 @@ public final class WealthsimpleDownloader {
     ///   - account: Account to retreive positions for
     ///   - date: Date of which the positions should be downloaded. If not date is provided, not date is sent to the API. The API falls back to the current date.
     ///   - completion: Result with an array of `Position`s or an `Position.PositionError`
-    public func getPositions(in account: Account, date: Date?, completion: @escaping (Result<[Position], Position.PositionError>) -> Void) {
+    public func getPositions(in account: Account, date: Date?, completion: @escaping (Result<[Position], PositionError>) -> Void) {
         guard let token = token else {
             completion(.failure(.tokenError(.noToken)))
             return
         }
-        Position.getPositions(token: token, account: account, date: date) {
+        WealthsimplePosition.getPositions(token: token, account: account, date: date) {
             if case let .failure(error) = $0 {
                 if case .tokenError = error {
                     self.token = nil
@@ -121,12 +121,12 @@ public final class WealthsimpleDownloader {
     ///   - account: Account to retreive transactions from
     ///   - startDate: Date from which the transactions are downloaded. If not date is provided, not date is sent to the API. The API falls back to 30 days ago from today.
     ///   - completion: Result with an array of `Transactions`s or an `Transactions.TransactionsError`
-    public func getTransactions(in account: Account, startDate: Date?, completion: @escaping (Result<[Transaction], Transaction.TransactionError>) -> Void) {
+    public func getTransactions(in account: Account, startDate: Date?, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
         guard let token = token else {
             completion(.failure(.tokenError(.noToken)))
             return
         }
-        Transaction.getTransactions(token: token, account: account, startDate: startDate) {
+        WealthsimpleTransaction.getTransactions(token: token, account: account, startDate: startDate) {
             if case let .failure(error) = $0 {
                 if case .tokenError = error {
                     self.token = nil

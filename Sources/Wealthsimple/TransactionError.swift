@@ -7,29 +7,25 @@
 
 import Foundation
 
-extension Transaction {
-
-    /// Errors which can happen when retrieving a Transaction
-    public enum TransactionError: Error {
-        /// When no data is received from the HTTP request
-        case noDataReceived
-        /// When an HTTP error occurs
-        case httpError(error: String)
-        /// When the received data is not valid JSON
-        case invalidJson(error: String)
-        /// When the received JSON does not have the right type
-        case invalidJsonType(json: Any)
-        /// When the received JSON does not have all expected values
-        case missingResultParamenter(json: [String: Any])
-        /// When the received JSON does have an unexpected value
-        case invalidResultParamenter(json: [String: Any])
-        /// An error with the token occured
-        case tokenError(_ error: TokenError)
-    }
-
+/// Errors which can happen when retrieving a Transaction
+public enum TransactionError: Error {
+    /// When no data is received from the HTTP request
+    case noDataReceived
+    /// When an HTTP error occurs
+    case httpError(error: String)
+    /// When the received data is not valid JSON
+    case invalidJson(error: String)
+    /// When the received JSON does not have the right type
+    case invalidJsonType(json: Any)
+    /// When the received JSON does not have all expected values
+    case missingResultParamenter(json: [String: Any])
+    /// When the received JSON does have an unexpected value
+    case invalidResultParamenter(json: [String: Any])
+    /// An error with the token occured
+    case tokenError(_ error: TokenError)
 }
 
-extension Transaction.TransactionError: LocalizedError {
+extension TransactionError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .noDataReceived:

@@ -10,28 +10,43 @@ import Foundation
 import FoundationNetworking
 #endif
 
-/// A Position, like certain amount of a stock or a currency held in an account
-public struct Position {
+/// Errors which can happen when retrieving a Position
+public enum PositionError: Error {
+    /// When no data is received from the HTTP request
+    case noDataReceived
+    /// When an HTTP error occurs
+    case httpError(error: String)
+    /// When the received data is not valid JSON
+    case invalidJson(error: String)
+    /// When the received JSON does not have the right type
+    case invalidJsonType(json: Any)
+    /// When the received JSON does not have all expected values
+    case missingResultParamenter(json: [String: Any])
+    /// When the received JSON does have an unexpected value
+    case invalidResultParamenter(json: [String: Any])
+    /// An error with the assets occured
+    case assetError(_ error: AssetError)
+    /// An error with the token occured
+    case tokenError(_ error: TokenError)
+}
 
-    /// Errors which can happen when retrieving a Position
-    public enum PositionError: Error {
-        /// When no data is received from the HTTP request
-        case noDataReceived
-        /// When an HTTP error occurs
-        case httpError(error: String)
-        /// When the received data is not valid JSON
-        case invalidJson(error: String)
-        /// When the received JSON does not have the right type
-        case invalidJsonType(json: Any)
-        /// When the received JSON does not have all expected values
-        case missingResultParamenter(json: [String: Any])
-        /// When the received JSON does have an unexpected value
-        case invalidResultParamenter(json: [String: Any])
-        /// An error with the assets occured
-        case assetError(_ error: Asset.AssetError)
-        /// An error with the token occured
-        case tokenError(_ error: TokenError)
-    }
+/// A Position, like certain amount of a stock or a currency held in an account
+public protocol Position {
+    /// Wealthsimple identifier of the account in which this position is held
+    var accountId: String { get }
+    /// Asset which is held
+    var asset: Asset { get }
+    /// Number of units of the asset held
+    var quantity: String { get }
+    /// Price per pice of the asset on `priceDate`
+    var priceAmount: String { get }
+    /// Currency of the price
+    var priceCurrency: String { get }
+    /// Date of the positon
+    var positionDate: Date { get }
+}
+
+struct WealthsimplePosition: Position {
 
     private static let baseUrl = URLComponents(string: "https://api.production.wealthsimple.com/v1/positions")!
 
@@ -41,18 +56,12 @@ public struct Position {
         return dateFormatter
     }()
 
-    /// Wealthsimple identifier of the account in which this position is held
-    public let accountId: String
-    /// Asset which is held
-    public let asset: Asset
-    /// Number of units of the asset held
-    public let quantity: String
-    /// Price per pice of the asset on `priceDate`
-    public let priceAmount: String
-    /// Currency of the price
-    public let priceCurrency: String
-    /// Date of the positon
-    public let positionDate: Date
+    let accountId: String
+    let asset: Asset
+    let quantity: String
+    let priceAmount: String
+    let priceCurrency: String
+    let positionDate: Date
 
     private init(json: [String: Any]) throws {
         guard let quantity = json["quantity"] as? String,
@@ -71,9 +80,9 @@ public struct Position {
             throw PositionError.invalidResultParamenter(json: json)
         }
         do {
-            self.asset = try Asset(json: assetDict)
+            self.asset = try WealthsimpleAsset(json: assetDict)
         } catch {
-            throw PositionError.assetError(error as! Asset.AssetError) // swiftlint:disable:this force_cast
+            throw PositionError.assetError(error as! AssetError) // swiftlint:disable:this force_cast
         }
         self.accountId = accountId
         self.quantity = quantity
@@ -138,7 +147,7 @@ public struct Position {
                 }
                 var positions = [Position]()
                 for result in results {
-                    positions.append(try Position(json: result))
+                    positions.append(try Self(json: result))
                 }
                 completion(.success(positions))
             } catch {

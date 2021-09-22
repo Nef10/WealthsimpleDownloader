@@ -10,72 +10,105 @@ import Foundation
 import FoundationNetworking
 #endif
 
-/// A Transaction, like buying or selling stock
-public struct Transaction {
+/// Type for the transaction, e.g. buying or selling
+public enum TransactionType: String {
+    /// buying a Stock, ETF, ...
+    case buy
+    /// depositing cash in a registered account
+    case contribution
+    /// receiving a cash dividend
+    case dividend
+    /// custodian fee
+    case custodianFee
+    /// depositing cash in an unregistered account
+    case deposit
+    /// wealthsimple management fee
+    case fee
+    /// forex
+    case forex
+    /// grant
+    case grant
+    /// home buyers plan
+    case homeBuyersPlan
+    /// hst
+    case hst
+    /// charged interest
+    case chargedInterest
+    /// journal
+    case journal
+    /// US non resident withholding tax on dividend payments
+    case nonResidentWithholdingTax
+    /// redemption
+    case redemption
+    /// risk exposure fee
+    case riskExposureFee
+    /// refund
+    case refund
+    /// reimbursements, e.g. ETF Fee Rebates
+    case reimbursement
+    /// selling a Stock, ETF, ...
+    case sell
+    /// stock distribution
+    case stockDistribution
+    /// stock dividend
+    case stockDividend
+    /// transfer in
+    case transferIn
+    /// transfer out
+    case transferOut
+    /// withholding tax
+    case withholdingTax
+    /// withdrawal of cash
+    case withdrawal
+    /// Cash transfer into cash account
+    case paymentTransferIn = "wealthsimplePaymentsTransferIn"
+    /// Cash withdrawl from cash account
+    case paymentTransferOut = "wealthsimplePaymentsTransferOut"
+    /// Referral Bonus
+    case referralBonus
+    /// Interest paid in saving accounts
+    case interest
+    /// Wealthsimple Cash Card payments
+    case paymentSpend = "wealthsimplePaymentsSpend"
+    /// Wealthsimple Cash Cashback
+    case giveawayBonus
+}
 
-    /// Type for the transaction, e.g. buying or selling
-    public enum TransactionType: String {
-        /// buying a Stock, ETF, ...
-        case buy
-        /// depositing cash in a registered account
-        case contribution
-        /// receiving a cash dividend
-        case dividend
-        /// custodian fee
-        case custodianFee
-        /// depositing cash in an unregistered account
-        case deposit
-        /// wealthsimple management fee
-        case fee
-        /// forex
-        case forex
-        /// grant
-        case grant
-        /// home buyers plan
-        case homeBuyersPlan
-        /// hst
-        case hst
-        /// charged interest
-        case chargedInterest
-        /// journal
-        case journal
-        /// US non resident withholding tax on dividend payments
-        case nonResidentWithholdingTax
-        /// redemption
-        case redemption
-        /// risk exposure fee
-        case riskExposureFee
-        /// refund
-        case refund
-        /// reimbursements, e.g. ETF Fee Rebates
-        case reimbursement
-        /// selling a Stock, ETF, ...
-        case sell
-        /// stock distribution
-        case stockDistribution
-        /// stock dividend
-        case stockDividend
-        /// transfer in
-        case transferIn
-        /// transfer out
-        case transferOut
-        /// withholding tax
-        case withholdingTax
-        /// withdrawal of cash
-        case withdrawal
-        /// Cash transfer into cash account
-        case paymentTransferIn = "wealthsimplePaymentsTransferIn"
-        /// Cash withdrawl from cash account
-        case paymentTransferOut = "wealthsimplePaymentsTransferOut"
-        /// Referral Bonus
-        case referralBonus
-        /// Interest paid in saving accounts
-        case interest
-        /// Wealthsimple Cash Card payments
-        case paymentSpend = "wealthsimplePaymentsSpend"
-        /// Wealthsimple Cash Cashback
-        case giveawayBonus
-    }
+/// A Transaction, like buying or selling stock
+public protocol Transaction {
+    /// Wealthsimples identifier of this transaction
+    var id: String { get }
+    /// Wealthsimple identifier of the account in which this transaction happend
+    var accountId: String { get }
+    /// type of the transaction, like buy or sell
+    var transactionType: TransactionType { get }
+    /// description of the transaction
+    var description: String { get }
+    /// symbol of the asset which is brought, sold, ...
+    var symbol: String { get }
+    /// Number of units of the asset brought, sold, ...
+    var quantity: String { get }
+    /// market pice of the asset
+    var marketPriceAmount: String { get }
+    /// Currency of the market price
+    var marketPriceCurrency: String { get }
+    /// market value of the assets
+    var marketValueAmount: String { get }
+    /// Currency of the market value
+    var marketValueCurrency: String { get }
+    /// Net chash change in the account
+    var netCashAmount: String { get }
+    /// Currency of the net cash change
+    var netCashCurrency: String { get }
+    /// Foreign exchange rate applied
+    var fxRate: String { get }
+    /// Date when the trade was settled
+    var effectiveDate: Date { get }
+    /// Date when the trade was processed
+    var processDate: Date { get }
+}
+
+struct WealthsimpleTransaction: Transaction {
 
     private static let baseUrl = URLComponents(string: "https://api.production.wealthsimple.com/v1/transactions")!
 
@@ -85,36 +118,21 @@ public struct Transaction {
         return dateFormatter
     }()
 
-    /// Wealthsimples identifier of this transaction
-    public let id: String
-    /// Wealthsimple identifier of the account in which this transaction happend
-    public let accountId: String
-    /// type of the transaction, like buy or sell
-    public let transactionType: TransactionType
-    /// description of the transaction
-    public let description: String
-    /// symbol of the asset which is brought, sold, ...
-    public let symbol: String
-    /// Number of units of the asset brought, sold, ...
-    public let quantity: String
-    /// market pice of the asset
-    public let marketPriceAmount: String
-    /// Currency of the market price
-    public let marketPriceCurrency: String
-    /// market value of the assets
-    public let marketValueAmount: String
-    /// Currency of the market value
-    public let marketValueCurrency: String
-    /// Net chash change in the account
-    public let netCashAmount: String
-    /// Currency of the net cash change
-    public let netCashCurrency: String
-    /// Foreign exchange rate applied
-    public let fxRate: String
-    /// Date when the trade was settled
-    public let effectiveDate: Date
-    /// Date when the trade was processed
-    public let processDate: Date
+    let id: String
+    let accountId: String
+    let transactionType: TransactionType
+    let description: String
+    let symbol: String
+    let quantity: String
+    let marketPriceAmount: String
+    let marketPriceCurrency: String
+    let marketValueAmount: String
+    let marketValueCurrency: String
+    let netCashAmount: String
+    let netCashCurrency: String
+    let fxRate: String
+    let effectiveDate: Date
+    let processDate: Date
 
     // swiftlint:disable:next function_body_length
     private init(json: [String: Any]) throws {
@@ -221,7 +239,7 @@ public struct Transaction {
                 }
                 var transactions = [Transaction]()
                 for result in results {
-                    transactions.append(try Transaction(json: result))
+                    transactions.append(try WealthsimpleTransaction(json: result))
                 }
                 completion(.success(transactions))
             } catch {
