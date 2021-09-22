@@ -10,63 +10,72 @@ import Foundation
  import FoundationNetworking
  #endif
 
-/// An Account at Wealthsimple
-public struct Account {
+/// Errors which can happen when retrieving an Account
+public enum AccountError: Error {
+    /// When no data is received from the HTTP request
+    case noDataReceived
+    /// When an HTTP error occurs
+    case httpError(error: String)
+    /// When the received data is not valid JSON
+    case invalidJson(error: String)
+    /// When the received JSON does not have the right type
+    case invalidJsonType(json: Any)
+    /// When the received JSON does not have all expected values
+    case missingResultParamenter(json: [String: Any])
+    /// When the received JSON does have an unexpected value
+    case invalidResultParamenter(json: [String: Any])
+    /// An error with the token occured
+    case tokenError(_ error: TokenError)
+}
 
-    /// Errors which can happen when retrieving an Account
-    public enum AccountError: Error {
-        /// When no data is received from the HTTP request
-        case noDataReceived
-        /// When an HTTP error occurs
-        case httpError(error: String)
-        /// When the received data is not valid JSON
-        case invalidJson(error: String)
-        /// When the received JSON does not have the right type
-        case invalidJsonType(json: Any)
-        /// When the received JSON does not have all expected values
-        case missingResultParamenter(json: [String: Any])
-        /// When the received JSON does have an unexpected value
-        case invalidResultParamenter(json: [String: Any])
-        /// An error with the token occured
-        case tokenError(_ error: TokenError)
-    }
+/// Type of the account
+///
+/// Note: Currently only Canadian Accounts are supported
+public enum AccountType: String {
+    /// Tax free savings account (CA)
+    case tfsa = "ca_tfsa"
+    /// Cash (chequing) account (CA)
+    case chequing = "ca_cash_msb"
+    /// Saving (CA)
+    case saving = "ca_cash"
+    /// Registered Retirement Savings Plan (CA)
+    case rrsp = "ca_rrsp"
+    /// Non-registered account (CA)
+    case nonRegistered = "ca_non_registered"
+    /// Non-registered crypto currency account (CA)
+    case nonRegisteredCrypto = "ca_non_registered_crypto"
+    /// Locked-in retirement account (CA)
+    case lira = "ca_lira"
+    /// Joint account (CA)
+    case joint = "ca_joint"
+    /// Registered Retirement Income Fund (CA)
+    case rrif = "ca_rrif"
+    /// Life Income Fund (CA)
+    case lif = "ca_lif"
+}
+
+/// An Account at Wealthsimple
+public protocol Account {
 
     /// Type of the account
-    ///
-    /// Note: Currently only Canadian Accounts are supported
-    public enum AccountType: String {
-        /// Tax free savings account (CA)
-        case tfsa = "ca_tfsa"
-        /// Cash (chequing) account (CA)
-        case chequing = "ca_cash_msb"
-        /// Saving (CA)
-        case saving = "ca_cash"
-        /// Registered Retirement Savings Plan (CA)
-        case rrsp = "ca_rrsp"
-        /// Non-registered account (CA)
-        case nonRegistered = "ca_non_registered"
-        /// Non-registered crypto currency account (CA)
-        case nonRegisteredCrypto = "ca_non_registered_crypto"
-        /// Locked-in retirement account (CA)
-        case lira = "ca_lira"
-        /// Joint account (CA)
-        case joint = "ca_joint"
-        /// Registered Retirement Income Fund (CA)
-        case rrif = "ca_rrif"
-        /// Life Income Fund (CA)
-        case lif = "ca_lif"
-    }
+    var accountType: AccountType { get }
+    /// Operating currency of the account
+    var currency: String { get }
+    /// Wealthsimple id for the account
+    var id: String { get }
+    /// Number of the account
+    var number: String { get }
+
+}
+
+struct WealthsimpleAccount: Account {
 
     private static let url = URL(string: "https://api.production.wealthsimple.com/v1/accounts")!
 
-    /// Type of the account
-    public let accountType: AccountType
-    /// Operating currency of the account
-    public let currency: String
-    /// Wealthsimple id for the account
-    public let id: String
-    /// Number of the account
-    public let number: String
+    let accountType: AccountType
+    let currency: String
+    let id: String
+    let number: String
 
     private init(json: [String: Any]) throws {
         guard let id = json["id"] as? String,
@@ -133,7 +142,7 @@ public struct Account {
                 }
                 var accounts = [Account]()
                 for result in results {
-                    accounts.append(try Account(json: result))
+                    accounts.append(try WealthsimpleAccount(json: result))
                 }
                 completion(.success(accounts))
             } catch {

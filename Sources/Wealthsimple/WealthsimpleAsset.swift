@@ -7,40 +7,46 @@
 
 import Foundation
 
+/// Errors which can happen when retrieving an Asset
+public enum AssetError: Error {
+    /// When the received JSON does not have all expected values
+    case missingResultParamenter(json: [String: Any])
+    /// When the received JSON does have an unexpected value
+    case invalidResultParamenter(json: [String: Any])
+}
+
+/// Type of the asset
+public enum AssetType: String {
+    /// Cash
+    case currency
+    /// Equity
+    case equity
+    /// Mutal Funds
+    case mutualFund = "mutual_fund"
+    /// Bonds
+    case bond
+    /// ETFs
+    case exchangeTradedFund = "exchange_traded_fund"
+}
+
 /// An asset, like a stock or a currency
-public struct Asset {
-
-    /// Errors which can happen when retrieving an Asset
-    public enum AssetError: Error {
-        /// When the received JSON does not have all expected values
-        case missingResultParamenter(json: [String: Any])
-        /// When the received JSON does have an unexpected value
-        case invalidResultParamenter(json: [String: Any])
-    }
-
-    /// Type of the asset
-    public enum AssetType: String {
-        /// Cash
-        case currency
-        /// Equity
-        case equity
-        /// Mutal Funds
-        case mutualFund = "mutual_fund"
-        /// Bonds
-        case bond
-        /// ETFs
-        case exchangeTradedFund = "exchange_traded_fund"
-    }
-
+public protocol Asset {
     /// Symbol of the asset, e.g. currency or ticker symbol
-    public let symbol: String
+    var symbol: String { get }
     /// Full name of the asset
-    public let name: String
+    var name: String { get }
     /// Currency the asset is held in
-    public let currency: String
+    var currency: String { get }
     /// Type of the asset, e.g. currency or ETF
-    public let type: AssetType
+    var type: AssetType { get }
+}
 
+struct WealthsimpleAsset: Asset {
+
+    let symbol: String
+    let name: String
+    let currency: String
+    let type: AssetType
     let id: String
 
     init(json: [String: Any]) throws {
