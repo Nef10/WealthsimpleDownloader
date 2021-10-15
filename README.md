@@ -36,7 +36,7 @@ class KeyChainCredentialStorage: CredentialStorage {
 4) Call `wealthsimpleDownloader.authenticate() { }` and wait for the callback
 5) Now you can start retreiving data with the other methods provided on `WealthsimpleDownloader` like `getAccounts` or `getPositions`
 
-Please check out the complete documentation [here](https://nef10.github.io/WealthsimpleDownloader/). You can also have a look at the [SwiftBeanCountDownloaderApp](https://github.com/Nef10/SwiftBeanCountDownloaderApp) which uses this library. If you want to convert the downloaded data into Beancount format, also check out [SwiftBeanCountWealthsimpleMapper](https://github.com/Nef10/SwiftBeanCountWealthsimpleMapper)
+Please check out the complete documentation [here](https://nef10.github.io/WealthsimpleDownloader/). You can also have a look at the [SwiftBeanCountImporterApp](https://github.com/Nef10/SwiftBeanCountImporterApp) which uses this library. If you want to convert the downloaded data into Beancount format, also check out [SwiftBeanCountWealthsimpleMapper](https://github.com/Nef10/SwiftBeanCountWealthsimpleMapper)
 
 ## Usage
 
