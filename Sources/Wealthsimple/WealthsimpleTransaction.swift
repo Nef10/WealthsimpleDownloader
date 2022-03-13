@@ -86,9 +86,9 @@ public protocol Transaction {
     var transactionType: TransactionType { get }
     /// description of the transaction
     var description: String { get }
-    /// symbol of the asset which is brought, sold, ...
+    /// symbol of the asset which is bought, sold, ...
     var symbol: String { get }
-    /// Number of units of the asset brought, sold, ...
+    /// Number of units of the asset bought, sold, ...
     var quantity: String { get }
     /// market pice of the asset
     var marketPriceAmount: String { get }
@@ -98,7 +98,7 @@ public protocol Transaction {
     var marketValueAmount: String { get }
     /// Currency of the market value
     var marketValueCurrency: String { get }
-    /// Net chash change in the account
+    /// Net cash change in the account
     var netCashAmount: String { get }
     /// Currency of the net cash change
     var netCashCurrency: String { get }
