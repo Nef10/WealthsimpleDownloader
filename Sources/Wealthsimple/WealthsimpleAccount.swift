@@ -129,28 +129,31 @@ struct WealthsimpleAccount: Account {
             return
         }
         do {
-            guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
-                completion(.failure(AccountError.invalidJsonType(json: try JSONSerialization.jsonObject(with: data, options: []))))
-                return
-            }
-            do {
-                guard let results = json["results"] as? [[String: Any]], let object = json["object"] as? String else {
-                    throw AccountError.missingResultParamenter(json: json)
-                }
-                guard object == "account" else {
-                    throw AccountError.invalidResultParamenter(json: json)
-                }
-                var accounts = [Account]()
-                for result in results {
-                    accounts.append(try WealthsimpleAccount(json: result))
-                }
-                completion(.success(accounts))
-            } catch {
-                completion(.failure(error as! AccountError)) // swiftlint:disable:this force_cast
-            }
+            completion(try parse(data: data))
         } catch {
             completion(.failure(AccountError.invalidJson(error: error.localizedDescription)))
             return
+        }
+    }
+
+    private static func parse(data: Data) throws -> Result<[Account], AccountError> {
+        guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            return .failure(AccountError.invalidJsonType(json: try JSONSerialization.jsonObject(with: data, options: [])))
+        }
+        do {
+            guard let results = json["results"] as? [[String: Any]], let object = json["object"] as? String else {
+                throw AccountError.missingResultParamenter(json: json)
+            }
+            guard object == "account" else {
+                throw AccountError.invalidResultParamenter(json: json)
+            }
+            var accounts = [Account]()
+            for result in results {
+                accounts.append(try Self(json: result))
+            }
+            return .success(accounts)
+        } catch {
+            return .failure(error as! AccountError) // swiftlint:disable:this force_cast
         }
     }
 }

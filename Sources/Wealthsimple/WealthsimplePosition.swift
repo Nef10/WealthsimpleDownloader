@@ -134,28 +134,31 @@ struct WealthsimplePosition: Position {
             return
         }
         do {
-            guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
-                completion(.failure(PositionError.invalidJsonType(json: try JSONSerialization.jsonObject(with: data, options: []))))
-                return
-            }
-            do {
-                guard let results = json["results"] as? [[String: Any]], let object = json["object"] as? String else {
-                    throw PositionError.missingResultParamenter(json: json)
-                }
-                guard object == "position" else {
-                    throw PositionError.invalidResultParamenter(json: json)
-                }
-                var positions = [Position]()
-                for result in results {
-                    positions.append(try Self(json: result))
-                }
-                completion(.success(positions))
-            } catch {
-                completion(.failure(error as! PositionError)) // swiftlint:disable:this force_cast
-            }
+            completion(try parse(data: data))
         } catch {
             completion(.failure(PositionError.invalidJson(error: error.localizedDescription)))
             return
+        }
+    }
+
+    private static func parse(data: Data) throws -> Result<[Position], PositionError> {
+        guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            return .failure(PositionError.invalidJsonType(json: try JSONSerialization.jsonObject(with: data, options: [])))
+        }
+        do {
+            guard let results = json["results"] as? [[String: Any]], let object = json["object"] as? String else {
+                throw PositionError.missingResultParamenter(json: json)
+            }
+            guard object == "position" else {
+                throw PositionError.invalidResultParamenter(json: json)
+            }
+            var positions = [Position]()
+            for result in results {
+                positions.append(try Self(json: result))
+            }
+            return .success(positions)
+        } catch {
+            return .failure(error as! PositionError) // swiftlint:disable:this force_cast
         }
     }
 
