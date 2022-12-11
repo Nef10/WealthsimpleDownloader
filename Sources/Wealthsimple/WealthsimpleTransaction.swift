@@ -228,28 +228,31 @@ struct WealthsimpleTransaction: Transaction {
             return
         }
         do {
-            guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
-                completion(.failure(TransactionError.invalidJsonType(json: try JSONSerialization.jsonObject(with: data, options: []))))
-                return
-            }
-            do {
-                guard let results = json["results"] as? [[String: Any]], let object = json["object"] as? String else {
-                    throw TransactionError.missingResultParamenter(json: json)
-                }
-                guard object == "transaction" else {
-                    throw TransactionError.invalidResultParamenter(json: json)
-                }
-                var transactions = [Transaction]()
-                for result in results {
-                    transactions.append(try WealthsimpleTransaction(json: result))
-                }
-                completion(.success(transactions))
-            } catch {
-                completion(.failure(error as! TransactionError)) // swiftlint:disable:this force_cast
-            }
+            completion(try parse(data: data))
         } catch {
             completion(.failure(TransactionError.invalidJson(error: error.localizedDescription)))
             return
+        }
+    }
+
+    private static func parse(data: Data) throws -> Result<[Transaction], TransactionError> {
+        guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            return .failure(TransactionError.invalidJsonType(json: try JSONSerialization.jsonObject(with: data, options: [])))
+        }
+        do {
+            guard let results = json["results"] as? [[String: Any]], let object = json["object"] as? String else {
+                throw TransactionError.missingResultParamenter(json: json)
+            }
+            guard object == "transaction" else {
+                throw TransactionError.invalidResultParamenter(json: json)
+            }
+            var transactions = [Transaction]()
+            for result in results {
+                transactions.append(try Self(json: result))
+            }
+            return .success(transactions)
+        } catch {
+            return .failure(error as! TransactionError) // swiftlint:disable:this force_cast
         }
     }
 
