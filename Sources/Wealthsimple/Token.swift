@@ -147,21 +147,22 @@ struct Token {
             return
         }
         do {
-            guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
-                completion(.failure(TokenError.invalidJsonType(json: try JSONSerialization.jsonObject(with: data, options: []))))
-                return
-            }
-            do {
-                let token = try Token(json: json, credentialStorage: credentialStorage)
-                token.saveToken()
-                completion(.success(token))
-            } catch {
-
-                completion(.failure(error as! TokenError)) // swiftlint:disable:this force_cast
-            }
+            completion(try parse(data: data, credentialStorage: credentialStorage))
         } catch {
             completion(.failure(TokenError.invalidJson(error: error.localizedDescription)))
-            return
+        }
+    }
+
+    private static func parse(data: Data, credentialStorage: CredentialStorage) throws -> Result<Self, TokenError> {
+        guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            return .failure(TokenError.invalidJsonType(json: try JSONSerialization.jsonObject(with: data, options: [])))
+        }
+        do {
+            let token = try Self(json: json, credentialStorage: credentialStorage)
+            token.saveToken()
+            return .success(token)
+        } catch {
+            return .failure(error as! TokenError) // swiftlint:disable:this force_cast
         }
     }
 
