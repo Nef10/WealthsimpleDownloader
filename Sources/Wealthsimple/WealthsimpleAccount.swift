@@ -112,8 +112,8 @@ struct WealthsimpleAccount: Account {
     }
 
     private static func handleResponse(data: Data?, response: URLResponse?, error: Error?, completion: @escaping (Result<[Account], AccountError>) -> Void) {
-        guard let data = data else {
-            if let error = error {
+        guard let data else {
+            if let error {
                 completion(.failure(AccountError.httpError(error: error.localizedDescription)))
             } else {
                 completion(.failure(AccountError.noDataReceived))

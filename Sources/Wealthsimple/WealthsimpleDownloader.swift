@@ -53,7 +53,7 @@ public final class WealthsimpleDownloader {
     /// Authneticates against the API. Call before calling any other method.
     /// - Parameter completion: Gets an error in case something went wrong, otherwise nil
     public func authenticate(completion: @escaping (Error?) -> Void) {
-        if let token = token {
+        if let token {
             token.refreshIfNeeded {
                 switch $0 {
                 case .failure:
@@ -82,7 +82,7 @@ public final class WealthsimpleDownloader {
     /// Get all Accounts the user has access to
     /// - Parameter completion: Result with an array of `Account`s or an `Account.AccountError`
     public func getAccounts(completion: @escaping (Result<[Account], AccountError>) -> Void) {
-        guard let token = token else {
+        guard let token else {
             completion(.failure(.tokenError(.noToken)))
             return
         }
@@ -102,7 +102,7 @@ public final class WealthsimpleDownloader {
     ///   - date: Date of which the positions should be downloaded. If not date is provided, not date is sent to the API. The API falls back to the current date.
     ///   - completion: Result with an array of `Position`s or an `Position.PositionError`
     public func getPositions(in account: Account, date: Date?, completion: @escaping (Result<[Position], PositionError>) -> Void) {
-        guard let token = token else {
+        guard let token else {
             completion(.failure(.tokenError(.noToken)))
             return
         }
@@ -122,7 +122,7 @@ public final class WealthsimpleDownloader {
     ///   - startDate: Date from which the transactions are downloaded. If not date is provided, not date is sent to the API. The API falls back to 30 days ago from today.
     ///   - completion: Result with an array of `Transactions`s or an `Transactions.TransactionsError`
     public func getTransactions(in account: Account, startDate: Date?, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
-        guard let token = token else {
+        guard let token else {
             completion(.failure(.tokenError(.noToken)))
             return
         }

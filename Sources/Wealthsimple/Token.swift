@@ -130,8 +130,8 @@ struct Token {
         credentialStorage: CredentialStorage,
         completion: @escaping (Result<Self, TokenError>) -> Void
     ) {
-        guard let data = data else {
-            if let error = error {
+        guard let data else {
+            if let error {
                 completion(.failure(TokenError.httpError(error: error.localizedDescription)))
             } else {
                 completion(.failure(TokenError.noDataReceived))
