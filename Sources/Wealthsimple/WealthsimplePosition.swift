@@ -97,7 +97,7 @@ struct WealthsimplePosition: Position {
             URLQueryItem(name: "account_id", value: account.id),
             URLQueryItem(name: "limit", value: "250")
         ]
-        if let date = date {
+        if let date {
             url.queryItems?.append(URLQueryItem(name: "date", value: dateFormatter.string(from: date)))
         }
         var request = URLRequest(url: url.url!)
@@ -117,8 +117,8 @@ struct WealthsimplePosition: Position {
     }
 
     private static func handleResponse(data: Data?, response: URLResponse?, error: Error?, completion: @escaping (Result<[Position], PositionError>) -> Void) {
-        guard let data = data else {
-            if let error = error {
+        guard let data else {
+            if let error {
                 completion(.failure(PositionError.httpError(error: error.localizedDescription)))
             } else {
                 completion(.failure(PositionError.noDataReceived))

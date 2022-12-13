@@ -211,8 +211,8 @@ struct WealthsimpleTransaction: Transaction {
     }
 
     private static func handleResponse(data: Data?, response: URLResponse?, error: Error?, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
-        guard let data = data else {
-            if let error = error {
+        guard let data else {
+            if let error {
                 completion(.failure(TransactionError.httpError(error: error.localizedDescription)))
             } else {
                 completion(.failure(TransactionError.noDataReceived))
