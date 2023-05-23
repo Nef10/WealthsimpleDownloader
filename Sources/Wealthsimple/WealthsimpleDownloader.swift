@@ -64,18 +64,16 @@ public final class WealthsimpleDownloader {
                 }
             }
             return
-        } else {
-            Token.getToken(from: credentialStorage) {
-                if let token = $0 {
-                    self.token = token
-                    completion(nil)
-                    return
-                } else {
-                    self.token = nil
-                    self.getNewToken(completion: completion)
-                    return
-                }
+        }
+        Token.getToken(from: credentialStorage) {
+            if let token = $0 {
+                self.token = token
+                completion(nil)
+                return
             }
+            self.token = nil
+            self.getNewToken(completion: completion)
+            return
         }
     }
 
