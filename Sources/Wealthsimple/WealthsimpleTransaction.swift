@@ -74,6 +74,8 @@ public enum TransactionType: String {
     case giveawayBonus
     /// Wealthsimple Cash Cashback
     case cashbackBonus
+    /// Online Bill Payment
+    case onlineBillPayment
 }
 
 /// A Transaction, like buying or selling stock
