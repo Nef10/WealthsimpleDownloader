@@ -14,7 +14,7 @@ extension String {
             return ""
         }
         var parts = self.components(separatedBy: CharacterSet.alphanumerics.inverted)
-        return "\(parts.removeFirst().lowercasingFirst)\(parts.map { $0.uppercasingFirst }.joined())"
+        return "\(parts.removeFirst().lowercasingFirst)\(parts.map(\.uppercasingFirst).joined())"
     }
 
     private var uppercasingFirst: Substring {
