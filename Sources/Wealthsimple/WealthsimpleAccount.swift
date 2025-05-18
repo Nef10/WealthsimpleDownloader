@@ -52,6 +52,8 @@ public enum AccountType: String {
     case rrif = "ca_rrif"
     /// Life Income Fund (CA)
     case lif = "ca_lif"
+    /// Credit Card (CA)
+    case cc = "ca_credit_card"
 }
 
 /// An Account at Wealthsimple
