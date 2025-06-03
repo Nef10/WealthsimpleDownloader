@@ -84,6 +84,8 @@ public enum TransactionType: String {
     case manufacturedDividend
     /// Return of Capital (Adjusted Cost Base entry only)
     case returnOfCapital
+    /// Non-cash Distribution (Adjusted Cost Base entry only)
+    case nonCashDistribution
 }
 
 /// A Transaction, like buying or selling stock
