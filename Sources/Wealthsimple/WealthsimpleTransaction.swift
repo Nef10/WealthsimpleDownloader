@@ -81,7 +81,9 @@ public enum TransactionType: String {
     /// Returning stock which was borrowed from a third party
     case stockLoanReturn = "fPLRecalledSecurities"
     /// Manufactured dividend, which is paid out from the third party who borrowed the stock
-    case manufacturedDividend = "manufacturedDividend"
+    case manufacturedDividend
+    /// Return of Capital (Adjusted Cost Base entry only)
+    case returnOfCapital
 }
 
 /// A Transaction, like buying or selling stock
