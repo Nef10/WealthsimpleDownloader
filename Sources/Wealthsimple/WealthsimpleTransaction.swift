@@ -76,6 +76,12 @@ public enum TransactionType: String {
     case cashbackBonus
     /// Online Bill Payment
     case onlineBillPayment
+    /// Loaning out stock to a third party
+    case stockLoanBorrow = "fPLLoanedSecurities"
+    /// Returning stock which was borrowed from a third party
+    case stockLoanReturn = "fPLRecalledSecurities"
+    /// Manufactured dividend, which is paid out from the third party who borrowed the stock
+    case manufacturedDividend = "manufacturedDividend"
 }
 
 /// A Transaction, like buying or selling stock
