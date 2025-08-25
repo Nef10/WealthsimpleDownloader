@@ -4,3 +4,7 @@
 /*.xcodeproj
 xcuserdata/
 .swiftpm
+
+# SwiftLint binary download
+swiftlint/
+swiftlint.zip
