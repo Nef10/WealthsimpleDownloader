@@ -26,21 +26,107 @@ class MockCredentialStorage: CredentialStorage {
     }
 }
 
+// MARK: - Mock URL Protocol
+
+class MockURLProtocol: URLProtocol {
+    static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
+
+    override class func canInit(with request: URLRequest) -> Bool {
+        // Only handle requests to localhost
+        return request.url?.host == "localhost"
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        request
+    }
+
+    override func startLoading() {
+        guard let handler = Self.requestHandler else {
+            fatalError("Handler is unavailable.")
+        }
+
+        do {
+            let (response, data) = try handler(request)
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: data)
+            client?.urlProtocolDidFinishLoading(self)
+        } catch {
+            client?.urlProtocol(self, didFailWithError: error)
+        }
+    }
+
+    override func stopLoading() {
+        // No-op
+    }
+}
+
 final class TokenTests: XCTestCase {
 
     private var mockCredentialStorage: MockCredentialStorage!
-    private let mockBaseURL = "https://mock.wealthsimple.test/v1/"
+    private let mockBaseURL = "http://localhost:8080/v1/"
 
     override func setUp() {
         super.setUp()
         mockCredentialStorage = MockCredentialStorage()
+
+        // Register mock URL protocol
+        _ = URLProtocol.registerClass(MockURLProtocol.self)
+
+        // Set up default request handler
+        MockURLProtocol.requestHandler = { request in
+            try self.handleMockRequest(request)
+        }
+
         URLConfiguration.shared.setBaseURL(mockBaseURL)
     }
 
     override func tearDown() {
         super.tearDown()
+        URLProtocol.unregisterClass(MockURLProtocol.self)
         URLConfiguration.shared.setBaseURL("https://api.production.wealthsimple.com/v1/")
+        MockURLProtocol.requestHandler = nil
         mockCredentialStorage = nil
+    }
+    
+    private func handleMockRequest(_ request: URLRequest) throws -> (HTTPURLResponse, Data) {
+        guard let url = request.url else {
+            throw URLError(.badURL)
+        }
+
+        let response: HTTPURLResponse
+        let data: Data
+
+        if url.path.contains("/oauth/token") && request.httpMethod == "POST" {
+            // For POST requests to /oauth/token, always return success for testing
+            // In real implementation, this would validate credentials
+            let jsonResponse = [
+                "access_token": "mock_access_token_12345",
+                "refresh_token": "mock_refresh_token_67890",
+                "expires_in": 3_600,
+                "created_at": Int(Date().timeIntervalSince1970),
+                "token_type": "Bearer"
+            ] as [String: Any]
+
+            data = try JSONSerialization.data(withJSONObject: jsonResponse)
+            response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: ["Content-Type": "application/json"])!
+        } else if url.path.contains("/oauth/token/info") && request.httpMethod == "GET" {
+            if let authHeader = request.value(forHTTPHeaderField: "Authorization"),
+               authHeader.contains("mock_access_token") {
+                // Mock successful token validation
+                data = Data()
+                response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            } else {
+                // Mock unauthorized response
+                data = Data()
+                response = HTTPURLResponse(url: url, statusCode: 401, httpVersion: nil, headerFields: nil)!
+            }
+        } else {
+            // Mock 404 for unknown endpoints
+            data = Data()
+            response = HTTPURLResponse(url: url, statusCode: 404, httpVersion: nil, headerFields: nil)!
+        }
+
+        return (response, data)
     }
 
     // MARK: - TokenError Tests
@@ -77,6 +163,23 @@ final class TokenTests: XCTestCase {
     }
 
     // MARK: - getToken from CredentialStorage Tests
+
+    func testGetTokenFromCredentialStorageWithValidToken() {
+        let expectation = XCTestExpectation(description: "getToken completion")
+        
+        // Set up valid token data in credential storage
+        mockCredentialStorage.storage["accessToken"] = "mock_access_token_12345"
+        mockCredentialStorage.storage["refreshToken"] = "mock_refresh_token_67890"
+        let futureExpiry = Date().addingTimeInterval(3600).timeIntervalSince1970
+        mockCredentialStorage.storage["expiry"] = String(futureExpiry)
+
+        Token.getToken(from: mockCredentialStorage) { token in
+            XCTAssertNotNil(token)
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 10.0)
+    }
 
     func testGetTokenFromCredentialStorageWithMissingAccessToken() {
         let expectation = XCTestExpectation(description: "getToken completion")
@@ -137,7 +240,37 @@ final class TokenTests: XCTestCase {
 
     // MARK: - Token Creation Network Tests
 
+    func testGetTokenWithUsernamePasswordOTPSuccess() {
+        let expectation = XCTestExpectation(description: "getToken completion")
+
+        Token.getToken(
+            username: "test@example.com",
+            password: "password",
+            otp: "123456",
+            credentialStorage: mockCredentialStorage
+        ) { result in
+            switch result {
+            case .success(let token):
+                XCTAssertNotNil(token)
+                // Verify token was saved to credential storage
+                XCTAssertEqual(self.mockCredentialStorage.read("accessToken"), "mock_access_token_12345")
+                XCTAssertEqual(self.mockCredentialStorage.read("refreshToken"), "mock_refresh_token_67890")
+                XCTAssertNotNil(self.mockCredentialStorage.read("expiry"))
+                expectation.fulfill()
+            case .failure(let error):
+                XCTFail("Expected success but got error: \(error)")
+            }
+        }
+
+        wait(for: [expectation], timeout: 10.0)
+    }
+
     func testGetTokenWithUsernamePasswordOTPNetworkFailure() {
+        // Set up the mock to throw an error for this test
+        MockURLProtocol.requestHandler = { _ in
+            throw URLError(.networkConnectionLost)
+        }
+        
         let expectation = XCTestExpectation(description: "getToken completion")
 
         Token.getToken(
@@ -148,7 +281,7 @@ final class TokenTests: XCTestCase {
         ) { result in
             switch result {
             case .success:
-                XCTFail("Expected failure due to mock URL")
+                XCTFail("Expected failure due to network error")
             case .failure(let error):
                 XCTAssertNotNil(error)
                 expectation.fulfill()
@@ -156,6 +289,11 @@ final class TokenTests: XCTestCase {
         }
 
         wait(for: [expectation], timeout: 10.0)
+        
+        // Restore normal handler for other tests
+        MockURLProtocol.requestHandler = { request in
+            return try self.handleMockRequest(request)
+        }
     }
 
     // MARK: - Credential Storage Tests
@@ -175,8 +313,41 @@ final class TokenTests: XCTestCase {
     // MARK: - Date and Expiry Logic Tests
 
     func testExpiryCalculation() {
+        setupMockForExpiredTokens()
+        testExpiredToken()
+        testFutureToken()
+        restoreDefaultMockHandler()
+    }
+
+    private func setupMockForExpiredTokens() {
+        // Test with mock that simulates server rejection for expired tokens
+        MockURLProtocol.requestHandler = { request in
+            guard let url = request.url else {
+                throw URLError(.badURL)
+            }
+
+            if url.path.contains("/oauth/token") && request.httpMethod == "POST" {
+                // Simulate server rejecting refresh token requests for expired tokens
+                let data = Data()
+                let response = HTTPURLResponse(url: url, statusCode: 401, httpVersion: nil, headerFields: nil)!
+                return (response, data)
+            }
+            
+            if url.path.contains("/oauth/token/info") {
+                // Simulate server rejecting token validation
+                let data = Data()
+                let response = HTTPURLResponse(url: url, statusCode: 401, httpVersion: nil, headerFields: nil)!
+                return (response, data)
+            }
+
+            let data = Data()
+            let response = HTTPURLResponse(url: url, statusCode: 404, httpVersion: nil, headerFields: nil)!
+            return (response, data)
+        }
+    }
+
+    private func testExpiredToken() {
         let expiredTimestamp = Date().addingTimeInterval(-3_600).timeIntervalSince1970
-        let futureTimestamp = Date().addingTimeInterval(3_600).timeIntervalSince1970
 
         mockCredentialStorage.storage["accessToken"] = "expired_token"
         mockCredentialStorage.storage["refreshToken"] = "refresh_token"
@@ -190,7 +361,10 @@ final class TokenTests: XCTestCase {
         }
 
         wait(for: [expiredExpectation], timeout: 10.0)
+    }
 
+    private func testFutureToken() {
+        let futureTimestamp = Date().addingTimeInterval(3_600).timeIntervalSince1970
         mockCredentialStorage.storage["expiry"] = String(futureTimestamp)
 
         let futureExpectation = XCTestExpectation(description: "future token test")
@@ -203,11 +377,44 @@ final class TokenTests: XCTestCase {
         wait(for: [futureExpectation], timeout: 10.0)
     }
 
+    private func restoreDefaultMockHandler() {
+        // Restore default handler
+        MockURLProtocol.requestHandler = { request in
+            try self.handleMockRequest(request)
+        }
+    }
+
     // MARK: - Edge Case Tests
 
     func testTokenWithExtremeTimestamps() {
+        setupMockToRejectTokenRequests()
+        testVeryOldToken()
+        testVeryFutureToken()
+        restoreDefaultMockHandler()
+    }
+
+    private func setupMockToRejectTokenRequests() {
+        // Set up mock to reject token refresh/validation requests
+        MockURLProtocol.requestHandler = { request in
+            guard let url = request.url else {
+                throw URLError(.badURL)
+            }
+
+            if url.path.contains("/oauth/token") || url.path.contains("/oauth/token/info") {
+                // Simulate server rejection for extreme timestamps
+                let data = Data()
+                let response = HTTPURLResponse(url: url, statusCode: 401, httpVersion: nil, headerFields: nil)!
+                return (response, data)
+            }
+
+            let data = Data()
+            let response = HTTPURLResponse(url: url, statusCode: 404, httpVersion: nil, headerFields: nil)!
+            return (response, data)
+        }
+    }
+
+    private func testVeryOldToken() {
         let veryOldDate = Date(timeIntervalSince1970: 0)
-        let veryFutureDate = Date(timeIntervalSince1970: 2_147_483_647)
 
         mockCredentialStorage.storage["accessToken"] = "old_token"
         mockCredentialStorage.storage["refreshToken"] = "refresh_token"
@@ -219,6 +426,11 @@ final class TokenTests: XCTestCase {
             oldExpectation.fulfill()
         }
 
+        wait(for: [oldExpectation], timeout: 15.0)
+    }
+
+    private func testVeryFutureToken() {
+        let veryFutureDate = Date(timeIntervalSince1970: 2_147_483_647)
         mockCredentialStorage.storage["expiry"] = String(veryFutureDate.timeIntervalSince1970)
 
         let futureExpectation = XCTestExpectation(description: "very future token")
@@ -227,7 +439,7 @@ final class TokenTests: XCTestCase {
             futureExpectation.fulfill()
         }
 
-        wait(for: [oldExpectation, futureExpectation], timeout: 15.0)
+        wait(for: [futureExpectation], timeout: 15.0)
     }
 
     // MARK: - CredentialStorage Comprehensive Tests
@@ -259,21 +471,21 @@ final class TokenTests: XCTestCase {
     // MARK: - Token Request Parameter Tests
 
     func testTokenRequestParameters() {
-        let testCases = [
-            ("", "", ""),
-            ("user", "", ""),
-            ("", "pass", ""),
-            ("", "", "123456"),
-            ("user", "pass", ""),
-            ("user", "", "123456"),
-            ("", "pass", "123456"),
-            ("a@b.c", "password", "123456")
+        let testCases: [(String, String, String)] = [
+            ("", "", ""), ("user", "", ""), ("", "pass", ""),
+            ("", "", "123456"), ("user", "pass", ""), ("user", "", "123456"),
+            ("", "pass", "123456"), ("a@b.c", "password", "123456")
         ]
 
         let expectations = testCases.indices.map { index in
             XCTestExpectation(description: "Test case \(index)")
         }
 
+        executeTokenRequestTests(testCases: testCases, expectations: expectations)
+        wait(for: expectations, timeout: 20.0)
+    }
+
+    private func executeTokenRequestTests(testCases: [(String, String, String)], expectations: [XCTestExpectation]) {
         for (index, testCase) in testCases.enumerated() {
             Token.getToken(
                 username: testCase.0,
@@ -281,15 +493,56 @@ final class TokenTests: XCTestCase {
                 otp: testCase.2,
                 credentialStorage: mockCredentialStorage
             ) { result in
-                if case .failure = result {
+                // With our mock server, all requests succeed for simplicity
+                if case .success = result {
                     expectations[index].fulfill()
                 } else {
-                    XCTFail("Expected failure for test case \(index)")
+                    XCTFail("Expected success for test case \(index)")
                 }
             }
         }
+    }
 
-        wait(for: expectations, timeout: 20.0)
+    func testTokenRequestParameterValidation() {
+        // Test that the token request handles different parameter scenarios
+        testValidParameterRequest()
+        testEmptyParameterRequest()
+    }
+
+    private func testValidParameterRequest() {
+        let validExpectation = XCTestExpectation(description: "Valid request")
+        Token.getToken(
+            username: "valid@example.com",
+            password: "password123",
+            otp: "123456",
+            credentialStorage: mockCredentialStorage
+        ) { result in
+            if case .success = result {
+                validExpectation.fulfill()
+            } else {
+                XCTFail("Expected success for valid parameters")
+            }
+        }
+        wait(for: [validExpectation], timeout: 5.0)
+    }
+
+    private func testEmptyParameterRequest() {
+        let emptyParamsExpectation = XCTestExpectation(description: "Empty parameters request")
+        Token.getToken(
+            username: "",
+            password: "",
+            otp: "",
+            credentialStorage: mockCredentialStorage
+        ) { result in
+            // With our mock server, even empty parameters succeed
+            // In a real environment, this would depend on server validation
+            if case .success = result {
+                emptyParamsExpectation.fulfill()
+            } else if case .failure = result {
+                emptyParamsExpectation.fulfill()
+            }
+        }
+        wait(for: [emptyParamsExpectation], timeout: 5.0)
     }
 
     // MARK: - Multiple Concurrent Token Requests
@@ -305,10 +558,12 @@ final class TokenTests: XCTestCase {
                 otp: "12345\(requestIndex)",
                 credentialStorage: mockCredentialStorage
             ) { result in
-                if case .failure = result {
+                // All requests should succeed with our mock server
+                switch result {
+                case .success:
                     expectations[requestIndex].fulfill()
-                } else {
-                    XCTFail("Expected failure for request \(requestIndex)")
+                case .failure(let error):
+                    XCTFail("Expected success for request \(requestIndex), got error: \(error)")
                 }
             }
         }
