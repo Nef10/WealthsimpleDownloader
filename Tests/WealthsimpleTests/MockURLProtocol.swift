@@ -12,6 +12,29 @@ import FoundationNetworking
 @testable import Wealthsimple
 import XCTest
 
+// MARK: - Supporting Types
+
+/// A mock implementation of CredentialStorage for testing purposes.
+class MockCredentialStorage: CredentialStorage {
+    var storage: [String: String] = [:]
+
+    func save(_ value: String, for key: String) {
+        storage[key] = value
+    }
+
+    func read(_ key: String) -> String? {
+        storage[key]
+    }
+}
+
+// MARK: - Test Case Structure
+
+struct TokenRequestTestCase {
+    let username: String
+    let password: String
+    let otp: String
+}
+
 // MARK: - Mock Classes
 
 /// A mock URLProtocol implementation for intercepting HTTP requests during testing.
@@ -98,25 +121,4 @@ class MockURLProtocol: URLProtocol {
     override func stopLoading() {
         // No-op
     }
-}
-
-/// A mock implementation of CredentialStorage for testing purposes.
-class MockCredentialStorage: CredentialStorage {
-    var storage: [String: String] = [:]
-
-    func save(_ value: String, for key: String) {
-        storage[key] = value
-    }
-
-    func read(_ key: String) -> String? {
-        storage[key]
-    }
-}
-
-// MARK: - Test Case Structure
-
-struct TokenRequestTestCase {
-    let username: String
-    let password: String
-    let otp: String
 }
