@@ -2,7 +2,7 @@
 //  URLConfiguration.swift
 //
 //
-//  Created by GitHub Copilot on 2024.
+// Created by Steffen Kötte on 2025-08-31.
 //
 
 import Foundation
@@ -28,7 +28,7 @@ final class URLConfiguration {
 
     /// Set a new base URL (internal access for testing)
     /// - Parameter url: The new base URL to use
-    internal func setBaseURL(_ url: String) {
+    func setBaseURL(_ url: String) {
         baseURL = url
     }
 

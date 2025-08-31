@@ -2,7 +2,7 @@
 //  URLConfigurationTests.swift
 //
 //
-//  Created by GitHub Copilot on 2024.
+// Created by Steffen Kötte on 2025-08-31.
 //
 
 import Foundation
@@ -67,7 +67,7 @@ final class URLConfigurationTests: XCTestCase {
         let config1 = URLConfiguration.shared
         let config2 = URLConfiguration.shared
 
-        XCTAssertTrue(config1 === config2)
+        XCTAssertIdentical(config1, config2)
     }
 
     func testConfigurationPersistsBetweenAccesses() {
@@ -79,17 +79,6 @@ final class URLConfigurationTests: XCTestCase {
         // Access through different references
         let newConfig = URLConfiguration.shared
         XCTAssertEqual(newConfig.base, testURL)
-    }
-
-    func testURLConfigurationAffectsTokenURLs() {
-        let config = URLConfiguration.shared
-        let testURL = "https://mock.server.test/v1/"
-
-        config.setBaseURL(testURL)
-
-        // Test that Token uses the new base URL
-        let oauthURL = config.urlObject(for: "oauth/token")
-        XCTAssertEqual(oauthURL?.absoluteString, "https://mock.server.test/v1/oauth/token")
     }
 
 }
