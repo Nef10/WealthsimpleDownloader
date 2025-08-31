@@ -72,7 +72,7 @@ public protocol Account {
 
 struct WealthsimpleAccount: Account {
 
-    private static let url = URL(string: "https://api.production.wealthsimple.com/v1/accounts")!
+    private static var url: URL { URLConfiguration.shared.urlObject(for: "accounts")! }
 
     let accountType: AccountType
     let currency: String

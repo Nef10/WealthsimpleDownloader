@@ -124,7 +124,7 @@ public protocol Transaction {
 
 struct WealthsimpleTransaction: Transaction {
 
-    private static let baseUrl = URLComponents(string: "https://api.production.wealthsimple.com/v1/transactions")!
+    private static var baseUrl: URLComponents { URLConfiguration.shared.urlComponents(for: "transactions")! }
 
     private static var dateFormatter: DateFormatter = {
         var dateFormatter = DateFormatter()
