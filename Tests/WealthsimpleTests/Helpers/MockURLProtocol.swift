@@ -79,3 +79,29 @@ class MockURLProtocol: URLProtocol {
         // No-op
     }
 }
+
+extension Data {
+    init(reading input: InputStream) throws {
+        self.init()
+        input.open()
+        defer {
+            input.close()
+        }
+
+        let bufferSize = 4_096
+        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+        defer {
+            buffer.deallocate()
+        }
+        while input.hasBytesAvailable {
+            let read = input.read(buffer, maxLength: bufferSize)
+            if read < 0 {
+                throw input.streamError!
+            }
+            if read == 0 {
+                break
+            }
+            self.append(buffer, count: read)
+        }
+    }
+}
