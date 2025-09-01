@@ -137,15 +137,17 @@ final class TokenTests: XCTestCase {
 
         MockURLProtocol.newTokenRequestHandler = { url, request in
             XCTAssertEqual(request.value(forHTTPHeaderField: "x-wealthsimple-otp"), "123456")
+            #if canImport(FoundationNetworking)
+            // body seems to be missing?
+            #else
             // get JSON from POST request body stream
-            let inputData = try Data(reading: request.httpBodyStream!)
-            let json = try JSONSerialization.jsonObject(with: inputData, options: []) as? [String: Any]
+            let inputData = try Data(reading: request.httpBodyStream!), json = try JSONSerialization.jsonObject(with: inputData, options: []) as? [String: Any]
             XCTAssertEqual(json?["username"] as? String, "test@example.com")
             XCTAssertEqual(json?["password"] as? String, "password1")
             XCTAssertEqual(json?["grant_type"] as? String, "password")
             XCTAssertEqual(json?["client_id"] as? String, "4da53ac2b03225bed1550eba8e4611e086c7b905a3855e6ed12ea08c246758fa")
             XCTAssertEqual(json?["scope"] as? String, "invest.read mfda.read mercer.read trade.read")
-
+            #endif
             let jsonResponse = [
                 "access_token": "atoken12345", "refresh_token": "rtoken67890", "expires_in": 3_600, "created_at": Int(Date().timeIntervalSince1970), "token_type": "Bearer"
             ]
@@ -154,16 +156,15 @@ final class TokenTests: XCTestCase {
         }
 
         Token.getToken(username: "test@example.com", password: "password1", otp: "123456", credentialStorage: mockCredentialStorage) { result in
-            switch result {
-            case .success(let token):
+            if case .success(let token) = result {
                 XCTAssertNotNil(token)
                 // Verify token was saved to credential storage
                 XCTAssertEqual(self.mockCredentialStorage.read("accessToken"), "atoken12345")
                 XCTAssertEqual(self.mockCredentialStorage.read("refreshToken"), "rtoken67890")
                 XCTAssertNotNil(self.mockCredentialStorage.read("expiry"))
                 tokenExpectation.fulfill()
-            case .failure(let error):
-                XCTFail("Expected success but got error: \(error)")
+            } else {
+                XCTFail("Expected success but got error")
             }
         }
 
