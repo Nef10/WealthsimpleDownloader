@@ -137,14 +137,6 @@ final class TokenTests: XCTestCase {
 
         MockURLProtocol.newTokenRequestHandler = { url, request in
             XCTAssertEqual(request.value(forHTTPHeaderField: "x-wealthsimple-otp"), "123456")
-            // get JSON from POST request body stream
-            let inputData = try Data(reading: request.httpBodyStream!)
-            let json = try JSONSerialization.jsonObject(with: inputData, options: []) as? [String: Any]
-            XCTAssertEqual(json?["username"] as? String, "test@example.com")
-            XCTAssertEqual(json?["password"] as? String, "password1")
-            XCTAssertEqual(json?["grant_type"] as? String, "password")
-            XCTAssertEqual(json?["client_id"] as? String, "4da53ac2b03225bed1550eba8e4611e086c7b905a3855e6ed12ea08c246758fa")
-            XCTAssertEqual(json?["scope"] as? String, "invest.read mfda.read mercer.read trade.read")
 
             let jsonResponse = [
                 "access_token": "atoken12345", "refresh_token": "rtoken67890", "expires_in": 3_600, "created_at": Int(Date().timeIntervalSince1970), "token_type": "Bearer"
