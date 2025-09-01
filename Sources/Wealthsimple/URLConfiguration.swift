@@ -10,11 +10,13 @@ import Foundation
 /// Singleton class that manages the base URL configuration for all Wealthsimple API endpoints
 final class URLConfiguration {
 
+    private static let defaultBaseURL = "https://api.production.wealthsimple.com/v1/"
+
     /// Shared singleton instance
     static let shared = URLConfiguration()
 
     /// Base URL for all Wealthsimple API endpoints
-    private var baseURL: String = "https://api.production.wealthsimple.com/v1/"
+    private var baseURL: String = URLConfiguration.defaultBaseURL
 
     /// Get the current base URL
     var base: String {
@@ -51,6 +53,10 @@ final class URLConfiguration {
     /// - Returns: A URLComponents object, or nil if the URL is invalid
     func urlComponents(for path: String) -> URLComponents? {
         URLComponents(string: url(for: path))
+    }
+
+    func reset() {
+        baseURL = Self.defaultBaseURL
     }
 
 }

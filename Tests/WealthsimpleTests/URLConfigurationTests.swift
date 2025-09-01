@@ -81,4 +81,15 @@ final class URLConfigurationTests: XCTestCase {
         XCTAssertEqual(newConfig.base, testURL)
     }
 
+    func testResetBaseURL() {
+        let config = URLConfiguration.shared
+        let testURL = "https://mock.server.test/v1/"
+
+        config.setBaseURL(testURL)
+        XCTAssertEqual(config.base, testURL)
+
+        config.reset()
+        XCTAssertEqual(config.base, "https://api.production.wealthsimple.com/v1/")
+    }
+
 }
