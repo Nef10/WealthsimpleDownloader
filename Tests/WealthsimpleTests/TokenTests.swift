@@ -109,7 +109,7 @@ final class TokenTests: XCTestCase {
     }
 
     func testExpiredTokenFailsRefresh() {
-        let requestExpectation = XCTestExpectation(description: "mock server caled")
+        let requestExpectation = XCTestExpectation(description: "mock server called")
         let getTokenExpectation = XCTestExpectation(description: "getToken completion")
 
         MockURLProtocol.newTokenRequestHandler = { url, _ in
@@ -128,6 +128,75 @@ final class TokenTests: XCTestCase {
         }
 
         wait(for: [getTokenExpectation, requestExpectation], timeout: 10.0)
+    }
+
+    func testExpiredTokenRefreshFailsValidation() {
+        let refreshExpectation = XCTestExpectation(description: "mock server called")
+        let validateExpectation = XCTestExpectation(description: "mock server called")
+        let getTokenExpectation = XCTestExpectation(description: "getToken completion")
+
+        MockURLProtocol.newTokenRequestHandler = { url, _ in
+            refreshExpectation.fulfill()
+            let jsonResponse = [
+                "access_token": "atoken12345", "refresh_token": "rtoken67890", "expires_in": 3_600, "created_at": Int(Date().timeIntervalSince1970), "token_type": "Bearer"
+            ]
+            return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, try JSONSerialization.data(withJSONObject: jsonResponse, options: []))
+        }
+        MockURLProtocol.tokenValidationRequestHandler = { _, _ in
+            validateExpectation.fulfill()
+            throw URLError(.networkConnectionLost)
+        }
+
+        mockCredentialStorage.storage["accessToken"] = "expired_token"
+        mockCredentialStorage.storage["refreshToken"] = "refresh_token"
+        mockCredentialStorage.storage["expiry"] = String(Date().addingTimeInterval(-3_600).timeIntervalSince1970)
+
+        Token.getToken(from: mockCredentialStorage) { token in
+            XCTAssertNil(token)
+            getTokenExpectation.fulfill()
+        }
+
+        wait(for: [getTokenExpectation, refreshExpectation, validateExpectation], timeout: 10.0)
+    }
+
+    func testExpiredTokenRefresh() {
+        let refreshExpectation = XCTestExpectation(description: "refresh called"), validateExpectation = XCTestExpectation(description: "validate called")
+        let getTokenExpectation = XCTestExpectation(description: "getToken completion")
+
+        MockURLProtocol.newTokenRequestHandler = { url, request in
+            #if canImport(FoundationNetworking)
+            // body seems to be missing?
+            #else
+            // get JSON from POST request body stream
+            let inputData = try Data(reading: request.httpBodyStream!), json = try JSONSerialization.jsonObject(with: inputData, options: []) as? [String: Any]
+            XCTAssertEqual(json?["grant_type"] as? String, "refresh_token")
+            XCTAssertEqual(json?["refresh_token"] as? String, "refresh_token_234")
+            XCTAssertEqual(json?["client_id"] as? String, "4da53ac2b03225bed1550eba8e4611e086c7b905a3855e6ed12ea08c246758fa")
+            #endif
+            refreshExpectation.fulfill()
+            return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, try JSONSerialization.data(withJSONObject: [
+                "access_token": "a34324532", "refresh_token": "r432432", "expires_in": 3_600, "created_at": Int(Date().timeIntervalSince1970), "token_type": "Bearer"
+            ], options: []))
+        }
+        MockURLProtocol.tokenValidationRequestHandler = { url, request in
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer a34324532")
+            validateExpectation.fulfill()
+            return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, Data())
+        }
+
+        mockCredentialStorage.storage["accessToken"] = "expired_token"
+        mockCredentialStorage.storage["refreshToken"] = "refresh_token_234"
+        mockCredentialStorage.storage["expiry"] = String(Date().addingTimeInterval(-3_600).timeIntervalSince1970)
+
+        Token.getToken(from: mockCredentialStorage) { token in
+            XCTAssertNotNil(token)
+            getTokenExpectation.fulfill()
+        }
+
+        wait(for: [getTokenExpectation, refreshExpectation, validateExpectation], timeout: 10.0)
+
+        XCTAssertEqual(mockCredentialStorage.read("accessToken"), "a34324532")
+        XCTAssertEqual(mockCredentialStorage.read("refreshToken"), "r432432")
     }
 
     // MARK: - getToken with Username/Password/OTP
