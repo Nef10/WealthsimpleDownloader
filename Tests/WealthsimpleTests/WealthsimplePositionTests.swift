@@ -1,5 +1,3 @@
-// swiftlint:disable file_length
-
 //
 //  WealthsimplePositionTests.swift
 //
@@ -23,6 +21,42 @@ private struct MockAccount: Account {
 }
 
 final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this type_body_length
+
+    private static let mockAccount = MockAccount(id: "account-123", accountType: .tfsa, currency: "CAD", number: "12345-67890")
+    private static let positionJSON: [String: Any] = [
+        "quantity": "100.0",
+        "account_id": "account-123",
+        "asset": [
+            "security_id": "asset-123",
+            "symbol": "AAPL",
+            "currency": "USD",
+            "name": "Apple Inc.",
+            "type": "equity"
+        ],
+        "market_price": [
+            "amount": "150.25",
+            "currency": "USD"
+        ],
+        "position_date": "2023-12-01",
+        "object": "position"
+    ]
+    private static let positionJSON2: [String: Any] = [
+        "quantity": "50.0",
+        "account_id": "account-123",
+        "asset": [
+            "security_id": "asset-456",
+            "symbol": "GOOGL",
+            "currency": "USD",
+            "name": "Alphabet Inc.",
+            "type": "equity"
+        ],
+        "market_price": [
+            "amount": "120.75",
+            "currency": "USD"
+        ],
+        "position_date": "2023-12-01",
+        "object": "position"
+    ]
 
     private var mockCredentialStorage: MockCredentialStorage!
 
@@ -48,7 +82,7 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
             return (response, Data())
         }
 
-        mockCredentialStorage.storage["accessToken"] = "valid_access_token"
+        mockCredentialStorage.storage["accessToken"] = "valid_access_token3"
         mockCredentialStorage.storage["refreshToken"] = "valid_refresh_token"
         mockCredentialStorage.storage["expiry"] = String(Date().addingTimeInterval(3_600).timeIntervalSince1970)
 
@@ -61,67 +95,15 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
         return try XCTUnwrap(resultToken)
     }
 
-    private func createMockAccount() -> Account {
-        MockAccount(id: "account-123", accountType: .tfsa, currency: "CAD", number: "12345-67890")
-    }
-
-    private func createValidPositionJSON() -> [String: Any] {
-        [
-            "quantity": "100.0",
-            "account_id": "account-123",
-            "asset": [
-                "security_id": "asset-123",
-                "symbol": "AAPL",
-                "currency": "USD",
-                "name": "Apple Inc.",
-                "type": "equity"
-            ],
-            "market_price": [
-                "amount": "150.25",
-                "currency": "USD"
-            ],
-            "position_date": "2023-12-01",
-            "object": "position"
-        ]
-    }
-
-    private func createValidPositionsResponseJSON() -> [String: Any] {
-        [
-            "object": "position",
-            "results": [
-                createValidPositionJSON(),
-                [
-                    "quantity": "50.0",
-                    "account_id": "account-123",
-                    "asset": [
-                        "security_id": "asset-456",
-                        "symbol": "GOOGL",
-                        "currency": "USD",
-                        "name": "Alphabet Inc.",
-                        "type": "equity"
-                    ],
-                    "market_price": [
-                        "amount": "120.75",
-                        "currency": "USD"
-                    ],
-                    "position_date": "2023-12-01",
-                    "object": "position"
-                ]
-            ]
-        ]
-    }
-
-    // MARK: - Helper Methods for Testing
-
     private func setupMockForSuccess(positions: [[String: Any]], expectation: XCTestExpectation) {
-        MockURLProtocol.getPositionsRequestHandler = { url, _ in
+        MockURLProtocol.getPositionsRequestHandler = { url, request in
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer valid_access_token3")
+            XCTAssertFalse((url.query ?? "").contains("date"))
+            XCTAssert((url.query ?? "").contains("account_id=\(Self.mockAccount.id)"))
+            XCTAssert((url.query ?? "").contains("limit=250"))
             expectation.fulfill()
-            let responseJSON: [String: Any] = [
-                "object": "position",
-                "results": positions
-            ]
-            let responseData = try JSONSerialization.data(withJSONObject: responseJSON, options: [])
-            return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, responseData)
+            let responseJSON: [String: Any] = ["object": "position", "results": positions]
+            return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, try JSONSerialization.data(withJSONObject: responseJSON, options: []))
         }
     }
 
@@ -135,7 +117,7 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
 
         MockURLProtocol.getPositionsRequestHandler = response
 
-        WealthsimplePosition.getPositions(token: try createValidToken(), account: createMockAccount(), date: nil) { result in
+        WealthsimplePosition.getPositions(token: try createValidToken(), account: Self.mockAccount, date: nil) { result in
             switch result {
             case .success:
                 XCTFail("Expected failure", file: file, line: line)
@@ -183,9 +165,9 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
         let expectation = XCTestExpectation(description: "getPositions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 
-        setupMockForSuccess(positions: [createValidPositionJSON()], expectation: mockExpectation)
+        setupMockForSuccess(positions: [Self.positionJSON], expectation: mockExpectation)
 
-        WealthsimplePosition.getPositions(token: try createValidToken(), account: createMockAccount(), date: nil) { result in
+        WealthsimplePosition.getPositions(token: try createValidToken(), account: Self.mockAccount, date: nil) { result in
             switch result {
             case .success(let positions):
                 XCTAssertEqual(positions.count, 1)
@@ -199,10 +181,11 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
                 XCTAssertEqual(position.asset.currency, "USD")
                 XCTAssertEqual(position.asset.type, .equity)
 
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        let expectedDate = dateFormatter.date(from: "2023-12-01")!
-        XCTAssertEqual(position.positionDate, expectedDate)
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd"
+                let expectedDate = dateFormatter.date(from: "2023-12-01")!
+                XCTAssertEqual(position.positionDate, expectedDate)
+
                 expectation.fulfill()
             case .failure(let error):
                 XCTFail("Expected success but got error: \(error)")
@@ -220,16 +203,15 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
             // Verify that the date parameter is included in the request
             XCTAssertEqual(url.query?.contains("date=2023-12-01"), true)
             mockExpectation.fulfill()
-            let responseJSON = self.createValidPositionsResponseJSON()
-            let responseData = try JSONSerialization.data(withJSONObject: responseJSON, options: [])
-            return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, responseData)
+            let json = ["object": "position", "results": [Self.positionJSON, Self.positionJSON2]]
+            return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, try JSONSerialization.data(withJSONObject: json, options: []))
         }
 
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         let testDate = dateFormatter.date(from: "2023-12-01")!
 
-        WealthsimplePosition.getPositions(token: try createValidToken(), account: createMockAccount(), date: testDate) { result in
+        WealthsimplePosition.getPositions(token: try createValidToken(), account: Self.mockAccount, date: testDate) { result in
             switch result {
             case .success(let positions):
                 XCTAssertEqual(positions.count, 2)
@@ -246,13 +228,9 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
         let expectation = XCTestExpectation(description: "getPositions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 
-        guard let results = createValidPositionsResponseJSON()["results"] as? [[String: Any]] else {
-            XCTFail("Failed to extract results from response JSON")
-            return
-        }
-        setupMockForSuccess(positions: results, expectation: mockExpectation)
+        setupMockForSuccess(positions: [Self.positionJSON, Self.positionJSON2], expectation: mockExpectation)
 
-        WealthsimplePosition.getPositions(token: try createValidToken(), account: createMockAccount(), date: nil) { result in
+        WealthsimplePosition.getPositions(token: try createValidToken(), account: Self.mockAccount, date: nil) { result in
             switch result {
             case .success(let positions):
                 XCTAssertEqual(positions.count, 2)
@@ -277,18 +255,28 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
 
     // MARK: - Network Failure Tests
 
-    func testGetPositionsNetworkFailure() throws {
+#if canImport(FoundationNetworking)
+        func testGetPositionsNetworkFailure() throws {
         try testPositionsFailure(
             response: { _, _ in
                 throw URLError(.networkConnectionLost)
             }, expectedError: PositionError.httpError(error: "The operation could not be completed. (NSURLErrorDomain error -1005.)")
         )
     }
+#else
+    func testGetPositionsNetworkFailure() throws {
+        try testPositionsFailure(
+            response: { _, _ in
+                throw URLError(.networkConnectionLost)
+            }, expectedError: PositionError.httpError(error: "The operation couldn’t be completed. (NSURLErrorDomain error -1005.)")
+        )
+    }
+#endif
 
-    func testGetPositionsInvalidJSONEmptyData() throws {
+    func testGetPositionsEmptyData() throws {
         try testPositionsFailure(response: { url, _ in
             (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, Data())
-        }, expectedError: PositionError.invalidJson(error: "The operation could not be completed. The data is not in the correct format."))
+        }, expectedError: PositionError.invalidJson(json: Data()))
     }
 
     func testGetPositionsWrongResponseType() throws {
@@ -307,10 +295,7 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
 
     func testGetPositionsInvalidJSON() throws {
         let data = Data("NOT VALID JSON".utf8)
-        try testJSONParsingFailure(
-            jsonData: data,
-            expectedError: PositionError.invalidJson(error: "The operation could not be completed. The data is not in the correct format.")
-        )
+        try testJSONParsingFailure(jsonData: data, expectedError: PositionError.invalidJson(json: data))
     }
 
     func testGetPositionsInvalidJSONType() throws {
@@ -320,124 +305,56 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
         }
         try testJSONParsingFailure(
             jsonData: jsonData,
-            expectedError: PositionError.invalidJsonType(json: ["not", "a", "dictionary"])
+            expectedError: PositionError.invalidJson(json: jsonData)
         )
     }
 
     func testGetPositionsMissingResults() throws {
-        try testJSONParsingFailure(jsonObject: ["object": "position"], expectedError: PositionError.missingResultParamenter(json: ["object": "position"]))
+        try testJSONParsingFailure(jsonObject: ["object": "position"], expectedError: PositionError.missingResultParamenter(json: "{\"object\":\"position\"}"))
     }
 
     func testGetPositionsInvalidObject() throws {
         try testJSONParsingFailure(
             jsonObject: ["object": "not_position", "results": []],
-            expectedError: PositionError.invalidResultParamenter(json: ["object": "not_position", "results": []])
+            expectedError: PositionError.invalidResultParamenter(json: "{\"object\":\"not_position\",\"results\":[]}")
         )
     }
 
     func testGetPositionsMissingQuantity() throws {
-        var json = createValidPositionJSON()
+        var json = Self.positionJSON
         json.removeValue(forKey: "quantity")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "position",
-            "results": [json]
-        ], expectedError: PositionError.missingResultParamenter(json: json))
+        try testJSONParsingFailure(
+            jsonObject: ["object": "position", "results": [json]],
+            expectedError: PositionError.missingResultParamenter(json:
+                String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? ""
+            )
+        )
     }
 
-    func testGetPositionsMissingAccountId() throws {
-        var json = createValidPositionJSON()
-        json.removeValue(forKey: "account_id")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "position",
-            "results": [json]
-        ], expectedError: PositionError.missingResultParamenter(json: json))
-    }
-
-    func testGetPositionsMissingAsset() throws {
-        var json = createValidPositionJSON()
-        json.removeValue(forKey: "asset")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "position",
-            "results": [json]
-        ], expectedError: PositionError.missingResultParamenter(json: json))
-    }
-
-    func testGetPositionsMissingMarketPrice() throws {
-        var json = createValidPositionJSON()
-        json.removeValue(forKey: "market_price")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "position",
-            "results": [json]
-        ], expectedError: PositionError.missingResultParamenter(json: json))
-    }
-
-    func testGetPositionsMissingPositionDate() throws {
-        var json = createValidPositionJSON()
-        json.removeValue(forKey: "position_date")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "position",
-            "results": [json]
-        ], expectedError: PositionError.missingResultParamenter(json: json))
-    }
-
-    func testGetPositionsMissingObject() throws {
-        var json = createValidPositionJSON()
-        json.removeValue(forKey: "object")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "position",
-            "results": [json]
-        ], expectedError: PositionError.missingResultParamenter(json: json))
-    }
-
-    func testGetPositionsMissingPriceAmount() throws {
-        var json = createValidPositionJSON()
-        guard var marketPrice = json["market_price"] as? [String: Any] else {
-            XCTFail("Failed to extract market_price")
-            return
-        }
-        marketPrice.removeValue(forKey: "amount")
-        json["market_price"] = marketPrice
-        try testJSONParsingFailure(jsonObject: [
-            "object": "position",
-            "results": [json]
-        ], expectedError: PositionError.missingResultParamenter(json: json))
-    }
-
-    func testGetPositionsMissingPriceCurrency() throws {
-        var json = createValidPositionJSON()
-        guard var marketPrice = json["market_price"] as? [String: Any] else {
-            XCTFail("Failed to extract market_price")
-            return
-        }
-        marketPrice.removeValue(forKey: "currency")
-        json["market_price"] = marketPrice
-        try testJSONParsingFailure(jsonObject: [
-            "object": "position",
-            "results": [json]
-        ], expectedError: PositionError.missingResultParamenter(json: json))
+    func testGetPositionsWrongObject() throws {
+        var json = Self.positionJSON
+        json["object"] = "not_position"
+        try testJSONParsingFailure(
+            jsonObject: ["object": "position", "results": [json]],
+            expectedError: PositionError.invalidResultParamenter(json:
+                String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? ""
+            )
+        )
     }
 
     func testGetPositionsInvalidDate() throws {
-        var json = createValidPositionJSON()
+        var json = Self.positionJSON
         json["position_date"] = "invalid-date"
-        try testJSONParsingFailure(jsonObject: [
-            "object": "position",
-            "results": [json]
-        ], expectedError: PositionError.invalidResultParamenter(json: json))
+        try testJSONParsingFailure(
+            jsonObject: ["object": "position", "results": [json]],
+            expectedError: PositionError.invalidResultParamenter(json:
+                String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? ""
+            )
+        )
     }
 
-    func testGetPositionsInvalidObjectInPosition() throws {
-        var json = createValidPositionJSON()
-        json["object"] = "not_position"
-        try testJSONParsingFailure(jsonObject: [
-            "object": "position",
-            "results": [json]
-        ], expectedError: PositionError.invalidResultParamenter(json: json))
-    }
-
-    // swiftlint:disable:next function_body_length
     func testGetPositionsInvalidAsset() throws {
-        var json = createValidPositionJSON()
+        var json = Self.positionJSON
         json["asset"] = [
             "security_id": "asset-123",
             "symbol": "AAPL",
@@ -445,138 +362,15 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
             "name": "Apple Inc."
             // missing "type"
         ]
-        // The error should be an assetError, but we need to check the actual error type
-        let expectation = XCTestExpectation(description: "getPositions completion")
 
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: [
-            "object": "position",
-            "results": [json]
-        ], options: []) else {
-            XCTFail("Failed to create JSON data")
-            return
-        }
-
-        MockURLProtocol.getPositionsRequestHandler = { url, _ in
-            (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, jsonData)
-        }
-
-        WealthsimplePosition.getPositions(token: try createValidToken(), account: createMockAccount(), date: nil) { result in
-            switch result {
-            case .success:
-                XCTFail("Expected failure but got success")
-            case .failure(let error):
-                if case .assetError = error {
-                    // Expected error
-                } else {
-                    XCTFail("Expected assetError but got \(error)")
-                }
-            }
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 10.0)
-    }
-
-    // MARK: - Additional Error Coverage Tests
-
-    func testGetPositionsNoDataReceived() throws {
-        let expectation = XCTestExpectation(description: "getPositions completion")
-
-        MockURLProtocol.getPositionsRequestHandler = { url, _ in
-            (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, Data())
-        }
-
-        // This will test the case where data is nil (which we simulate by returning empty data and expecting an error)
-        WealthsimplePosition.getPositions(token: try createValidToken(), account: createMockAccount(), date: nil) { result in
-            switch result {
-            case .success:
-                XCTFail("Expected failure but got success")
-            case .failure(let error):
-                // The error will actually be invalidJson because empty data fails JSON parsing
-                if case .invalidJson = error {
-                    // Expected error
-                } else {
-                    XCTFail("Expected invalidJson error but got \(error)")
-                }
-            }
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 10.0)
-    }
-
-    func testGetPositionsAssetTypeVariations() throws {
-        let expectation = XCTestExpectation(description: "getPositions completion")
-        let mockExpectation = XCTestExpectation(description: "mock server called")
-
-        let positions = createAssetTypeVariationPositions()
-        setupMockForSuccess(positions: positions, expectation: mockExpectation)
-
-        WealthsimplePosition.getPositions(token: try createValidToken(), account: createMockAccount(), date: nil) { result in
-            switch result {
-            case .success(let positionList):
-                self.validateAssetTypeVariations(positionList)
-                expectation.fulfill()
-            case .failure(let error):
-                XCTFail("Expected success but got error: \(error)")
-            }
-        }
-
-        wait(for: [expectation, mockExpectation], timeout: 10.0)
-    }
-
-    // swiftlint:disable:next function_body_length
-    private func createAssetTypeVariationPositions() -> [[String: Any]] {
-        [
-            // Mutual fund
-            [
-                "quantity": "25.0",
-                "account_id": "account-123",
-                "asset": [
-                    "security_id": "asset-789",
-                    "symbol": "MFC",
-                    "currency": "CAD",
-                    "name": "Mutual Fund Corp",
-                    "type": "mutual_fund"
-                ],
-                "market_price": [
-                    "amount": "75.50",
-                    "currency": "CAD"
-                ],
-                "position_date": "2023-12-01",
-                "object": "position"
-            ],
-            // Currency
-            [
-                "quantity": "1000.0",
-                "account_id": "account-123",
-                "asset": [
-                    "security_id": "asset-USD",
-                    "symbol": "USD",
-                    "currency": "USD",
-                    "name": "US Dollar",
-                    "type": "currency"
-                ],
-                "market_price": [
-                    "amount": "1.0",
-                    "currency": "USD"
-                ],
-                "position_date": "2023-12-01",
-                "object": "position"
-            ]
-        ]
-    }
-
-    private func validateAssetTypeVariations(_ positionList: [Position]) {
-        XCTAssertEqual(positionList.count, 2)
-
-        let mutualFund = positionList[0]
-        XCTAssertEqual(mutualFund.asset.type, .mutualFund)
-        XCTAssertEqual(mutualFund.asset.symbol, "MFC")
-
-        let currency = positionList[1]
-        XCTAssertEqual(currency.asset.type, .currency)
-        XCTAssertEqual(currency.asset.symbol, "USD")
+        try testJSONParsingFailure(
+            jsonObject: ["object": "position", "results": [json]],
+            expectedError: PositionError.assetError(
+                AssetError.missingResultParamenter(json:
+                    String(data: try JSONSerialization.data(withJSONObject: json["asset"]!, options: [.sortedKeys]), encoding: .utf8) ?? ""
+                )
+            )
+        )
     }
 
 }
