@@ -8,11 +8,11 @@
 import Foundation
 
 /// Errors which can happen when retrieving an Asset
-public enum AssetError: Error {
+public enum AssetError: Error, Equatable {
     /// When the received JSON does not have all expected values
-    case missingResultParamenter(json: [String: Any])
+    case missingResultParamenter(json: String)
     /// When the received JSON does have an unexpected value
-    case invalidResultParamenter(json: [String: Any])
+    case invalidResultParamenter(json: String)
 }
 
 /// Type of the asset
@@ -55,10 +55,10 @@ struct WealthsimpleAsset: Asset {
               let currency = json["currency"] as? String,
               let name = json["name"] as? String,
               let typeString = json["type"] as? String else {
-            throw AssetError.missingResultParamenter(json: json)
+            throw AssetError.missingResultParamenter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
         }
         guard let type = AssetType(rawValue: typeString) else {
-            throw AssetError.invalidResultParamenter(json: json)
+            throw AssetError.invalidResultParamenter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
         }
         self.id = id
         self.symbol = symbol
