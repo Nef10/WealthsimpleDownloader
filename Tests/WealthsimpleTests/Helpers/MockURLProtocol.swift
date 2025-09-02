@@ -14,8 +14,8 @@ import XCTest
 
 /// A mock URLProtocol implementation for intercepting HTTP requests during testing.
 class MockURLProtocol: URLProtocol {
-    static var newTokenRequestHandler: ((URL, URLRequest) throws -> (HTTPURLResponse, Data)) = failTest
-    static var tokenValidationRequestHandler: ((URL, URLRequest) throws -> (HTTPURLResponse, Data)) = failTest
+    static var newTokenRequestHandler: ((URL, URLRequest) throws -> (URLResponse, Data)) = failTest
+    static var tokenValidationRequestHandler: ((URL, URLRequest) throws -> (URLResponse, Data)) = failTest
 
     // MARK: - Static Methods
 
@@ -40,7 +40,7 @@ class MockURLProtocol: URLProtocol {
         URLProtocol.unregisterClass(Self.self)
     }
 
-    private static func handleMockRequest(_ request: URLRequest) throws -> (HTTPURLResponse, Data) {
+    private static func handleMockRequest(_ request: URLRequest) throws -> (URLResponse, Data) {
         guard let url = request.url else {
             throw URLError(.badURL)
         }

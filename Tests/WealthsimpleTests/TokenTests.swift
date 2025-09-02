@@ -12,7 +12,7 @@ import FoundationNetworking
 @testable import Wealthsimple
 import XCTest
 
-final class TokenTests: XCTestCase {
+final class TokenTests: XCTestCase { // swiftlint:disable:this type_body_length
 
     private var mockCredentialStorage: MockCredentialStorage!
 
@@ -264,12 +264,14 @@ final class TokenTests: XCTestCase {
     }
 
     func testGetTokenWithUsernamePasswordOTPNetworkFailure() {
+        let tokenExpectation = XCTestExpectation(description: "getToken completion")
+        let serverExpectation = XCTestExpectation(description: "mock server called")
+
         // Set up the mock to throw an error for this test
         MockURLProtocol.newTokenRequestHandler = { _, _ in
+            serverExpectation.fulfill()
             throw URLError(.networkConnectionLost)
         }
-
-        let expectation = XCTestExpectation(description: "getToken completion")
 
         Token.getToken(
             username: "test@example.com",
@@ -282,11 +284,67 @@ final class TokenTests: XCTestCase {
                 XCTFail("Expected failure due to network error")
             case .failure(let error):
                 XCTAssertNotNil(error)
-                expectation.fulfill()
             }
+            tokenExpectation.fulfill()
         }
 
-        wait(for: [expectation], timeout: 10.0)
+        wait(for: [tokenExpectation, serverExpectation], timeout: 10.0)
+    }
+
+    func testGetTokenWithResponseType() {
+        let tokenExpectation = XCTestExpectation(description: "getToken completion")
+        let serverExpectation = XCTestExpectation(description: "mock server called")
+
+        // Set up the mock to throw return an URLResponse which is not a HTTPURLResponse for this test
+        MockURLProtocol.newTokenRequestHandler = { _, _ in
+            serverExpectation.fulfill()
+            return (URLResponse(), Data())
+        }
+
+        Token.getToken(
+            username: "test@example.com",
+            password: "password",
+            otp: "123456",
+            credentialStorage: mockCredentialStorage
+        ) { result in
+            switch result {
+            case .success:
+                XCTFail("Expected failure due to wrong response type")
+            case .failure(let error):
+                XCTAssertNotNil(error)
+            }
+            tokenExpectation.fulfill()
+        }
+
+        wait(for: [tokenExpectation, serverExpectation], timeout: 10.0)
+    }
+
+    func testGetTokenWithInvalidJSON() {
+        let tokenExpectation = XCTestExpectation(description: "getToken completion")
+        let serverExpectation = XCTestExpectation(description: "mock server called")
+
+        // Set up the mock to throw return an URLResponse which is not a HTTPURLResponse for this test
+        MockURLProtocol.newTokenRequestHandler = { url, _ in
+            serverExpectation.fulfill()
+            return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, Data("NOT JSON".utf8))
+        }
+
+        Token.getToken(
+            username: "test@example.com",
+            password: "password",
+            otp: "123456",
+            credentialStorage: mockCredentialStorage
+        ) { result in
+            switch result {
+            case .success:
+                XCTFail("Expected failure due to wrong response type")
+            case .failure(let error):
+                XCTAssertNotNil(error)
+            }
+            tokenExpectation.fulfill()
+        }
+
+        wait(for: [tokenExpectation, serverExpectation], timeout: 10.0)
     }
 
 }
