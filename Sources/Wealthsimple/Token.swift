@@ -11,17 +11,17 @@ import Foundation
  #endif
 
 /// Errors which can happen when getting a Token
-public enum TokenError: Error {
+public enum TokenError: Error, Equatable {
     /// When no token is found
     case noToken
     /// When the received data is not valid JSON
     case invalidJson(error: String)
     /// When the received JSON does not have the right type
-    case invalidJsonType(json: Any)
+    case invalidJsonType(json: Data)
     /// When the paramters could not be converted to JSON
     case invalidParameters(parameters: [String: String])
     /// When the received JSON does not have all expected values
-    case missingResultParamenter(json: [String: Any])
+    case missingResultParamenter(json: String)
     /// When an HTTP error occurs
     case httpError(error: String)
     /// When no data is received from the HTTP request
@@ -56,7 +56,7 @@ struct Token {
               let expiresIn = json["expires_in"] as? Int,
               let createdAt = json["created_at"] as? Int,
               let refreshToken = json["refresh_token"] as? String else {
-            throw TokenError.missingResultParamenter(json: json)
+            throw TokenError.missingResultParamenter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
         }
         self.accessToken = accessToken
         self.refreshToken = refreshToken
