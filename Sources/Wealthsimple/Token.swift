@@ -146,16 +146,12 @@ struct Token {
             completion(.failure(TokenError.httpError(error: "Status code \(httpResponse.statusCode)")))
             return
         }
-        do {
-            completion(try parse(data: data, credentialStorage: credentialStorage))
-        } catch {
-            completion(.failure(TokenError.invalidJson(error: error.localizedDescription)))
-        }
+        completion(parse(data: data, credentialStorage: credentialStorage))
     }
 
-    private static func parse(data: Data, credentialStorage: CredentialStorage) throws -> Result<Self, TokenError> {
-        guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
-            return .failure(TokenError.invalidJsonType(json: try JSONSerialization.jsonObject(with: data, options: [])))
+    private static func parse(data: Data, credentialStorage: CredentialStorage) -> Result<Self, TokenError> {
+        guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            return .failure(TokenError.invalidJsonType(json: data))
         }
         do {
             let token = try Self(json: json, credentialStorage: credentialStorage)
