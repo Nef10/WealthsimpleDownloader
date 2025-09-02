@@ -159,6 +159,35 @@ final class TokenTests: XCTestCase { // swiftlint:disable:this type_body_length
         wait(for: [getTokenExpectation, refreshExpectation, validateExpectation], timeout: 10.0)
     }
 
+    func testExpiredTokenRefreshFailsValidationWithWrongResponseType() {
+        let refreshExpectation = XCTestExpectation(description: "mock server called for token refresh")
+        let validateExpectation = XCTestExpectation(description: "mock server called for token validation")
+        let getTokenExpectation = XCTestExpectation(description: "getToken completion")
+
+        MockURLProtocol.newTokenRequestHandler = { url, _ in
+            refreshExpectation.fulfill()
+            let jsonResponse = [
+                "access_token": "atoken12345", "refresh_token": "rtoken67890", "expires_in": 3_600, "created_at": Int(Date().timeIntervalSince1970), "token_type": "Bearer"
+            ]
+            return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, try JSONSerialization.data(withJSONObject: jsonResponse, options: []))
+        }
+        MockURLProtocol.tokenValidationRequestHandler = { _, _ in
+            validateExpectation.fulfill()
+            return (URLResponse(), Data())
+        }
+
+        mockCredentialStorage.storage["accessToken"] = "expired_token"
+        mockCredentialStorage.storage["refreshToken"] = "refresh_token"
+        mockCredentialStorage.storage["expiry"] = String(Date().addingTimeInterval(-3_600).timeIntervalSince1970)
+
+        Token.getToken(from: mockCredentialStorage) { token in
+            XCTAssertNil(token)
+            getTokenExpectation.fulfill()
+        }
+
+        wait(for: [getTokenExpectation, refreshExpectation, validateExpectation], timeout: 10.0)
+    }
+
     func testExpiredTokenRefresh() {
         let refreshExpectation = XCTestExpectation(description: "refresh called"), validateExpectation = XCTestExpectation(description: "validate called")
         let getTokenExpectation = XCTestExpectation(description: "getToken completion")
@@ -291,11 +320,11 @@ final class TokenTests: XCTestCase { // swiftlint:disable:this type_body_length
         wait(for: [tokenExpectation, serverExpectation], timeout: 10.0)
     }
 
-    func testGetTokenWithResponseType() {
+    func testGetTokenWithWrongResponseType() {
         let tokenExpectation = XCTestExpectation(description: "getToken completion")
         let serverExpectation = XCTestExpectation(description: "mock server called")
 
-        // Set up the mock to throw return an URLResponse which is not a HTTPURLResponse for this test
+        // Set up the mock to return an URLResponse which is not a HTTPURLResponse for this test
         MockURLProtocol.newTokenRequestHandler = { _, _ in
             serverExpectation.fulfill()
             return (URLResponse(), Data())
