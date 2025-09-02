@@ -11,19 +11,17 @@ import Foundation
  #endif
 
 /// Errors which can happen when retrieving an Account
-public enum AccountError: Error {
+public enum AccountError: Error, Equatable {
     /// When no data is received from the HTTP request
     case noDataReceived
     /// When an HTTP error occurs
     case httpError(error: String)
     /// When the received data is not valid JSON
-    case invalidJson(error: String)
-    /// When the received JSON does not have the right type
-    case invalidJsonType(json: Any)
+    case invalidJson(json: Data)
     /// When the received JSON does not have all expected values
-    case missingResultParamenter(json: [String: Any])
+    case missingResultParamenter(json: String)
     /// When the received JSON does have an unexpected value
-    case invalidResultParamenter(json: [String: Any])
+    case invalidResultParamenter(json: String)
     /// An error with the token occured
     case tokenError(_ error: TokenError)
 }
@@ -85,10 +83,10 @@ struct WealthsimpleAccount: Account {
               let object = json["object"] as? String,
               let currency = json["base_currency"] as? String,
               let number = json["custodian_account_number"] as? String else {
-            throw AccountError.missingResultParamenter(json: json)
+            throw AccountError.missingResultParamenter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
         }
         guard let type = AccountType(rawValue: typeString), object == "account" else {
-            throw AccountError.invalidResultParamenter(json: json)
+            throw AccountError.invalidResultParamenter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
         }
         self.id = id
         self.accountType = type
@@ -125,24 +123,19 @@ struct WealthsimpleAccount: Account {
             completion(.failure(AccountError.httpError(error: "Status code \(httpResponse.statusCode)")))
             return
         }
-        do {
-            completion(try parse(data: data))
-        } catch {
-            completion(.failure(AccountError.invalidJson(error: error.localizedDescription)))
-            return
-        }
+        completion(parse(data: data))
     }
 
-    private static func parse(data: Data) throws -> Result<[Account], AccountError> {
-        guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
-            return .failure(AccountError.invalidJsonType(json: try JSONSerialization.jsonObject(with: data, options: [])))
+    private static func parse(data: Data) -> Result<[Account], AccountError> {
+        guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            return .failure(AccountError.invalidJson(json: data))
         }
         do {
             guard let results = json["results"] as? [[String: Any]], let object = json["object"] as? String else {
-                throw AccountError.missingResultParamenter(json: json)
+                throw AccountError.missingResultParamenter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
             }
             guard object == "account" else {
-                throw AccountError.invalidResultParamenter(json: json)
+                throw AccountError.invalidResultParamenter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
             }
             var accounts = [Account]()
             for result in results {

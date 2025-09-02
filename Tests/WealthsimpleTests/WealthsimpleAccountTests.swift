@@ -12,7 +12,7 @@ import FoundationNetworking
 @testable import Wealthsimple
 import XCTest
 
-final class WealthsimpleAccountTests: XCTestCase { // swiftlint:disable:this type_body_length
+final class WealthsimpleAccountTests: XCTestCase {
 
     private var mockCredentialStorage: MockCredentialStorage!
 
@@ -70,7 +70,7 @@ final class WealthsimpleAccountTests: XCTestCase { // swiftlint:disable:this typ
         }
     }
 
-    private func testAccountsFailure(response: (URLResponse, Data), expectedError: @escaping (AccountError) -> Bool, file: StaticString = #file, line: UInt = #line) throws {
+    private func testAccountsFailure(response: (URLResponse, Data), expectedError: AccountError, file: StaticString = #file, line: UInt = #line) throws {
         let mockExpectation = XCTestExpectation(description: "mock server called")
 
         try testAccountsFailure(
@@ -89,7 +89,7 @@ final class WealthsimpleAccountTests: XCTestCase { // swiftlint:disable:this typ
 
     private func testAccountsFailure(
         response: @escaping ((URL, URLRequest) throws -> (URLResponse, Data)),
-        expectedError: @escaping (AccountError) -> Bool,
+        expectedError: AccountError,
         file: StaticString = #file,
         line: UInt = #line
     ) throws {
@@ -102,12 +102,30 @@ final class WealthsimpleAccountTests: XCTestCase { // swiftlint:disable:this typ
             case .success:
                 XCTFail("Expected failure", file: file, line: line)
             case .failure(let error):
-                XCTAssertTrue(expectedError(error), "Unexpected error: \(error)", file: file, line: line)
+                XCTAssertEqual(error, expectedError, file: file, line: line)
             }
             expectation.fulfill()
         }
 
         wait(for: [expectation], timeout: 10.0)
+    }
+
+    private func testJSONParsingFailure(jsonData: Data, expectedError: AccountError, file: StaticString = #file, line: UInt = #line) throws {
+        try testAccountsFailure(response: (
+                HTTPURLResponse(url: URL(string: "http://test.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)!,
+                jsonData
+            ),
+            expectedError: expectedError,
+            file: file,
+            line: line)
+    }
+
+    private func testJSONParsingFailure(jsonObject: [String: Any], expectedError: AccountError, file: StaticString = #file, line: UInt = #line) throws {
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject, options: []) else {
+            XCTFail("Failed to create JSON data", file: file, line: line)
+            return
+        }
+        try testJSONParsingFailure(jsonData: jsonData, expectedError: expectedError, file: file, line: line)
     }
 
     // MARK: - Successful getAccounts Tests
@@ -175,119 +193,40 @@ final class WealthsimpleAccountTests: XCTestCase { // swiftlint:disable:this typ
         try testAccountsFailure(
             response: { _, _ in
                 throw URLError(.networkConnectionLost)
-            }, expectedError: { error in
-                if case .httpError = error {
-                    return true
-                }
-                return false
-            }
+            }, expectedError: AccountError.httpError(error: "The operation couldn’t be completed. (NSURLErrorDomain error -1005.)")
         )
     }
 
     func testGetAccountsInvalidJSONEmptyData() throws {
         try testAccountsFailure(response: (
-            HTTPURLResponse(url: URL(string: "http://test.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)!,
-            Data()
-        )) { error in
-            if case .invalidJson = error {
-                return true
-            }
-            return false
-        }
+                HTTPURLResponse(url: URL(string: "http://test.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)!,
+                Data()
+            ), expectedError: AccountError.invalidJson(json: Data())
+        )
     }
 
     func testGetAccountsWrongResponseType() throws {
         try testAccountsFailure(response: (
             URLResponse(url: URL(string: "http://test.com")!, mimeType: nil, expectedContentLength: 0, textEncodingName: nil),
             Data("test".utf8)
-        )) { error in
-            if case .httpError(let errorMessage) = error {
-                return errorMessage == "No HTTPURLResponse"
-            }
-            return false
-        }
+        ), expectedError: AccountError.httpError(error: "No HTTPURLResponse"))
     }
 
     func testGetAccountsHTTPError() throws {
         try testAccountsFailure(response: (
             HTTPURLResponse(url: URL(string: "http://test.com")!, statusCode: 401, httpVersion: nil, headerFields: nil)!,
             Data()
-        )) { error in
-            if case .httpError(let errorMessage) = error {
-                return errorMessage == "Status code 401"
-            }
-            return false
-        }
+        ), expectedError: AccountError.httpError(error: "Status code 401"))
     }
 
     // MARK: - JSON Parsing Error Tests
 
-    private func testJSONParsingFailure(
-        jsonData: Data,
-        expectedError: @escaping (AccountError) -> Bool,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) throws {
-        try testAccountsFailure(response: (
-                HTTPURLResponse(url: URL(string: "http://test.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)!,
-                jsonData
-            ),
-            expectedError: expectedError,
-            file: file,
-            line: line)
-    }
-
-    private func testMissingFieldFailure(
-        jsonObject: [String: Any],
-        file: StaticString = #file,
-        line: UInt = #line
-    ) throws {
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject, options: []) else {
-            XCTFail("Failed to create JSON data", file: file, line: line)
-            return
-        }
-        try testJSONParsingFailure(
-            jsonData: jsonData,
-            expectedError: { error in
-                if case .missingResultParamenter = error {
-                    return true
-                }
-                return false
-            },
-            file: file,
-            line: line
-        )
-    }
-
-    private func testInvalidFieldFailure(
-        jsonObject: [String: Any],
-        file: StaticString = #file,
-        line: UInt = #line
-    ) throws {
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject, options: []) else {
-            XCTFail("Failed to create JSON data", file: file, line: line)
-            return
-        }
-        try testJSONParsingFailure(
-            jsonData: jsonData,
-            expectedError: { error in
-                if case .invalidResultParamenter = error {
-                    return true
-                }
-                return false
-            },
-            file: file,
-            line: line
-        )
-    }
-
     func testGetAccountsInvalidJSON() throws {
-        try testJSONParsingFailure(jsonData: Data("NOT VALID JSON".utf8)) { error in
-            if case .invalidJson = error {
-                return true
-            }
-            return false
-        }
+        let data = Data("NOT VALID JSON".utf8)
+        try testJSONParsingFailure(
+            jsonData: data,
+            expectedError: AccountError.invalidJson(json: data)
+        )
     }
 
     func testGetAccountsInvalidJSONType() throws {
@@ -295,30 +234,22 @@ final class WealthsimpleAccountTests: XCTestCase { // swiftlint:disable:this typ
             XCTFail("Failed to create test JSON data")
             return
         }
-        try testJSONParsingFailure(jsonData: jsonData) { error in
-            if case .invalidJsonType = error {
-                return true
-            }
-            return false
-        }
+        try testJSONParsingFailure(
+            jsonData: jsonData,
+            expectedError: AccountError.invalidJson(json: jsonData)
+        )
     }
 
     func testGetAccountsMissingResults() throws {
-        try testMissingFieldFailure(jsonObject: ["object": "account"])
-    }
-
-    func testGetAccountsMissingObject() throws {
-        try testMissingFieldFailure(jsonObject: ["results": []])
+        try testJSONParsingFailure(jsonObject: ["object": "account"], expectedError: AccountError.missingResultParamenter(json: "{\"object\":\"account\"}"))
     }
 
     func testGetAccountsInvalidObject() throws {
-        try testInvalidFieldFailure(jsonObject: ["object": "not_account", "results": []])
+        try testJSONParsingFailure(jsonObject: ["object": "not_account", "results": []], expectedError: AccountError.invalidResultParamenter(json: "{\"object\":\"not_account\",\"results\":[]}"))
     }
 
-    // MARK: - Individual Account JSON Parsing Tests
-
     func testGetAccountsMissingAccountId() throws {
-        try testMissingFieldFailure(jsonObject: [
+        try testJSONParsingFailure(jsonObject: [
             "object": "account",
             "results": [
                 [
@@ -328,25 +259,11 @@ final class WealthsimpleAccountTests: XCTestCase { // swiftlint:disable:this typ
                     "custodian_account_number": "12345"
                 ]
             ]
-        ])
-    }
-
-    func testGetAccountsMissingAccountType() throws {
-        try testMissingFieldFailure(jsonObject: [
-            "object": "account",
-            "results": [
-                [
-                    "id": "account-123",
-                    "object": "account",
-                    "base_currency": "CAD",
-                    "custodian_account_number": "12345"
-                ]
-            ]
-        ])
+        ], expectedError: AccountError.missingResultParamenter(json: "{\"base_currency\":\"CAD\",\"custodian_account_number\":\"12345\",\"object\":\"account\",\"type\":\"ca_tfsa\"}"))
     }
 
     func testGetAccountsInvalidAccountType() throws {
-        try testInvalidFieldFailure(jsonObject: [
+        try testJSONParsingFailure(jsonObject: [
             "object": "account",
             "results": [
                 [
@@ -357,39 +274,11 @@ final class WealthsimpleAccountTests: XCTestCase { // swiftlint:disable:this typ
                     "custodian_account_number": "12345"
                 ]
             ]
-        ])
-    }
-
-    func testGetAccountsMissingCurrency() throws {
-        try testMissingFieldFailure(jsonObject: [
-            "object": "account",
-            "results": [
-                [
-                    "id": "account-123",
-                    "type": "ca_tfsa",
-                    "object": "account",
-                    "custodian_account_number": "12345"
-                ]
-            ]
-        ])
-    }
-
-    func testGetAccountsMissingAccountNumber() throws {
-        try testMissingFieldFailure(jsonObject: [
-            "object": "account",
-            "results": [
-                [
-                    "id": "account-123",
-                    "type": "ca_tfsa",
-                    "object": "account",
-                    "base_currency": "CAD"
-                ]
-            ]
-        ])
+        ], expectedError: AccountError.invalidResultParamenter(json: "{\"base_currency\":\"CAD\",\"custodian_account_number\":\"12345\",\"id\":\"account-123\",\"object\":\"account\",\"type\":\"invalid_account_type\"}"))
     }
 
     func testGetAccountsInvalidAccountObject() throws {
-        try testInvalidFieldFailure(jsonObject: [
+        try testJSONParsingFailure(jsonObject: [
             "object": "account",
             "results": [
                 [
@@ -400,7 +289,7 @@ final class WealthsimpleAccountTests: XCTestCase { // swiftlint:disable:this typ
                     "custodian_account_number": "12345"
                 ]
             ]
-        ])
+        ], expectedError: AccountError.invalidResultParamenter(json: "{\"base_currency\":\"CAD\",\"custodian_account_number\":\"12345\",\"id\":\"account-123\",\"object\":\"not_account\",\"type\":\"ca_tfsa\"}"))
     }
 
 }
