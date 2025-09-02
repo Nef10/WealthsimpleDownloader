@@ -45,3 +45,26 @@ extension TransactionError: LocalizedError {
         }
     }
 }
+
+extension TransactionError: Equatable {
+    public static func == (lhs: TransactionError, rhs: TransactionError) -> Bool {
+        switch (lhs, rhs) {
+        case (.noDataReceived, .noDataReceived):
+            return true
+        case let (.httpError(lhsError), .httpError(rhsError)):
+            return lhsError == rhsError
+        case let (.invalidJson(lhsError), .invalidJson(rhsError)):
+            return lhsError == rhsError
+        case let (.invalidJsonType(lhsJson), .invalidJsonType(rhsJson)):
+            return String(describing: lhsJson) == String(describing: rhsJson)
+        case let (.missingResultParamenter(lhsJson), .missingResultParamenter(rhsJson)):
+            return lhsJson.count == rhsJson.count && Set(lhsJson.keys) == Set(rhsJson.keys)
+        case let (.invalidResultParamenter(lhsJson), .invalidResultParamenter(rhsJson)):
+            return lhsJson.count == rhsJson.count && Set(lhsJson.keys) == Set(rhsJson.keys)
+        case let (.tokenError(lhsError), .tokenError(rhsError)):
+            return lhsError == rhsError
+        default:
+            return false
+        }
+    }
+}
