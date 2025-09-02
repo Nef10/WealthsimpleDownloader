@@ -209,16 +209,11 @@ struct WealthsimpleTransaction: Transaction {
         var request = URLRequest(url: url.url!)
         let session = URLSession.shared
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        token.authenticateRequest(request) {
-            switch $0 {
-            case let .failure(error):
-                completion(.failure(.tokenError(error)))
-            case let .success(request):
-                let task = session.dataTask(with: request) { data, response, error in
-                    handleResponse(data: data, response: response, error: error, completion: completion)
-                }
-                task.resume()
+        token.authenticateRequest(request) { request in
+            let task = session.dataTask(with: request) { data, response, error in
+                handleResponse(data: data, response: response, error: error, completion: completion)
             }
+            task.resume()
         }
     }
 

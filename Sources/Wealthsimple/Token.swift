@@ -170,31 +170,26 @@ struct Token {
         var request = URLRequest(url: Self.testUrl)
         let session = URLSession.shared
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        authenticateRequest(request) {
-            switch $0 {
-            case .failure:
-                completion(false)
-            case let .success(request):
-                let task = session.dataTask(with: request) { _, response, error in
-                    guard error == nil else {
-                        completion(false)
-                        return
-                    }
-                    guard let httpResponse = response as? HTTPURLResponse else {
-                        completion(false)
-                        return
-                    }
-                    completion(httpResponse.statusCode == 200)
+        authenticateRequest(request) { request in
+            let task = session.dataTask(with: request) { _, response, error in
+                guard error == nil else {
+                    completion(false)
+                    return
                 }
-                task.resume()
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    completion(false)
+                    return
+                }
+                completion(httpResponse.statusCode == 200)
             }
+            task.resume()
         }
     }
 
-    func authenticateRequest(_ request: URLRequest, completion: @escaping (Result<URLRequest, TokenError>) -> Void) {
+    func authenticateRequest(_ request: URLRequest, completion: @escaping (URLRequest) -> Void) {
         var requestCopy = request
         requestCopy.setValue("Bearer \(self.accessToken)", forHTTPHeaderField: "Authorization")
-        completion(.success(requestCopy))
+        completion(requestCopy)
     }
 
     func refreshIfNeeded(completion: @escaping (Result<Self, TokenError>) -> Void) {
