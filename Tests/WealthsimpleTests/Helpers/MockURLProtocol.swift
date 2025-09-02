@@ -16,6 +16,7 @@ import XCTest
 class MockURLProtocol: URLProtocol {
     static var newTokenRequestHandler: ((URL, URLRequest) throws -> (URLResponse, Data)) = failTest
     static var tokenValidationRequestHandler: ((URL, URLRequest) throws -> (URLResponse, Data)) = failTest
+    static var accountsRequestHandler: ((URL, URLRequest) throws -> (URLResponse, Data)) = failTest
 
     // MARK: - Static Methods
 
@@ -37,6 +38,7 @@ class MockURLProtocol: URLProtocol {
         URLConfiguration.shared.reset()
         newTokenRequestHandler = failTest
         tokenValidationRequestHandler = failTest
+        accountsRequestHandler = failTest
         URLProtocol.unregisterClass(Self.self)
     }
 
@@ -50,6 +52,9 @@ class MockURLProtocol: URLProtocol {
         }
         if url.path.contains("/oauth/token/info") && request.httpMethod == "GET" {
             return try tokenValidationRequestHandler(url, request)
+        }
+        if url.path.contains("/accounts") && request.httpMethod == "GET" {
+            return try accountsRequestHandler(url, request)
         }
 
         XCTFail("Unexpected request: \(url)")
