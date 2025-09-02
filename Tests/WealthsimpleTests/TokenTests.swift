@@ -171,9 +171,9 @@ final class TokenTests: XCTestCase { // swiftlint:disable:this type_body_length
             ]
             return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, try JSONSerialization.data(withJSONObject: jsonResponse, options: []))
         }
-        MockURLProtocol.tokenValidationRequestHandler = { _, _ in
+        MockURLProtocol.tokenValidationRequestHandler = { url, _ in
             validateExpectation.fulfill()
-            return (URLResponse(), Data())
+            return (URLResponse(url: url, mimeType: nil, expectedContentLength: 0, textEncodingName: nil), Data())
         }
 
         mockCredentialStorage.storage["accessToken"] = "expired_token"
@@ -325,9 +325,9 @@ final class TokenTests: XCTestCase { // swiftlint:disable:this type_body_length
         let serverExpectation = XCTestExpectation(description: "mock server called")
 
         // Set up the mock to return an URLResponse which is not a HTTPURLResponse for this test
-        MockURLProtocol.newTokenRequestHandler = { _, _ in
+        MockURLProtocol.newTokenRequestHandler = { url, _ in
             serverExpectation.fulfill()
-            return (URLResponse(), Data())
+            return (URLResponse(url: url, mimeType: nil, expectedContentLength: 0, textEncodingName: nil), Data())
         }
 
         Token.getToken(
