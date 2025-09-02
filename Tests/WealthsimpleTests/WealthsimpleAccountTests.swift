@@ -189,6 +189,15 @@ final class WealthsimpleAccountTests: XCTestCase {
 
     // MARK: - Network Error Tests
 
+#if canImport(FoundationNetworking)
+    func testGetAccountsNetworkFailure() throws {
+        try testAccountsFailure(
+            response: { _, _ in
+                throw URLError(.networkConnectionLost)
+            }, expectedError: AccountError.httpError(error: "The operation could not be completed. (NSURLErrorDomain error -1005.)")
+        )
+    }
+#else
     func testGetAccountsNetworkFailure() throws {
         try testAccountsFailure(
             response: { _, _ in
@@ -196,6 +205,7 @@ final class WealthsimpleAccountTests: XCTestCase {
             }, expectedError: AccountError.httpError(error: "The operation couldn’t be completed. (NSURLErrorDomain error -1005.)")
         )
     }
+#endif
 
     func testGetAccountsInvalidJSONEmptyData() throws {
         try testAccountsFailure(response: (
@@ -245,7 +255,10 @@ final class WealthsimpleAccountTests: XCTestCase {
     }
 
     func testGetAccountsInvalidObject() throws {
-        try testJSONParsingFailure(jsonObject: ["object": "not_account", "results": []], expectedError: AccountError.invalidResultParamenter(json: "{\"object\":\"not_account\",\"results\":[]}"))
+        try testJSONParsingFailure(
+            jsonObject: ["object": "not_account", "results": []],
+            expectedError: AccountError.invalidResultParamenter(json: "{\"object\":\"not_account\",\"results\":[]}")
+        )
     }
 
     func testGetAccountsMissingAccountId() throws {
@@ -259,7 +272,9 @@ final class WealthsimpleAccountTests: XCTestCase {
                     "custodian_account_number": "12345"
                 ]
             ]
-        ], expectedError: AccountError.missingResultParamenter(json: "{\"base_currency\":\"CAD\",\"custodian_account_number\":\"12345\",\"object\":\"account\",\"type\":\"ca_tfsa\"}"))
+        ], expectedError: AccountError.missingResultParamenter(
+            json: "{\"base_currency\":\"CAD\",\"custodian_account_number\":\"12345\",\"object\":\"account\",\"type\":\"ca_tfsa\"}"
+        ))
     }
 
     func testGetAccountsInvalidAccountType() throws {
@@ -274,7 +289,9 @@ final class WealthsimpleAccountTests: XCTestCase {
                     "custodian_account_number": "12345"
                 ]
             ]
-        ], expectedError: AccountError.invalidResultParamenter(json: "{\"base_currency\":\"CAD\",\"custodian_account_number\":\"12345\",\"id\":\"account-123\",\"object\":\"account\",\"type\":\"invalid_account_type\"}"))
+        ], expectedError: AccountError.invalidResultParamenter(json:
+            "{\"base_currency\":\"CAD\",\"custodian_account_number\":\"12345\",\"id\":\"account-123\",\"object\":\"account\",\"type\":\"invalid_account_type\"}"
+        ))
     }
 
     func testGetAccountsInvalidAccountObject() throws {
@@ -289,7 +306,9 @@ final class WealthsimpleAccountTests: XCTestCase {
                     "custodian_account_number": "12345"
                 ]
             ]
-        ], expectedError: AccountError.invalidResultParamenter(json: "{\"base_currency\":\"CAD\",\"custodian_account_number\":\"12345\",\"id\":\"account-123\",\"object\":\"not_account\",\"type\":\"ca_tfsa\"}"))
+        ], expectedError: AccountError.invalidResultParamenter(
+            json: "{\"base_currency\":\"CAD\",\"custodian_account_number\":\"12345\",\"id\":\"account-123\",\"object\":\"not_account\",\"type\":\"ca_tfsa\"}"
+        ))
     }
 
 }
