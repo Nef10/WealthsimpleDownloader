@@ -11,7 +11,7 @@ import FoundationNetworking
 #endif
 
 /// Errors which can happen when retrieving a Position
-public enum PositionError: Error {
+public enum PositionError: Error, Equatable {
     /// When no data is received from the HTTP request
     case noDataReceived
     /// When an HTTP error occurs
@@ -28,6 +28,29 @@ public enum PositionError: Error {
     case assetError(_ error: AssetError)
     /// An error with the token occured
     case tokenError(_ error: TokenError)
+
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        switch (lhs, rhs) {
+        case (.noDataReceived, .noDataReceived):
+            return true
+        case let (.httpError(lhsError), .httpError(rhsError)):
+            return lhsError == rhsError
+        case let (.invalidJson(lhsError), .invalidJson(rhsError)):
+            return lhsError == rhsError
+        case (.invalidJsonType, .invalidJsonType):
+            return true // Simplified comparison for Any types
+        case (.missingResultParamenter, .missingResultParamenter):
+            return true // Simplified comparison for Dictionary types
+        case (.invalidResultParamenter, .invalidResultParamenter):
+            return true // Simplified comparison for Dictionary types
+        case let (.assetError(lhsError), .assetError(rhsError)):
+            return lhsError == rhsError
+        case let (.tokenError(lhsError), .tokenError(rhsError)):
+            return lhsError == rhsError
+        default:
+            return false
+        }
+    }
 }
 
 /// A Position, like certain amount of a stock or a currency held in an account
