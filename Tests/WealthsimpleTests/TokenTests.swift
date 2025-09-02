@@ -199,6 +199,29 @@ final class TokenTests: XCTestCase {
         XCTAssertEqual(mockCredentialStorage.read("refreshToken"), "r432432")
     }
 
+    func testTokenInitMissingParameter() {
+        let refreshExpectation = XCTestExpectation(description: "mock server called")
+        let getTokenExpectation = XCTestExpectation(description: "getToken completion")
+
+        MockURLProtocol.newTokenRequestHandler = { url, _ in
+            refreshExpectation.fulfill()
+            let jsonResponse = [
+                "refresh_token": "rtoken67890", "expires_in": 3_600, "created_at": Int(Date().timeIntervalSince1970), "token_type": "Bearer"
+            ]
+            return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, try JSONSerialization.data(withJSONObject: jsonResponse, options: []))
+        }
+        mockCredentialStorage.storage["accessToken"] = "expired_token"
+        mockCredentialStorage.storage["refreshToken"] = "refresh_token"
+        mockCredentialStorage.storage["expiry"] = String(Date().addingTimeInterval(-3_600).timeIntervalSince1970)
+
+        Token.getToken(from: mockCredentialStorage) { token in
+            XCTAssertNil(token)
+            getTokenExpectation.fulfill()
+        }
+
+        wait(for: [getTokenExpectation, refreshExpectation], timeout: 10.0)
+    }
+
     // MARK: - getToken with Username/Password/OTP
 
     func testGetTokenWithUsernamePasswordOTPSuccess() {
