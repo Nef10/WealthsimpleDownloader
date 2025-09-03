@@ -12,7 +12,7 @@ import FoundationNetworking
 @testable import Wealthsimple
 import XCTest
 
-final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this type_body_length
+final class WealthsimplePositionTests: DownloaderTestCase { // swiftlint:disable:this type_body_length
 
     private static let mockAccount = MockAccount(id: "account-123", accountType: .tfsa, currency: "CAD", number: "12345-67890")
     private static let positionJSON: [String: Any] = [
@@ -49,19 +49,6 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
         "position_date": "2023-12-01",
         "object": "position"
     ]
-
-    private var mockCredentialStorage: MockCredentialStorage!
-
-    override func setUp() {
-        super.setUp()
-        mockCredentialStorage = MockCredentialStorage()
-        MockURLProtocol.setup()
-    }
-
-    override func tearDown() {
-        MockURLProtocol.reset()
-        super.tearDown()
-    }
 
     // MARK: - Helper Methods
 

@@ -13,7 +13,7 @@ import FoundationNetworking
 @testable import Wealthsimple
 import XCTest
 
-final class WealthsimpleTransactionTests: XCTestCase { // swiftlint:disable:this type_body_length
+final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disable:this type_body_length
 
     private static let transactionJSON: [String: Any] = [
         "id": "transaction-123",
@@ -30,19 +30,6 @@ final class WealthsimpleTransactionTests: XCTestCase { // swiftlint:disable:this
         "fx_rate": "1.0",
         "object": "transaction"
     ]
-
-    private var mockCredentialStorage: MockCredentialStorage!
-
-    override func setUp() {
-        super.setUp()
-        mockCredentialStorage = MockCredentialStorage()
-        MockURLProtocol.setup()
-    }
-
-    override func tearDown() {
-        MockURLProtocol.reset()
-        super.tearDown()
-    }
 
     // MARK: - Helper Methods
 
@@ -271,7 +258,6 @@ final class WealthsimpleTransactionTests: XCTestCase { // swiftlint:disable:this
         MockURLProtocol.transactionsRequestHandler = { url, request in
             XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/json")
             XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer valid_access_token3")
-            print(url.query()!)
             XCTAssert(url.query()?.contains("effective_date_start=\(expectedDateString)") ?? false)
             XCTAssert(url.query()?.contains("process_date_start=\(expectedDateString)") ?? false)
 
@@ -467,5 +453,4 @@ final class WealthsimpleTransactionTests: XCTestCase { // swiftlint:disable:this
         XCTAssertEqual(TransactionError.tokenError(tokenError).errorDescription, tokenError.localizedDescription)
     }
 
-    // 
 }

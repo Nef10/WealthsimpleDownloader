@@ -1,4 +1,3 @@
-// swiftlint:disable file_length function_body_length type_contents_order
 //
 //  WealthsimpleDownloaderTests.swift
 //
@@ -13,21 +12,9 @@ import FoundationNetworking
 @testable import Wealthsimple
 import XCTest
 
-final class WealthsimpleDownloaderTests: XCTestCase { // swiftlint:disable:this type_body_length file_length
+final class WealthsimpleDownloaderTests: DownloaderTestCase {
 
-    private var mockCredentialStorage: MockCredentialStorage!
     private var downloader: WealthsimpleDownloader!
-
-    override func setUp() {
-        super.setUp()
-        mockCredentialStorage = MockCredentialStorage()
-        MockURLProtocol.setup()
-    }
-
-    override func tearDown() {
-        MockURLProtocol.reset()
-        super.tearDown()
-    }
 
     // MARK: - Helper Methods
 
