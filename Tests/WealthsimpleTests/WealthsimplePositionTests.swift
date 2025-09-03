@@ -96,7 +96,7 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
     }
 
     private func setupMockForSuccess(positions: [[String: Any]], expectation: XCTestExpectation) {
-        MockURLProtocol.getPositionsRequestHandler = { url, request in
+        MockURLProtocol.positionsRequestHandler = { url, request in
             XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer valid_access_token3")
             XCTAssertFalse((url.query ?? "").contains("date"))
             XCTAssert((url.query ?? "").contains("account_id=\(Self.mockAccount.id)"))
@@ -115,7 +115,7 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
     ) throws {
         let expectation = XCTestExpectation(description: "getPositions completion")
 
-        MockURLProtocol.getPositionsRequestHandler = response
+        MockURLProtocol.positionsRequestHandler = response
 
         WealthsimplePosition.getPositions(token: try createValidToken(), account: Self.mockAccount, date: nil) { result in
             switch result {
@@ -199,7 +199,7 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
         let expectation = XCTestExpectation(description: "getPositions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 
-        MockURLProtocol.getPositionsRequestHandler = { url, _ in
+        MockURLProtocol.positionsRequestHandler = { url, _ in
             // Verify that the date parameter is included in the request
             XCTAssertEqual(url.query?.contains("date=2023-12-01"), true)
             mockExpectation.fulfill()
