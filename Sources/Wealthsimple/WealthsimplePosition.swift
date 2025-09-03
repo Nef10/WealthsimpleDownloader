@@ -11,19 +11,17 @@ import FoundationNetworking
 #endif
 
 /// Errors which can happen when retrieving a Position
-public enum PositionError: Error {
+public enum PositionError: Error, Equatable {
     /// When no data is received from the HTTP request
     case noDataReceived
     /// When an HTTP error occurs
     case httpError(error: String)
     /// When the received data is not valid JSON
-    case invalidJson(error: String)
-    /// When the received JSON does not have the right type
-    case invalidJsonType(json: Any)
+    case invalidJson(json: Data)
     /// When the received JSON does not have all expected values
-    case missingResultParamenter(json: [String: Any])
+    case missingResultParamenter(json: String)
     /// When the received JSON does have an unexpected value
-    case invalidResultParamenter(json: [String: Any])
+    case invalidResultParamenter(json: String)
     /// An error with the assets occured
     case assetError(_ error: AssetError)
     /// An error with the token occured
@@ -73,11 +71,11 @@ struct WealthsimplePosition: Position {
               let priceCurrency = price["currency"] as? String,
               let object = json["object"] as? String
         else {
-            throw PositionError.missingResultParamenter(json: json)
+            throw PositionError.missingResultParamenter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
         }
         guard let date = Self.dateFormatter.date(from: dateString),
               object == "position" else {
-            throw PositionError.invalidResultParamenter(json: json)
+            throw PositionError.invalidResultParamenter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
         }
         do {
             self.asset = try WealthsimpleAsset(json: assetDict)
@@ -128,24 +126,21 @@ struct WealthsimplePosition: Position {
             completion(.failure(PositionError.httpError(error: "Status code \(httpResponse.statusCode)")))
             return
         }
-        do {
-            completion(try parse(data: data))
-        } catch {
-            completion(.failure(PositionError.invalidJson(error: error.localizedDescription)))
-            return
-        }
+        completion(parse(data: data))
     }
 
-    private static func parse(data: Data) throws -> Result<[Position], PositionError> {
-        guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
-            return .failure(PositionError.invalidJsonType(json: try JSONSerialization.jsonObject(with: data, options: [])))
+    private static func parse(data: Data) -> Result<[Position], PositionError> {
+        guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            return .failure(PositionError.invalidJson(json: data))
         }
         do {
             guard let results = json["results"] as? [[String: Any]], let object = json["object"] as? String else {
-                throw PositionError.missingResultParamenter(json: json)
+                throw PositionError.missingResultParamenter(json:
+                    String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
             }
             guard object == "position" else {
-                throw PositionError.invalidResultParamenter(json: json)
+                throw PositionError.invalidResultParamenter(json:
+                    String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
             }
             var positions = [Position]()
             for result in results {
