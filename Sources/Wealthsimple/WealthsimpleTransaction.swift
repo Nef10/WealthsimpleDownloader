@@ -10,6 +10,22 @@ import Foundation
 import FoundationNetworking
 #endif
 
+/// Errors which can happen when retrieving a Transaction
+public enum TransactionError: Error, Equatable {
+    /// When no data is received from the HTTP request
+    case noDataReceived
+    /// When an HTTP error occurs
+    case httpError(error: String)
+    /// When the received data is not valid JSON
+    case invalidJson(json: Data)
+    /// When the received JSON does not have all expected values
+    case missingResultParameter(json: String)
+    /// When the received JSON does have an unexpected value
+    case invalidResultParameter(json: String)
+    /// An error with the token occured
+    case tokenError(_ error: TokenError)
+}
+
 /// Type for the transaction, e.g. buying or selling
 public enum TransactionType: String {
     /// buying a Stock, ETF, ...
@@ -170,13 +186,13 @@ struct WealthsimpleTransaction: Transaction {
               let fxRate = json["fx_rate"] as? String,
               let object = json["object"] as? String
         else {
-            throw TransactionError.missingResultParamenter(json: json)
+            throw TransactionError.missingResultParameter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
         }
         guard let processDate = Self.dateFormatter.date(from: processDateString),
               let effectiveDate = Self.dateFormatter.date(from: effectiveDateString),
               let type = TransactionType(rawValue: typeString.camelCase),
               object == "transaction" else {
-            throw TransactionError.invalidResultParamenter(json: json)
+            throw TransactionError.invalidResultParameter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
         }
         self.id = id
         self.accountId = accountId
@@ -234,24 +250,21 @@ struct WealthsimpleTransaction: Transaction {
             completion(.failure(TransactionError.httpError(error: "Status code \(httpResponse.statusCode)")))
             return
         }
-        do {
-            completion(try parse(data: data))
-        } catch {
-            completion(.failure(TransactionError.invalidJson(error: error.localizedDescription)))
-            return
-        }
+        completion(parse(data: data))
     }
 
-    private static func parse(data: Data) throws -> Result<[Transaction], TransactionError> {
-        guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
-            return .failure(TransactionError.invalidJsonType(json: try JSONSerialization.jsonObject(with: data, options: [])))
+    private static func parse(data: Data) -> Result<[Transaction], TransactionError> {
+        guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            return .failure(TransactionError.invalidJson(json: data))
         }
         do {
             guard let results = json["results"] as? [[String: Any]], let object = json["object"] as? String else {
-                throw TransactionError.missingResultParamenter(json: json)
+                throw TransactionError.missingResultParameter(json:
+                    String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
             }
             guard object == "transaction" else {
-                throw TransactionError.invalidResultParamenter(json: json)
+                throw TransactionError.invalidResultParameter(json:
+                    String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
             }
             var transactions = [Transaction]()
             for result in results {
@@ -263,4 +276,23 @@ struct WealthsimpleTransaction: Transaction {
         }
     }
 
+}
+
+extension TransactionError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .noDataReceived:
+            return "No Data was received from the server"
+        case let .httpError(error):
+            return "An HTTP error occurred: \(error)"
+        case let .invalidJson(error):
+            return "The server response contained invalid JSON: \(error)"
+        case let .missingResultParameter(json):
+            return "The server response JSON was missing expected parameters: \(json)"
+        case let .invalidResultParameter(json):
+            return "The server response JSON contained invalid parameters: \(json)"
+        case let .tokenError(error):
+            return error.localizedDescription
+        }
+    }
 }

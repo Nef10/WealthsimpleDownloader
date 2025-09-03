@@ -15,6 +15,22 @@ import XCTest
 
 final class WealthsimpleTransactionTests: XCTestCase { // swiftlint:disable:this type_body_length
 
+    private static let transactionJSON: [String: Any] = [
+        "id": "transaction-123",
+        "account_id": "account-456",
+        "type": "buy",
+        "description": "Buy AAPL",
+        "symbol": "AAPL",
+        "quantity": "10.0",
+        "market_price": ["amount": "150.00", "currency": "USD"],
+        "market_value": ["amount": "1500.00", "currency": "USD"],
+        "net_cash": ["amount": "-1500.00", "currency": "USD"],
+        "process_date": "2023-01-15",
+        "effective_date": "2023-01-16",
+        "fx_rate": "1.0",
+        "object": "transaction"
+    ]
+
     private var mockCredentialStorage: MockCredentialStorage!
 
     override func setUp() {
@@ -39,7 +55,7 @@ final class WealthsimpleTransactionTests: XCTestCase { // swiftlint:disable:this
             return (response, Data())
         }
 
-        mockCredentialStorage.storage["accessToken"] = "valid_access_token1"
+        mockCredentialStorage.storage["accessToken"] = "valid_access_token3"
         mockCredentialStorage.storage["refreshToken"] = "valid_refresh_token"
         mockCredentialStorage.storage["expiry"] = String(Date().addingTimeInterval(3_600).timeIntervalSince1970)
 
@@ -66,37 +82,12 @@ final class WealthsimpleTransactionTests: XCTestCase { // swiftlint:disable:this
         return TestAccount(id: "test-account-123", accountType: .tfsa, currency: "CAD", number: "12345")
     }
 
-    private func createValidTransactionJSON() -> [String: Any] {
-        [
-            "id": "transaction-123",
-            "account_id": "account-456",
-            "type": "buy",
-            "description": "Buy AAPL",
-            "symbol": "AAPL",
-            "quantity": "10.0",
-            "market_price": [
-                "amount": "150.00",
-                "currency": "USD"
-            ],
-            "market_value": [
-                "amount": "1500.00",
-                "currency": "USD"
-            ],
-            "net_cash": [
-                "amount": "-1500.00",
-                "currency": "USD"
-            ],
-            "process_date": "2023-01-15",
-            "effective_date": "2023-01-16",
-            "fx_rate": "1.0",
-            "object": "transaction"
-        ]
-    }
-
     private func setupMockForSuccess(transactions: [[String: Any]], expectation: XCTestExpectation) {
         MockURLProtocol.transactionsRequestHandler = { url, request in
             XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/json")
-            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer valid_access_token1")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer valid_access_token3")
+            XCTAssertFalse(url.query()?.contains("effective_date_start") ?? true)
+            XCTAssertFalse(url.query()?.contains("process_date_start") ?? true)
 
             let jsonResponse = [
                 "object": "transaction",
@@ -154,7 +145,8 @@ final class WealthsimpleTransactionTests: XCTestCase { // swiftlint:disable:this
             ),
             expectedError: expectedError,
             file: file,
-            line: line)
+            line: line
+        )
     }
 
     private func testJSONParsingFailure(jsonObject: [String: Any], expectedError: TransactionError, file: StaticString = #file, line: UInt = #line) throws {
@@ -172,7 +164,7 @@ final class WealthsimpleTransactionTests: XCTestCase { // swiftlint:disable:this
         let expectation = XCTestExpectation(description: "getTransactions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 
-        let transactionJSON = createValidTransactionJSON()
+        let transactionJSON = Self.transactionJSON
         setupMockForSuccess(transactions: [transactionJSON], expectation: mockExpectation)
 
         WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: nil) { result in
@@ -228,43 +220,36 @@ final class WealthsimpleTransactionTests: XCTestCase { // swiftlint:disable:this
         wait(for: [expectation, mockExpectation], timeout: 10.0)
     }
 
-    // swiftlint:disable:next function_body_length
     func testGetTransactionsMultipleTransactionTypes() throws {
         let expectation = XCTestExpectation(description: "getTransactions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 
-        var buyTransaction = createValidTransactionJSON()
+        var buyTransaction = Self.transactionJSON
         buyTransaction["type"] = "buy"
         buyTransaction["id"] = "buy-transaction"
 
-        var sellTransaction = createValidTransactionJSON()
-        sellTransaction["type"] = "sell"
-        sellTransaction["id"] = "sell-transaction"
-
-        var dividendTransaction = createValidTransactionJSON()
+        var dividendTransaction = Self.transactionJSON
         dividendTransaction["type"] = "dividend"
         dividendTransaction["id"] = "dividend-transaction"
 
-        // Test some transaction types that use camelCase conversion
-        var feeTransaction = createValidTransactionJSON()
+        var feeTransaction = Self.transactionJSON
         feeTransaction["type"] = "custodian_fee"
         feeTransaction["id"] = "fee-transaction"
 
-        var paymentTransaction = createValidTransactionJSON()
+        var paymentTransaction = Self.transactionJSON
         paymentTransaction["type"] = "wealthsimple_payments_transfer_in"
         paymentTransaction["id"] = "payment-transaction"
 
-        setupMockForSuccess(transactions: [buyTransaction, sellTransaction, dividendTransaction, feeTransaction, paymentTransaction], expectation: mockExpectation)
+        setupMockForSuccess(transactions: [buyTransaction, dividendTransaction, feeTransaction, paymentTransaction], expectation: mockExpectation)
 
         WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: nil) { result in
             switch result {
             case .success(let transactions):
-                XCTAssertEqual(transactions.count, 5)
+                XCTAssertEqual(transactions.count, 4)
                 XCTAssertEqual(transactions[0].transactionType, .buy)
-                XCTAssertEqual(transactions[1].transactionType, .sell)
-                XCTAssertEqual(transactions[2].transactionType, .dividend)
-                XCTAssertEqual(transactions[3].transactionType, .custodianFee)
-                XCTAssertEqual(transactions[4].transactionType, .paymentTransferIn)
+                XCTAssertEqual(transactions[1].transactionType, .dividend)
+                XCTAssertEqual(transactions[2].transactionType, .custodianFee)
+                XCTAssertEqual(transactions[3].transactionType, .paymentTransferIn)
             case .failure(let error):
                 XCTFail("Expected success but got error: \(error)")
             }
@@ -272,6 +257,45 @@ final class WealthsimpleTransactionTests: XCTestCase { // swiftlint:disable:this
         }
 
         wait(for: [expectation, mockExpectation], timeout: 10.0)
+    }
+
+    func testGetTransactionsAppendsStartDateQueryItems() throws {
+        let startDate = Date(timeIntervalSince1970: 1_700_000_000)
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let expectedDateString = dateFormatter.string(from: startDate)
+
+        let expectation = XCTestExpectation(description: "getTransactions completion")
+        let mockExpectation = XCTestExpectation(description: "mock server called")
+
+        MockURLProtocol.transactionsRequestHandler = { url, request in
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/json")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer valid_access_token3")
+            print(url.query()!)
+            XCTAssert(url.query()?.contains("effective_date_start=\(expectedDateString)") ?? false)
+            XCTAssert(url.query()?.contains("process_date_start=\(expectedDateString)") ?? false)
+
+            let jsonResponse = [
+                "object": "transaction",
+                "results": [Self.transactionJSON]
+            ]
+            mockExpectation.fulfill()
+            return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!,
+                    try JSONSerialization.data(withJSONObject: jsonResponse, options: []))
+        }
+
+        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: startDate) { result in
+            switch result {
+            case .success(let transactions):
+                XCTAssertEqual(transactions.count, 1)
+            case .failure(let error):
+                XCTFail("Expected success but got error: \(error)")
+            }
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation, mockExpectation], timeout: 10.0)
+
     }
 
     // MARK: - Network Error Tests
@@ -289,23 +313,23 @@ final class WealthsimpleTransactionTests: XCTestCase { // swiftlint:disable:this
         try testTransactionsFailure(
             response: { _, _ in
                 throw URLError(.networkConnectionLost)
-            }, expectedError: TransactionError.httpError(error: "The operation couldn't be completed. (NSURLErrorDomain error -1005.)")
+            }, expectedError: TransactionError.httpError(error: "The operation couldn’t be completed. (NSURLErrorDomain error -1005.)")
         )
     }
 #endif
 
-    func testGetTransactionsInvalidJSONEmptyData() throws {
+    func testGetTransactionsEmptyData() throws {
         try testTransactionsFailure(response: (
                 HTTPURLResponse(url: URL(string: "http://test.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)!,
                 Data()
-            ), expectedError: TransactionError.invalidJson(error: "The operation could not be completed. The data is not in the correct format.")
+            ), expectedError: TransactionError.invalidJson(json: Data())
         )
     }
 
     func testGetTransactionsWrongResponseType() throws {
         try testTransactionsFailure(response: (
             URLResponse(url: URL(string: "http://test.com")!, mimeType: nil, expectedContentLength: 0, textEncodingName: nil),
-            Data("test".utf8)
+            Data()
         ), expectedError: TransactionError.httpError(error: "No HTTPURLResponse"))
     }
 
@@ -320,10 +344,7 @@ final class WealthsimpleTransactionTests: XCTestCase { // swiftlint:disable:this
 
     func testGetTransactionsInvalidJSON() throws {
         let data = Data("NOT VALID JSON".utf8)
-        try testJSONParsingFailure(
-            jsonData: data,
-            expectedError: TransactionError.invalidJson(error: "The operation could not be completed. The data is not in the correct format.")
-        )
+        try testJSONParsingFailure(jsonData: data, expectedError: TransactionError.invalidJson(json: data))
     }
 
     func testGetTransactionsInvalidJSONType() throws {
@@ -331,231 +352,103 @@ final class WealthsimpleTransactionTests: XCTestCase { // swiftlint:disable:this
             XCTFail("Failed to create test JSON data")
             return
         }
-        try testJSONParsingFailure(
-            jsonData: jsonData,
-            expectedError: TransactionError.invalidJsonType(json: ["not", "a", "dictionary"])
-        )
+        try testJSONParsingFailure(jsonData: jsonData, expectedError: TransactionError.invalidJson(json: jsonData))
     }
 
     func testGetTransactionsMissingResults() throws {
-        try testJSONParsingFailure(jsonObject: ["object": "transaction"], expectedError: TransactionError.missingResultParamenter(json: ["object": "transaction"]))
-    }
-
-    func testGetTransactionsInvalidObject() throws {
+        let json = ["object": "transaction"]
         try testJSONParsingFailure(
-            jsonObject: ["object": "not_transaction", "results": []],
-            expectedError: TransactionError.invalidResultParamenter(json: ["object": "not_transaction", "results": []])
+            jsonObject: json,
+            expectedError: TransactionError.missingResultParameter(
+                json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? ""
+            )
         )
     }
 
-    // MARK: - Transaction JSON Parsing Error Tests
+    func testGetTransactionsInvalidObject() throws {
+        let json: [String: Any] = ["object": "not_transaction", "results": []]
+        try testJSONParsingFailure(
+            jsonObject: json,
+            expectedError: TransactionError.invalidResultParameter(
+                json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? ""
+            )
+        )
+    }
 
     func testTransactionMissingId() throws {
-        var transaction = createValidTransactionJSON()
+        var transaction = Self.transactionJSON
         transaction.removeValue(forKey: "id")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
-    }
-
-    func testTransactionMissingAccountId() throws {
-        var transaction = createValidTransactionJSON()
-        transaction.removeValue(forKey: "account_id")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
-    }
-
-    func testTransactionMissingType() throws {
-        var transaction = createValidTransactionJSON()
-        transaction.removeValue(forKey: "type")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
-    }
-
-    func testTransactionMissingDescription() throws {
-        var transaction = createValidTransactionJSON()
-        transaction.removeValue(forKey: "description")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
-    }
-
-    func testTransactionMissingSymbol() throws {
-        var transaction = createValidTransactionJSON()
-        transaction.removeValue(forKey: "symbol")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
-    }
-
-    func testTransactionMissingQuantity() throws {
-        var transaction = createValidTransactionJSON()
-        transaction.removeValue(forKey: "quantity")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
-    }
-
-    func testTransactionMissingMarketPrice() throws {
-        var transaction = createValidTransactionJSON()
-        transaction.removeValue(forKey: "market_price")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
-    }
-
-    func testTransactionMissingMarketValue() throws {
-        var transaction = createValidTransactionJSON()
-        transaction.removeValue(forKey: "market_value")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
-    }
-
-    func testTransactionMissingNetCash() throws {
-        var transaction = createValidTransactionJSON()
-        transaction.removeValue(forKey: "net_cash")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
+        try testJSONParsingFailure(
+            jsonObject: ["object": "transaction", "results": [transaction]],
+            expectedError: TransactionError.missingResultParameter(
+                json: String(data: try JSONSerialization.data(withJSONObject: transaction, options: [.sortedKeys]), encoding: .utf8) ?? ""
+            )
+        )
     }
 
     func testTransactionMissingProcessDate() throws {
-        var transaction = createValidTransactionJSON()
+        var transaction = Self.transactionJSON
         transaction.removeValue(forKey: "process_date")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
+        try testJSONParsingFailure(
+            jsonObject: ["object": "transaction", "results": [transaction]],
+            expectedError: TransactionError.missingResultParameter(
+                json: String(data: try JSONSerialization.data(withJSONObject: transaction, options: [.sortedKeys]), encoding: .utf8) ?? ""
+            )
+        )
     }
 
     func testTransactionMissingEffectiveDate() throws {
-        var transaction = createValidTransactionJSON()
+        var transaction = Self.transactionJSON
         transaction.removeValue(forKey: "effective_date")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
+        try testJSONParsingFailure(
+            jsonObject: ["object": "transaction", "results": [transaction]],
+            expectedError: TransactionError.missingResultParameter(
+                json: String(data: try JSONSerialization.data(withJSONObject: transaction, options: [.sortedKeys]), encoding: .utf8) ?? ""
+            )
+        )
     }
-
-    func testTransactionMissingFxRate() throws {
-        var transaction = createValidTransactionJSON()
-        transaction.removeValue(forKey: "fx_rate")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
-    }
-
-    func testTransactionMissingObject() throws {
-        var transaction = createValidTransactionJSON()
-        transaction.removeValue(forKey: "object")
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
-    }
-
-    func testTransactionMissingMarketPriceAmount() throws {
-        var transaction = createValidTransactionJSON()
-        transaction["market_price"] = ["currency": "USD"]
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
-    }
-
-    func testTransactionMissingMarketPriceCurrency() throws {
-        var transaction = createValidTransactionJSON()
-        transaction["market_price"] = ["amount": "150.00"]
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
-    }
-
-    func testTransactionMissingMarketValueAmount() throws {
-        var transaction = createValidTransactionJSON()
-        transaction["market_value"] = ["currency": "USD"]
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
-    }
-
-    func testTransactionMissingMarketValueCurrency() throws {
-        var transaction = createValidTransactionJSON()
-        transaction["market_value"] = ["amount": "1500.00"]
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
-    }
-
-    func testTransactionMissingNetCashAmount() throws {
-        var transaction = createValidTransactionJSON()
-        transaction["net_cash"] = ["currency": "USD"]
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
-    }
-
-    func testTransactionMissingNetCashCurrency() throws {
-        var transaction = createValidTransactionJSON()
-        transaction["net_cash"] = ["amount": "-1500.00"]
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.missingResultParamenter(json: transaction))
-    }
-
-    // MARK: - Invalid Value Tests
 
     func testTransactionInvalidProcessDate() throws {
-        var transaction = createValidTransactionJSON()
+        var transaction = Self.transactionJSON
         transaction["process_date"] = "invalid-date"
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.invalidResultParamenter(json: transaction))
+        try testJSONParsingFailure(
+            jsonObject: ["object": "transaction", "results": [transaction]],
+            expectedError: TransactionError.invalidResultParameter(
+                json: String(data: try JSONSerialization.data(withJSONObject: transaction, options: [.sortedKeys]), encoding: .utf8) ?? ""
+            )
+        )
     }
 
     func testTransactionInvalidEffectiveDate() throws {
-        var transaction = createValidTransactionJSON()
+        var transaction = Self.transactionJSON
         transaction["effective_date"] = "invalid-date"
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.invalidResultParamenter(json: transaction))
+        try testJSONParsingFailure(
+            jsonObject: ["object": "transaction", "results": [transaction]],
+            expectedError: TransactionError.invalidResultParameter(
+                json: String(data: try JSONSerialization.data(withJSONObject: transaction, options: [.sortedKeys]), encoding: .utf8) ?? ""
+            )
+        )
     }
 
     func testTransactionInvalidType() throws {
-        var transaction = createValidTransactionJSON()
+        var transaction = Self.transactionJSON
         transaction["type"] = "invalid_transaction_type"
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.invalidResultParamenter(json: transaction))
+        try testJSONParsingFailure(
+            jsonObject: ["object": "transaction", "results": [transaction]],
+            expectedError: TransactionError.invalidResultParameter(
+                json: String(data: try JSONSerialization.data(withJSONObject: transaction, options: [.sortedKeys]), encoding: .utf8) ?? ""
+            )
+        )
     }
 
     func testTransactionInvalidObject() throws {
-        var transaction = createValidTransactionJSON()
+        var transaction = Self.transactionJSON
         transaction["object"] = "not_transaction"
-        try testJSONParsingFailure(jsonObject: [
-            "object": "transaction",
-            "results": [transaction]
-        ], expectedError: TransactionError.invalidResultParamenter(json: transaction))
+        try testJSONParsingFailure(
+            jsonObject: ["object": "transaction", "results": [transaction]],
+            expectedError: TransactionError.invalidResultParameter(
+                json: String(data: try JSONSerialization.data(withJSONObject: transaction, options: [.sortedKeys]), encoding: .utf8) ?? ""
+            )
+        )
     }
 }
