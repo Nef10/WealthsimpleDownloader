@@ -17,6 +17,7 @@ class MockURLProtocol: URLProtocol {
     static var newTokenRequestHandler: ((URL, URLRequest) throws -> (URLResponse, Data)) = failTest
     static var tokenValidationRequestHandler: ((URL, URLRequest) throws -> (URLResponse, Data)) = failTest
     static var accountsRequestHandler: ((URL, URLRequest) throws -> (URLResponse, Data)) = failTest
+    static var transactionsRequestHandler: ((URL, URLRequest) throws -> (URLResponse, Data)) = failTest
     static var getPositionsRequestHandler: ((URL, URLRequest) throws -> (URLResponse, Data)) = failTest
 
     // MARK: - Static Methods
@@ -40,6 +41,7 @@ class MockURLProtocol: URLProtocol {
         newTokenRequestHandler = failTest
         tokenValidationRequestHandler = failTest
         accountsRequestHandler = failTest
+        transactionsRequestHandler = failTest
         getPositionsRequestHandler = failTest
         URLProtocol.unregisterClass(Self.self)
     }
@@ -57,6 +59,9 @@ class MockURLProtocol: URLProtocol {
         }
         if url.path.contains("/accounts") && request.httpMethod == "GET" {
             return try accountsRequestHandler(url, request)
+        }
+        if url.path.contains("/transactions") && request.httpMethod == "GET" {
+            return try transactionsRequestHandler(url, request)
         }
         if url.path.contains("/positions") && request.httpMethod == "GET" {
             return try getPositionsRequestHandler(url, request)
