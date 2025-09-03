@@ -29,15 +29,6 @@ final class WealthsimpleDownloaderTests: XCTestCase { // swiftlint:disable:this 
         super.tearDown()
     }
 
-    // MARK: - Helper Classes
-
-    private struct MockAccount: Account {
-        let id: String
-        let accountType: AccountType
-        let currency: String
-        let number: String
-    }
-
     // MARK: - Helper Methods
 
     private func createDownloader(withAuthCallback callback: @escaping WealthsimpleDownloader.AuthenticationCallback) -> WealthsimpleDownloader {

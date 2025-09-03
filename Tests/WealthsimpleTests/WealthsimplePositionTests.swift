@@ -12,14 +12,6 @@ import FoundationNetworking
 @testable import Wealthsimple
 import XCTest
 
-// Mock Account implementation for testing
-private struct MockAccount: Account {
-    let id: String
-    let accountType: AccountType
-    let currency: String
-    let number: String
-}
-
 final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this type_body_length
 
     private static let mockAccount = MockAccount(id: "account-123", accountType: .tfsa, currency: "CAD", number: "12345-67890")
