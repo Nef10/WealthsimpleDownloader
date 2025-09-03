@@ -451,4 +451,21 @@ final class WealthsimpleTransactionTests: XCTestCase { // swiftlint:disable:this
             )
         )
     }
+
+    // MARK: - TransactionError LocalizedError Tests
+
+    func testTransactionErrorLocalizedDescription() {
+        XCTAssertEqual(TransactionError.noDataReceived.errorDescription, "No Data was received from the server")
+        XCTAssertEqual(TransactionError.httpError(error: "Test HTTP Error").errorDescription, "An HTTP error occurred: Test HTTP Error")
+        let invalidJsonData = Data("invalid".utf8)
+        XCTAssertEqual(TransactionError.invalidJson(json: invalidJsonData).errorDescription, "The server response contained invalid JSON: \(invalidJsonData)")
+        let missingJson = "{\"missing\":true}"
+        XCTAssertEqual(TransactionError.missingResultParameter(json: missingJson).errorDescription, "The server response JSON was missing expected parameters: \(missingJson)")
+        let invalidJson = "{\"invalid\":true}"
+        XCTAssertEqual(TransactionError.invalidResultParameter(json: invalidJson).errorDescription, "The server response JSON contained invalid parameters: \(invalidJson)")
+        let tokenError = TokenError.noToken
+        XCTAssertEqual(TransactionError.tokenError(tokenError).errorDescription, tokenError.localizedDescription)
+    }
+
+    // 
 }
