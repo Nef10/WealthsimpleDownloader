@@ -66,7 +66,7 @@ final class WealthsimpleDownloaderTests: DownloaderTestCase {
     func testAuthenticateWithExistingTokenRefreshSuccess() {
         let expectation = XCTestExpectation(description: "authenticate completion")
 
-        let authCallback: WealthsimpleDownloader.AuthenticationCallback = { completion in
+        let authCallback: WealthsimpleDownloader.AuthenticationCallback = { _ in
             XCTFail("Auth callback should not be called when credential storage has valid token")
         }
 
@@ -102,7 +102,7 @@ final class WealthsimpleDownloaderTests: DownloaderTestCase {
         downloader = createDownloader(withAuthCallback: authCallback)
 
         // Set up refresh to fail, then new token to succeed
-        MockURLProtocol.newTokenRequestHandler = { url, request in
+        MockURLProtocol.newTokenRequestHandler = { url, _ in
             let jsonResponse = [
                 "access_token": "new_access_token",
                 "refresh_token": "new_refresh_token",
@@ -125,7 +125,7 @@ final class WealthsimpleDownloaderTests: DownloaderTestCase {
     func testAuthenticateWithoutTokenValidCredentialStorage() {
         let expectation = XCTestExpectation(description: "authenticate completion")
 
-        let authCallback: WealthsimpleDownloader.AuthenticationCallback = { completion in
+        let authCallback: WealthsimpleDownloader.AuthenticationCallback = { _ in
             XCTFail("Auth callback should not be called when credential storage has valid token")
         }
 
@@ -190,7 +190,7 @@ final class WealthsimpleDownloaderTests: DownloaderTestCase {
 
         downloader = createDownloader(withAuthCallback: authCallback)
 
-        MockURLProtocol.newTokenRequestHandler = { url, _ in
+        MockURLProtocol.newTokenRequestHandler = { _, _ in
             throw URLError(.networkConnectionLost)
         }
 
@@ -295,7 +295,7 @@ final class WealthsimpleDownloaderTests: DownloaderTestCase {
         downloader = createDownloader(withAuthCallback: authCallback)
 
         // Setup mock to return HTTP error
-        MockURLProtocol.accountsRequestHandler = { url, request in
+        MockURLProtocol.accountsRequestHandler = { url, _ in
             mockExpectation.fulfill()
             return (HTTPURLResponse(url: url, statusCode: 401, httpVersion: nil, headerFields: nil)!, Data())
         }
@@ -343,7 +343,7 @@ final class WealthsimpleDownloaderTests: DownloaderTestCase {
         downloader = createDownloader(withAuthCallback: authCallback)
 
         // Setup mock to throw network error
-        MockURLProtocol.accountsRequestHandler = { url, request in
+        MockURLProtocol.accountsRequestHandler = { _, _ in
             mockExpectation.fulfill()
             throw URLError(.networkConnectionLost)
         }
@@ -490,7 +490,7 @@ final class WealthsimpleDownloaderTests: DownloaderTestCase {
         downloader = createDownloader(withAuthCallback: authCallback)
 
         // Setup mock to throw network error
-        MockURLProtocol.positionsRequestHandler = { url, request in
+        MockURLProtocol.positionsRequestHandler = { _, _ in
             mockExpectation.fulfill()
             throw URLError(.networkConnectionLost)
         }
@@ -639,7 +639,7 @@ final class WealthsimpleDownloaderTests: DownloaderTestCase {
         downloader = createDownloader(withAuthCallback: authCallback)
 
         // Setup mock to throw network error
-        MockURLProtocol.transactionsRequestHandler = { url, request in
+        MockURLProtocol.transactionsRequestHandler = { _, _ in
             mockExpectation.fulfill()
             throw URLError(.networkConnectionLost)
         }
