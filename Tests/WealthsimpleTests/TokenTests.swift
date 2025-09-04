@@ -12,20 +12,7 @@ import FoundationNetworking
 @testable import Wealthsimple
 import XCTest
 
-final class TokenTests: XCTestCase { // swiftlint:disable:this type_body_length
-
-    private var mockCredentialStorage: MockCredentialStorage!
-
-    override func setUp() {
-        super.setUp()
-        mockCredentialStorage = MockCredentialStorage()
-        MockURLProtocol.setup()
-    }
-
-    override func tearDown() {
-        MockURLProtocol.reset()
-        super.tearDown()
-    }
+final class TokenTests: DownloaderTestCase { // swiftlint:disable:this type_body_length
 
     // MARK: - getToken with Credential Storage
 
