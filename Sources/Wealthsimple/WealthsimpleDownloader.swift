@@ -85,11 +85,6 @@ public final class WealthsimpleDownloader {
             return
         }
         WealthsimpleAccount.getAccounts(token: token) {
-            if case let .failure(error) = $0 {
-                if case .tokenError = error {
-                    self.token = nil
-                }
-            }
             completion($0)
         }
     }
@@ -105,11 +100,6 @@ public final class WealthsimpleDownloader {
             return
         }
         WealthsimplePosition.getPositions(token: token, account: account, date: date) {
-            if case let .failure(error) = $0 {
-                if case .tokenError = error {
-                    self.token = nil
-                }
-            }
             completion($0)
         }
     }
@@ -125,11 +115,6 @@ public final class WealthsimpleDownloader {
             return
         }
         WealthsimpleTransaction.getTransactions(token: token, account: account, startDate: startDate) {
-            if case let .failure(error) = $0 {
-                if case .tokenError = error {
-                    self.token = nil
-                }
-            }
             completion($0)
         }
     }
