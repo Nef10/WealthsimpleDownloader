@@ -12,20 +12,7 @@ import FoundationNetworking
 @testable import Wealthsimple
 import XCTest
 
-final class WealthsimpleAccountTests: XCTestCase {
-
-    private var mockCredentialStorage: MockCredentialStorage!
-
-    override func setUp() {
-        super.setUp()
-        mockCredentialStorage = MockCredentialStorage()
-        MockURLProtocol.setup()
-    }
-
-    override func tearDown() {
-        MockURLProtocol.reset()
-        super.tearDown()
-    }
+final class WealthsimpleAccountTests: DownloaderTestCase {
 
     // MARK: - Helper Methods
 

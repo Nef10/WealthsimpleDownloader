@@ -12,15 +12,7 @@ import FoundationNetworking
 @testable import Wealthsimple
 import XCTest
 
-// Mock Account implementation for testing
-private struct MockAccount: Account {
-    let id: String
-    let accountType: AccountType
-    let currency: String
-    let number: String
-}
-
-final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this type_body_length
+final class WealthsimplePositionTests: DownloaderTestCase { // swiftlint:disable:this type_body_length
 
     private static let mockAccount = MockAccount(id: "account-123", accountType: .tfsa, currency: "CAD", number: "12345-67890")
     private static let positionJSON: [String: Any] = [
@@ -58,19 +50,6 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
         "object": "position"
     ]
 
-    private var mockCredentialStorage: MockCredentialStorage!
-
-    override func setUp() {
-        super.setUp()
-        mockCredentialStorage = MockCredentialStorage()
-        MockURLProtocol.setup()
-    }
-
-    override func tearDown() {
-        MockURLProtocol.reset()
-        super.tearDown()
-    }
-
     // MARK: - Helper Methods
 
     private func createValidToken() throws -> Token {
@@ -96,7 +75,7 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
     }
 
     private func setupMockForSuccess(positions: [[String: Any]], expectation: XCTestExpectation) {
-        MockURLProtocol.getPositionsRequestHandler = { url, request in
+        MockURLProtocol.positionsRequestHandler = { url, request in
             XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer valid_access_token3")
             XCTAssertFalse((url.query ?? "").contains("date"))
             XCTAssert((url.query ?? "").contains("account_id=\(Self.mockAccount.id)"))
@@ -115,7 +94,7 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
     ) throws {
         let expectation = XCTestExpectation(description: "getPositions completion")
 
-        MockURLProtocol.getPositionsRequestHandler = response
+        MockURLProtocol.positionsRequestHandler = response
 
         WealthsimplePosition.getPositions(token: try createValidToken(), account: Self.mockAccount, date: nil) { result in
             switch result {
@@ -199,7 +178,7 @@ final class WealthsimplePositionTests: XCTestCase { // swiftlint:disable:this ty
         let expectation = XCTestExpectation(description: "getPositions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 
-        MockURLProtocol.getPositionsRequestHandler = { url, _ in
+        MockURLProtocol.positionsRequestHandler = { url, _ in
             // Verify that the date parameter is included in the request
             XCTAssertEqual(url.query?.contains("date=2023-12-01"), true)
             mockExpectation.fulfill()
