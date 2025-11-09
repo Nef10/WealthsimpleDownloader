@@ -102,6 +102,10 @@ public enum TransactionType: String {
     case returnOfCapital
     /// Non-cash Distribution (Adjusted Cost Base entry only)
     case nonCashDistribution
+    /// Credit Card Purchase
+    case purchase
+    /// Credit Card Payment
+    case payment
 }
 
 /// A Transaction, like buying or selling stock
@@ -140,11 +144,57 @@ public protocol Transaction {
 
 struct WealthsimpleTransaction: Transaction {
 
+    private enum RequestType {
+        case graphQL
+        case rest
+    }
+
     private static var baseUrl: URLComponents { URLConfiguration.shared.urlComponents(for: "transactions")! }
 
-    private static var dateFormatter: DateFormatter = {
+    private static let graphQLQuery = """
+        query FetchActivityFeedItems($cursor: Cursor, $condition: ActivityCondition) { \
+          activityFeedItems( \
+            after: $cursor \
+            condition: $condition \
+            orderBy: OCCURRED_AT_DESC \
+          ) { \
+            edges { \
+              node { \
+                amount \
+                amountSign \
+                currency \
+                externalCanonicalId \
+                occurredAt \
+                spendMerchant \
+                status \
+                subType \
+                accountId \
+              } \
+            } \
+            pageInfo { \
+              hasNextPage \
+              endCursor \
+            } \
+          } \
+        }
+        """
+    private static let graphQLOperation = "FetchActivityFeedItems"
+
+    private static var dateFormatterREST: DateFormatter = {
         var dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
+        return dateFormatter
+    }()
+
+    private static var dateFormatterGraphQLRequest: DateFormatter = {
+        var dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+        return dateFormatter
+    }()
+
+    private static var dateFormatterGraphQLResult: DateFormatter = {
+        var dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX"
         return dateFormatter
     }()
 
@@ -188,8 +238,8 @@ struct WealthsimpleTransaction: Transaction {
         else {
             throw TransactionError.missingResultParameter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
         }
-        guard let processDate = Self.dateFormatter.date(from: processDateString),
-              let effectiveDate = Self.dateFormatter.date(from: effectiveDateString),
+        guard let processDate = Self.dateFormatterREST.date(from: processDateString),
+              let effectiveDate = Self.dateFormatterREST.date(from: effectiveDateString),
               let type = TransactionType(rawValue: typeString.camelCase),
               object == "transaction" else {
             throw TransactionError.invalidResultParameter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
@@ -211,29 +261,92 @@ struct WealthsimpleTransaction: Transaction {
         self.processDate = processDate
     }
 
-    static func getTransactions(token: Token, account: Account, startDate: Date?, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
-        var url = baseUrl
-        url.queryItems = [
-            URLQueryItem(name: "account_id", value: account.id),
-            URLQueryItem(name: "limit", value: "250")
-        ]
-        if let date = startDate {
-            url.queryItems?.append(URLQueryItem(name: "effective_date_start", value: dateFormatter.string(from: date)))
-            url.queryItems?.append(URLQueryItem(name: "process_date_start", value: dateFormatter.string(from: date)))
+    private init(graphQL: [String: Any]) throws {
+        guard let json = graphQL["node"] as? [String: Any],
+              let quantity = json["amount"] as? String,
+              let amountSign = json["amountSign"] as? String,
+              let currency = json["currency"] as? String,
+              let id = json["externalCanonicalId"] as? String,
+              let occurredAt = json["occurredAt"] as? String,
+              let _ = json["status"] as? String,
+              let subType = json["subType"] as? String,
+              let accountId = json["accountId"] as? String
+        else {
+            throw TransactionError.missingResultParameter(json: String(data: try JSONSerialization.data(withJSONObject: graphQL, options: [.sortedKeys]), encoding: .utf8) ?? "")
         }
-        url.queryItems?.append(URLQueryItem(name: "effective_date_end", value: dateFormatter.string(from: Calendar.current.date(byAdding: .day, value: 7, to: Date())!)))
-        var request = URLRequest(url: url.url!)
+        let description = json["spendMerchant"] as? String ?? ""
+        guard let processDate = Self.dateFormatterGraphQLResult.date(from: occurredAt),
+              //let effectiveDate = Self.dateFormatter.date(from: effectiveDateString),
+              let type = TransactionType(rawValue: subType.lowercased().camelCase) else {
+            throw TransactionError.invalidResultParameter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
+        }
+        self.id = id
+        self.accountId = accountId
+        self.description = description
+        self.transactionType = type
+        self.symbol = "CAD" // TODO fx
+        self.quantity = quantity
+        self.marketPriceAmount = "1.0" // ?
+        self.marketPriceCurrency = currency // ?
+        self.marketValueAmount = quantity
+        self.marketValueCurrency = currency
+        self.netCashAmount = amountSign == "negative" ? "-\(quantity)" : quantity
+        self.netCashCurrency = currency
+        self.fxRate = "1.0" // TODO fx
+        self.effectiveDate = processDate // TODO pending
+        self.processDate = processDate
+    }
+
+    static func getTransactions(token: Token, account: Account, startDate: Date, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
+        let endDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
+        let request: URLRequest!
+        let type: RequestType!
+        if account.accountType == .creditCard {
+            type = .graphQL
+            do {
+                request = try getTransactionsGraphQLRequest(accountID: account.id, startDate: startDate, endDate: endDate)
+            } catch {
+                completion(.failure(error as! TransactionError)) // swiftlint:disable:this force_cast
+                return
+            }
+        } else {
+            type = .rest
+            request = getTransactionsRESTRequest(accountID: account.id, startDate: startDate, endDate: endDate)
+        }
         let session = URLSession.shared
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         token.authenticateRequest(request) { request in
             let task = session.dataTask(with: request) { data, response, error in
-                handleResponse(data: data, response: response, error: error, completion: completion)
+                handleResponse(type: type, data: data, response: response, error: error, completion: completion)
+                // TODO: Pagination
             }
             task.resume()
         }
     }
 
-    private static func handleResponse(data: Data?, response: URLResponse?, error: Error?, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
+    static func getTransactionsGraphQLRequest(accountID: String, startDate: Date, endDate: Date) throws -> URLRequest {
+        guard var request = URLConfiguration.shared.graphQLURLRequest() else {
+            throw TransactionError.httpError(error: "Invalid URL")
+        }
+        let requestData: String = #"{"query": "\#(Self.graphQLQuery)", "operationName": "\#(Self.graphQLOperation)", "variables": { "condition": { "startDate": "\#(dateFormatterGraphQLRequest.string(from: startDate))", "endDate": "\#(dateFormatterGraphQLRequest.string(from: endDate))", "accountIds": ["\#(accountID)"] } } }"#
+        request.httpBody = Data(requestData.utf8)
+        return request
+    }
+
+    static func getTransactionsRESTRequest(accountID: String, startDate: Date, endDate: Date) -> URLRequest {
+        var url = baseUrl
+        url.queryItems = [
+            URLQueryItem(name: "account_id", value: accountID),
+            URLQueryItem(name: "limit", value: "250"),
+            URLQueryItem(name: "effective_date_start", value: dateFormatterREST.string(from: startDate)),
+            URLQueryItem(name: "process_date_start", value: dateFormatterREST.string(from: startDate))
+        ]
+        url.queryItems?.append(URLQueryItem(name: "effective_date_end", value: dateFormatterREST.string(from: endDate)))
+        var request = URLRequest(url: url.url!)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        return request
+    }
+
+    private static func handleResponse(type: RequestType, data: Data?, response: URLResponse?, error: Error?, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
         guard let data else {
             if let error {
                 completion(.failure(TransactionError.httpError(error: error.localizedDescription)))
@@ -250,10 +363,15 @@ struct WealthsimpleTransaction: Transaction {
             completion(.failure(TransactionError.httpError(error: "Status code \(httpResponse.statusCode)")))
             return
         }
-        completion(parse(data: data))
+        switch(type) {
+        case .graphQL:
+            completion(parseGraphQL(data: data))
+        case .rest:
+            completion(parseREST(data: data))
+        }
     }
 
-    private static func parse(data: Data) -> Result<[Transaction], TransactionError> {
+    private static func parseREST(data: Data) -> Result<[Transaction], TransactionError> {
         guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
             return .failure(TransactionError.invalidJson(json: data))
         }
@@ -269,6 +387,26 @@ struct WealthsimpleTransaction: Transaction {
             var transactions = [Transaction]()
             for result in results {
                 transactions.append(try Self(json: result))
+            }
+            return .success(transactions)
+        } catch {
+            return .failure(error as! TransactionError) // swiftlint:disable:this force_cast
+        }
+    }
+
+    private static func parseGraphQL(data: Data) -> Result<[Transaction], TransactionError> {
+        guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            return .failure(TransactionError.invalidJson(json: data))
+        }
+        do {
+            guard let data = json["data"] as? [String: Any], let results = data["activityFeedItems"] as? [String: Any], let page = results["pageInfo"] as? [String: Any], let edges = results["edges"] as? [[String: Any]] else {
+                throw TransactionError.missingResultParameter(json:
+                    String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
+            }
+            print(page["hasNextPage"] as! Bool)
+            var transactions = [Transaction]()
+            for result in edges {
+                transactions.append(try Self(graphQL: result))
             }
             return .success(transactions)
         } catch {
