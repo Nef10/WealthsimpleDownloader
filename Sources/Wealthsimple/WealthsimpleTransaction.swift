@@ -24,6 +24,8 @@ public enum TransactionError: Error, Equatable {
     case invalidResultParameter(json: String)
     /// An error with the token occured
     case tokenError(_ error: TokenError)
+    /// Invalid Parameter
+    case invalidParameter
 }
 
 /// Type for the transaction, e.g. buying or selling
@@ -147,6 +149,11 @@ struct WealthsimpleTransaction: Transaction {
     private enum RequestType {
         case graphQL
         case rest
+    }
+
+    private enum RequestResult {
+        case graphQL([String: Any])
+        case rest([Transaction])
     }
 
     private static var baseUrl: URLComponents { URLConfiguration.shared.urlComponents(for: "transactions")! }
@@ -298,41 +305,96 @@ struct WealthsimpleTransaction: Transaction {
     }
 
     static func getTransactions(token: Token, account: Account, startDate: Date, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
+        getTransactions(token: token, account: account, startDate: startDate, cursor: nil, completion: completion)
+    }
+
+    private static func getTransactions(token: Token, account: Account, startDate: Date, cursor: String? = nil, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
         let endDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
-        let request: URLRequest!
-        let type: RequestType!
+        let request: URLRequest
+        let type: RequestType
+        let completionHandler: (Result<RequestResult, TransactionError>) -> Void = {
+            switch $0 {
+            case .success(let result):
+                switch result {
+                case .graphQL(let json):
+                    do {
+                        guard let page = json["pageInfo"] as? [String: Any], let edges = json["edges"] as? [[String: Any]], let hasNextPage = page["hasNextPage"] as? Bool, let cursor = page["endCursor"] as? String else {
+                            throw TransactionError.invalidResultParameter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
+                        }
+                        var transactions = [Transaction]()
+                        for result in edges {
+                            transactions.append(try Self(graphQL: result))
+                        }
+                        if hasNextPage {
+                            var nextResult: Result<[Transaction], TransactionError>!
+                            let group = DispatchGroup()
+                            group.enter()
+                            DispatchQueue.global(qos: .userInitiated).async {
+                                getTransactions(token: token, account: account, startDate: startDate, cursor: cursor) {
+                                    nextResult = $0
+                                    group.leave()
+                                }
+                            }
+                            group.wait()
+                            switch nextResult {
+                            case .failure(let error):
+                                completion(.failure(error))
+                                return
+                            case .success(let nextTransactions):
+                                transactions.append(contentsOf: nextTransactions)
+                            case .none:
+                                throw TransactionError.noDataReceived
+                            }
+                        }
+                        completion(.success(transactions))
+                    } catch {
+                        completion(.failure(error as! TransactionError))
+                        return
+                    }
+                case .rest(let transactions):
+                    completion(.success(transactions))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
         if account.accountType == .creditCard {
             type = .graphQL
             do {
-                request = try getTransactionsGraphQLRequest(accountID: account.id, startDate: startDate, endDate: endDate)
+                request = try getTransactionsGraphQLRequest(accountID: account.id, startDate: startDate, endDate: endDate, cursor: cursor)
             } catch {
                 completion(.failure(error as! TransactionError)) // swiftlint:disable:this force_cast
                 return
             }
         } else {
+            if cursor != nil {
+                completion(.failure(.invalidParameter))
+                return
+            }
             type = .rest
             request = getTransactionsRESTRequest(accountID: account.id, startDate: startDate, endDate: endDate)
         }
         let session = URLSession.shared
         token.authenticateRequest(request) { request in
             let task = session.dataTask(with: request) { data, response, error in
-                handleResponse(type: type, data: data, response: response, error: error, completion: completion)
-                // TODO: Pagination
+                DispatchQueue.global(qos: .userInitiated).async {
+                    handleResponse(type: type, data: data, response: response, error: error, completion: completionHandler)
+                }
             }
             task.resume()
         }
     }
 
-    static func getTransactionsGraphQLRequest(accountID: String, startDate: Date, endDate: Date) throws -> URLRequest {
+    private static func getTransactionsGraphQLRequest(accountID: String, startDate: Date, endDate: Date, cursor: String?) throws -> URLRequest {
         guard var request = URLConfiguration.shared.graphQLURLRequest() else {
             throw TransactionError.httpError(error: "Invalid URL")
         }
-        let requestData: String = #"{"query": "\#(Self.graphQLQuery)", "operationName": "\#(Self.graphQLOperation)", "variables": { "condition": { "startDate": "\#(dateFormatterGraphQLRequest.string(from: startDate))", "endDate": "\#(dateFormatterGraphQLRequest.string(from: endDate))", "accountIds": ["\#(accountID)"] } } }"#
+        let requestData: String = #"{"query": "\#(Self.graphQLQuery)", "operationName": "\#(Self.graphQLOperation)", "variables": { \#(cursor != nil ? #""cursor": "\#(cursor!)","# : "") "condition": { "startDate": "\#(dateFormatterGraphQLRequest.string(from: startDate))", "endDate": "\#(dateFormatterGraphQLRequest.string(from: endDate))", "accountIds": ["\#(accountID)"] } } }"#
         request.httpBody = Data(requestData.utf8)
         return request
     }
 
-    static func getTransactionsRESTRequest(accountID: String, startDate: Date, endDate: Date) -> URLRequest {
+    private static func getTransactionsRESTRequest(accountID: String, startDate: Date, endDate: Date) -> URLRequest {
         var url = baseUrl
         url.queryItems = [
             URLQueryItem(name: "account_id", value: accountID),
@@ -346,7 +408,7 @@ struct WealthsimpleTransaction: Transaction {
         return request
     }
 
-    private static func handleResponse(type: RequestType, data: Data?, response: URLResponse?, error: Error?, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
+    private static func handleResponse(type: RequestType, data: Data?, response: URLResponse?, error: Error?, completion: @escaping (Result<RequestResult, TransactionError>) -> Void) {
         guard let data else {
             if let error {
                 completion(.failure(TransactionError.httpError(error: error.localizedDescription)))
@@ -371,7 +433,7 @@ struct WealthsimpleTransaction: Transaction {
         }
     }
 
-    private static func parseREST(data: Data) -> Result<[Transaction], TransactionError> {
+    private static func parseREST(data: Data) -> Result<RequestResult, TransactionError> {
         guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
             return .failure(TransactionError.invalidJson(json: data))
         }
@@ -388,27 +450,22 @@ struct WealthsimpleTransaction: Transaction {
             for result in results {
                 transactions.append(try Self(json: result))
             }
-            return .success(transactions)
+            return .success(.rest(transactions))
         } catch {
             return .failure(error as! TransactionError) // swiftlint:disable:this force_cast
         }
     }
 
-    private static func parseGraphQL(data: Data) -> Result<[Transaction], TransactionError> {
+    private static func parseGraphQL(data: Data) -> Result<RequestResult, TransactionError> {
         guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
             return .failure(TransactionError.invalidJson(json: data))
         }
         do {
-            guard let data = json["data"] as? [String: Any], let results = data["activityFeedItems"] as? [String: Any], let page = results["pageInfo"] as? [String: Any], let edges = results["edges"] as? [[String: Any]] else {
+            guard let data = json["data"] as? [String: Any], let results = data["activityFeedItems"] as? [String: Any] else {
                 throw TransactionError.missingResultParameter(json:
                     String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
             }
-            print(page["hasNextPage"] as! Bool)
-            var transactions = [Transaction]()
-            for result in edges {
-                transactions.append(try Self(graphQL: result))
-            }
-            return .success(transactions)
+            return .success(.graphQL(results))
         } catch {
             return .failure(error as! TransactionError) // swiftlint:disable:this force_cast
         }
@@ -431,6 +488,8 @@ extension TransactionError: LocalizedError {
             return "The server response JSON contained invalid parameters: \(json)"
         case let .tokenError(error):
             return error.localizedDescription
+        case .invalidParameter:
+            return "Invalid paramter passed in"
         }
     }
 }
