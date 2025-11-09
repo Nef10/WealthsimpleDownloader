@@ -187,6 +187,17 @@ struct WealthsimpleTransaction: Transaction {
         """
     private static let graphQLOperation = "FetchActivityFeedItems"
 
+    private static let graphQLQueryDetailsFragment = """
+        fragment Activity on CreditCardActivity { \
+          originalAmount \
+          originalCurrency \
+          isForeign \
+          foreignExchangeRate \
+          settledAt \
+        }
+        """
+    private static let graphQLOperationDetails = "CreditCardActivity"
+
     private static var dateFormatterREST: DateFormatter = {
         var dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -202,6 +213,12 @@ struct WealthsimpleTransaction: Transaction {
     private static var dateFormatterGraphQLResult: DateFormatter = {
         var dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX"
+        return dateFormatter
+    }()
+
+    private static var dateFormatterGraphQLResult2: DateFormatter = {
+        var dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss z"
         return dateFormatter
     }()
 
@@ -268,39 +285,59 @@ struct WealthsimpleTransaction: Transaction {
         self.processDate = processDate
     }
 
-    private init(graphQL: [String: Any]) throws {
-        guard let json = graphQL["node"] as? [String: Any],
-              let quantity = json["amount"] as? String,
+    private init(graphQL json: [String: Any]) throws {
+        guard let quantity = json["amount"] as? String,
               let amountSign = json["amountSign"] as? String,
+              let originalAmount = json["originalAmount"] as? String,
               let currency = json["currency"] as? String,
+              let originalCurrency = json["originalCurrency"] as? String,
               let id = json["externalCanonicalId"] as? String,
               let occurredAt = json["occurredAt"] as? String,
-              let _ = json["status"] as? String,
+              let status = json["status"] as? String,
               let subType = json["subType"] as? String,
-              let accountId = json["accountId"] as? String
+              let accountId = json["accountId"] as? String,
+              let isForeign = json["isForeign"] as? Bool
         else {
-            throw TransactionError.missingResultParameter(json: String(data: try JSONSerialization.data(withJSONObject: graphQL, options: [.sortedKeys]), encoding: .utf8) ?? "")
+            throw TransactionError.missingResultParameter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
         }
         let description = json["spendMerchant"] as? String ?? ""
         guard let processDate = Self.dateFormatterGraphQLResult.date(from: occurredAt),
-              //let effectiveDate = Self.dateFormatter.date(from: effectiveDateString),
               let type = TransactionType(rawValue: subType.lowercased().camelCase) else {
             throw TransactionError.invalidResultParameter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
         }
+        let effectiveDate: Date
+        if status == "settled" {
+            guard let settledAt = json["settledAt"] as? String, let settlementDate = Self.dateFormatterGraphQLResult2.date(from: settledAt) else {
+                throw TransactionError.missingResultParameter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
+            }
+            effectiveDate = settlementDate
+        } else {
+            effectiveDate = processDate
+        }
+        let foreignExchangeRate: String
+        if isForeign {
+            guard let fx = json["foreignExchangeRate"] as? String else {
+                throw TransactionError.invalidResultParameter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
+            }
+            foreignExchangeRate = fx
+        } else {
+            foreignExchangeRate = "1.0"
+        }
+
         self.id = id
         self.accountId = accountId
         self.description = description
         self.transactionType = type
-        self.symbol = "CAD" // TODO fx
-        self.quantity = quantity
-        self.marketPriceAmount = "1.0" // ?
-        self.marketPriceCurrency = currency // ?
+        self.symbol = originalCurrency
+        self.quantity = originalAmount
+        self.marketPriceAmount = "1.00"
+        self.marketPriceCurrency = currency
         self.marketValueAmount = quantity
         self.marketValueCurrency = currency
         self.netCashAmount = amountSign == "negative" ? "-\(quantity)" : quantity
         self.netCashCurrency = currency
-        self.fxRate = "1.0" // TODO fx
-        self.effectiveDate = processDate // TODO pending
+        self.fxRate = foreignExchangeRate
+        self.effectiveDate = effectiveDate
         self.processDate = processDate
     }
 
@@ -308,6 +345,125 @@ struct WealthsimpleTransaction: Transaction {
         getTransactions(token: token, account: account, startDate: startDate, cursor: nil, completion: completion)
     }
 
+    private static func enrichWithFXInfo(edges: [[String : Any]], token: Token) throws -> [[String : Any]] {
+        var queryPart1 = "query CreditCardActivity("
+        var queryPart2 = ""
+        var variables = ""
+        var i = 0
+
+        var results = [[String: Any]]()
+
+        for result in edges {
+            guard let node = result["node"] as? [String: Any], let id = node["externalCanonicalId"] as? String else {
+                throw TransactionError.invalidResultParameter(json: String(data: try JSONSerialization.data(withJSONObject: result, options: [.sortedKeys]), encoding: .utf8) ?? "")
+            }
+            results.append(node)
+            queryPart1 += "$id\(i): ID!, "
+            queryPart2 += "a\(i): creditCardActivity(id: $id\(i)) { ...Activity } "
+            variables += #" "id\#(i)": "\#(id)", "#
+            i += 1
+        }
+        // remove trailing comma and space
+        queryPart1.removeLast(2)
+        variables.removeLast(2)
+        let query = queryPart1 + ") { " + queryPart2 + "} " + Self.graphQLQueryDetailsFragment
+        let requestData: String = #"{"query": "\#(query)", "operationName": "\#(Self.graphQLOperationDetails)", "variables": { \#(variables) } }"#
+        guard var request = URLConfiguration.shared.graphQLURLRequest() else {
+            throw TransactionError.httpError(error: "Invalid URL")
+        }
+        let group = DispatchGroup()
+        group.enter()
+        request.httpBody = Data(requestData.utf8)
+        let session = URLSession.shared
+
+        var requestError: Error?
+        var fxResult: [String: [String : Any]] = [:]
+
+        token.authenticateRequest(request) { request in
+            let task = session.dataTask(with: request) { data, response, error in
+                DispatchQueue.global(qos: .userInitiated).async {
+                    handleResponse(data: data, response: response, error: error) {
+                        switch $0 {
+                        case .failure(let failure):
+                            requestError = failure
+                        case .success(let data):
+                            guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+                                requestError = TransactionError.invalidJson(json: data)
+                                return
+                            }
+                            do {
+                                guard let objects = json["data"] as? [String: [String : Any]] else {
+                                    throw TransactionError.missingResultParameter(json:
+                                        String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
+                                }
+                                fxResult = objects
+                            } catch {
+                                requestError = error
+                            }
+                        }
+                    }
+                    group.leave()
+                }
+            }
+            task.resume()
+        }
+        group.wait()
+        guard requestError == nil else {
+            throw requestError!
+        }
+        for (key, values) in fxResult {
+            guard let index = Int(key.dropFirst()) else {
+                throw TransactionError.invalidResultParameter(json: String(data: try JSONSerialization.data(withJSONObject: fxResult, options: [.sortedKeys]), encoding: .utf8) ?? "")
+            }
+            results[index] = results[index].merging(values) { (current, _) in current }
+        }
+        return results
+    }
+    
+    private static func loadNextPage(cursor: String, token: Token, account: Account, startDate: Date) throws -> [Transaction] {
+        var nextResult: Result<[Transaction], TransactionError>!
+        let group = DispatchGroup()
+        group.enter()
+        DispatchQueue.global(qos: .userInitiated).async {
+            getTransactions(token: token, account: account, startDate: startDate, cursor: cursor) {
+                nextResult = $0
+                group.leave()
+            }
+        }
+        group.wait()
+        switch nextResult {
+        case .success(let nextTransactions):
+            return nextTransactions
+        case .failure(let error):
+            throw error
+        case .none:
+            throw TransactionError.noDataReceived
+        }
+    }
+    
+    private static func processGraphQLTransactions(json: [String : Any], token: Token, account: Account, startDate: Date, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
+        do {
+            guard let page = json["pageInfo"] as? [String: Any], let edges = json["edges"] as? [[String: Any]], let hasNextPage = page["hasNextPage"] as? Bool, let cursor = page["endCursor"] as? String else {
+                throw TransactionError.invalidResultParameter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
+            }
+            
+            let transactionInfo = try enrichWithFXInfo(edges: edges, token: token)
+
+            var transactions = [Transaction]()
+            for transaction in transactionInfo {
+                transactions.append(try Self(graphQL: transaction))
+            }
+            if hasNextPage {
+                let nextTransactions = try loadNextPage(cursor: cursor, token: token, account: account, startDate: startDate)
+                transactions.append(contentsOf: nextTransactions)
+            }
+            completion(.success(transactions))
+        } catch {
+            completion(.failure(error as! TransactionError))
+            return
+        }
+    }
+    
     private static func getTransactions(token: Token, account: Account, startDate: Date, cursor: String? = nil, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
         let endDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
         let request: URLRequest
@@ -317,40 +473,7 @@ struct WealthsimpleTransaction: Transaction {
             case .success(let result):
                 switch result {
                 case .graphQL(let json):
-                    do {
-                        guard let page = json["pageInfo"] as? [String: Any], let edges = json["edges"] as? [[String: Any]], let hasNextPage = page["hasNextPage"] as? Bool, let cursor = page["endCursor"] as? String else {
-                            throw TransactionError.invalidResultParameter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
-                        }
-                        var transactions = [Transaction]()
-                        for result in edges {
-                            transactions.append(try Self(graphQL: result))
-                        }
-                        if hasNextPage {
-                            var nextResult: Result<[Transaction], TransactionError>!
-                            let group = DispatchGroup()
-                            group.enter()
-                            DispatchQueue.global(qos: .userInitiated).async {
-                                getTransactions(token: token, account: account, startDate: startDate, cursor: cursor) {
-                                    nextResult = $0
-                                    group.leave()
-                                }
-                            }
-                            group.wait()
-                            switch nextResult {
-                            case .failure(let error):
-                                completion(.failure(error))
-                                return
-                            case .success(let nextTransactions):
-                                transactions.append(contentsOf: nextTransactions)
-                            case .none:
-                                throw TransactionError.noDataReceived
-                            }
-                        }
-                        completion(.success(transactions))
-                    } catch {
-                        completion(.failure(error as! TransactionError))
-                        return
-                    }
+                    processGraphQLTransactions(json: json, token: token, account: account, startDate: startDate, completion: completion)
                 case .rest(let transactions):
                     completion(.success(transactions))
                 }
@@ -378,7 +501,19 @@ struct WealthsimpleTransaction: Transaction {
         token.authenticateRequest(request) { request in
             let task = session.dataTask(with: request) { data, response, error in
                 DispatchQueue.global(qos: .userInitiated).async {
-                    handleResponse(type: type, data: data, response: response, error: error, completion: completionHandler)
+                    handleResponse(data: data, response: response, error: error) {
+                        switch $0 {
+                        case .failure(let error):
+                            completionHandler(.failure(error))
+                        case .success(let data):
+                            switch type {
+                            case .graphQL:
+                                completionHandler(parseGraphQL(data: data))
+                            case .rest:
+                                completionHandler(parseREST(data: data))
+                            }
+                        }
+                    }
                 }
             }
             task.resume()
@@ -408,7 +543,7 @@ struct WealthsimpleTransaction: Transaction {
         return request
     }
 
-    private static func handleResponse(type: RequestType, data: Data?, response: URLResponse?, error: Error?, completion: @escaping (Result<RequestResult, TransactionError>) -> Void) {
+    private static func handleResponse(data: Data?, response: URLResponse?, error: Error?, completion: @escaping (Result<Data, TransactionError>) -> Void) {
         guard let data else {
             if let error {
                 completion(.failure(TransactionError.httpError(error: error.localizedDescription)))
@@ -425,12 +560,7 @@ struct WealthsimpleTransaction: Transaction {
             completion(.failure(TransactionError.httpError(error: "Status code \(httpResponse.statusCode)")))
             return
         }
-        switch(type) {
-        case .graphQL:
-            completion(parseGraphQL(data: data))
-        case .rest:
-            completion(parseREST(data: data))
-        }
+        completion(.success(data))
     }
 
     private static func parseREST(data: Data) -> Result<RequestResult, TransactionError> {
