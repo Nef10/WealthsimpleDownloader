@@ -73,8 +73,8 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         MockURLProtocol.transactionsRequestHandler = { url, request in
             XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/json")
             XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer valid_access_token3")
-            XCTAssertFalse(url.query()?.contains("effective_date_start") ?? true)
-            XCTAssertFalse(url.query()?.contains("process_date_start") ?? true)
+            XCTAssertTrue(url.query()?.contains("effective_date_start") ?? false)
+            XCTAssertTrue(url.query()?.contains("process_date_start") ?? false)
 
             let jsonResponse = [
                 "object": "transaction",
@@ -112,7 +112,8 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
 
         MockURLProtocol.transactionsRequestHandler = response
 
-        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: nil) { result in
+        let defaultDate = Date(timeIntervalSince1970: 0)
+        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: defaultDate) { result in
             switch result {
             case .success:
                 XCTFail("Expected failure", file: file, line: line)
@@ -154,7 +155,8 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         let transactionJSON = Self.transactionJSON
         setupMockForSuccess(transactions: [transactionJSON], expectation: mockExpectation)
 
-        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: nil) { result in
+        let defaultDate = Date(timeIntervalSince1970: 0)
+        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: defaultDate) { result in
             switch result {
             case .success(let transactions):
                 XCTAssertEqual(transactions.count, 1)
@@ -194,7 +196,8 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
 
         setupMockForSuccess(transactions: [], expectation: mockExpectation)
 
-        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: nil) { result in
+        let defaultDate = Date(timeIntervalSince1970: 0)
+        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: defaultDate) { result in
             switch result {
             case .success(let transactions):
                 XCTAssertEqual(transactions.count, 0)
@@ -229,7 +232,8 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
 
         setupMockForSuccess(transactions: [buyTransaction, dividendTransaction, feeTransaction, paymentTransaction], expectation: mockExpectation)
 
-        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: nil) { result in
+        let defaultDate = Date(timeIntervalSince1970: 0)
+        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: defaultDate) { result in
             switch result {
             case .success(let transactions):
                 XCTAssertEqual(transactions.count, 4)
@@ -345,9 +349,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         let json = ["object": "transaction"]
         try testJSONParsingFailure(
             jsonObject: json,
-            expectedError: TransactionError.missingResultParameter(
-                json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? ""
-            )
+            expectedError: TransactionError.missingResultParameter(json: json)
         )
     }
 
@@ -355,9 +357,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         let json: [String: Any] = ["object": "not_transaction", "results": []]
         try testJSONParsingFailure(
             jsonObject: json,
-            expectedError: TransactionError.invalidResultParameter(
-                json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? ""
-            )
+            expectedError: TransactionError.invalidResultParameter(json: json)
         )
     }
 
@@ -366,9 +366,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         transaction.removeValue(forKey: "id")
         try testJSONParsingFailure(
             jsonObject: ["object": "transaction", "results": [transaction]],
-            expectedError: TransactionError.missingResultParameter(
-                json: String(data: try JSONSerialization.data(withJSONObject: transaction, options: [.sortedKeys]), encoding: .utf8) ?? ""
-            )
+            expectedError: TransactionError.missingResultParameter(json: transaction)
         )
     }
 
@@ -377,9 +375,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         transaction.removeValue(forKey: "process_date")
         try testJSONParsingFailure(
             jsonObject: ["object": "transaction", "results": [transaction]],
-            expectedError: TransactionError.missingResultParameter(
-                json: String(data: try JSONSerialization.data(withJSONObject: transaction, options: [.sortedKeys]), encoding: .utf8) ?? ""
-            )
+            expectedError: TransactionError.missingResultParameter(json: transaction)
         )
     }
 
@@ -388,9 +384,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         transaction.removeValue(forKey: "effective_date")
         try testJSONParsingFailure(
             jsonObject: ["object": "transaction", "results": [transaction]],
-            expectedError: TransactionError.missingResultParameter(
-                json: String(data: try JSONSerialization.data(withJSONObject: transaction, options: [.sortedKeys]), encoding: .utf8) ?? ""
-            )
+            expectedError: TransactionError.missingResultParameter(json: transaction)
         )
     }
 
@@ -399,9 +393,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         transaction["process_date"] = "invalid-date"
         try testJSONParsingFailure(
             jsonObject: ["object": "transaction", "results": [transaction]],
-            expectedError: TransactionError.invalidResultParameter(
-                json: String(data: try JSONSerialization.data(withJSONObject: transaction, options: [.sortedKeys]), encoding: .utf8) ?? ""
-            )
+            expectedError: TransactionError.invalidResultParameter(json: transaction)
         )
     }
 
@@ -410,9 +402,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         transaction["effective_date"] = "invalid-date"
         try testJSONParsingFailure(
             jsonObject: ["object": "transaction", "results": [transaction]],
-            expectedError: TransactionError.invalidResultParameter(
-                json: String(data: try JSONSerialization.data(withJSONObject: transaction, options: [.sortedKeys]), encoding: .utf8) ?? ""
-            )
+            expectedError: TransactionError.invalidResultParameter(json: transaction)
         )
     }
 
@@ -421,9 +411,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         transaction["type"] = "invalid_transaction_type"
         try testJSONParsingFailure(
             jsonObject: ["object": "transaction", "results": [transaction]],
-            expectedError: TransactionError.invalidResultParameter(
-                json: String(data: try JSONSerialization.data(withJSONObject: transaction, options: [.sortedKeys]), encoding: .utf8) ?? ""
-            )
+            expectedError: TransactionError.invalidResultParameter(json: transaction)
         )
     }
 
@@ -432,9 +420,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         transaction["object"] = "not_transaction"
         try testJSONParsingFailure(
             jsonObject: ["object": "transaction", "results": [transaction]],
-            expectedError: TransactionError.invalidResultParameter(
-                json: String(data: try JSONSerialization.data(withJSONObject: transaction, options: [.sortedKeys]), encoding: .utf8) ?? ""
-            )
+            expectedError: TransactionError.invalidResultParameter(json: transaction)
         )
     }
 
@@ -445,10 +431,20 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         XCTAssertEqual(TransactionError.httpError(error: "Test HTTP Error").errorDescription, "An HTTP error occurred: Test HTTP Error")
         let invalidJsonData = Data("invalid".utf8)
         XCTAssertEqual(TransactionError.invalidJson(json: invalidJsonData).errorDescription, "The server response contained invalid JSON: \(invalidJsonData)")
-        let missingJson = "{\"missing\":true}"
-        XCTAssertEqual(TransactionError.missingResultParameter(json: missingJson).errorDescription, "The server response JSON was missing expected parameters: \(missingJson)")
-        let invalidJson = "{\"invalid\":true}"
-        XCTAssertEqual(TransactionError.invalidResultParameter(json: invalidJson).errorDescription, "The server response JSON contained invalid parameters: \(invalidJson)")
+        let missingJson = ["missing": true as Any]
+        XCTAssertNoThrow(try {
+            let missingJsonStr = try String(data: JSONSerialization.data(withJSONObject: missingJson), encoding: .utf8)!
+            XCTAssertEqual(
+                TransactionError.missingResultParameter(json: missingJson).errorDescription,
+                "The server response JSON was missing expected parameters: \(missingJsonStr)"
+            )
+            let invalidJson = ["invalid": true as Any]
+            let invalidJsonStr = try String(data: JSONSerialization.data(withJSONObject: invalidJson), encoding: .utf8)!
+            XCTAssertEqual(
+                TransactionError.invalidResultParameter(json: invalidJson).errorDescription,
+                "The server response JSON contained invalid parameters: \(invalidJsonStr)"
+            )
+        }())
         let tokenError = TokenError.noToken
         XCTAssertEqual(TransactionError.tokenError(tokenError).errorDescription, tokenError.localizedDescription)
     }
