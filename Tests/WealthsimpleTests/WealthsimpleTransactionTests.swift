@@ -15,6 +15,15 @@ import XCTest
 
 final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disable:this type_body_length
 
+    private struct TestAccount: Account {
+        let id: String
+        let accountType: AccountType
+        let currency: String
+        let number: String
+    }
+
+    private static let startDate = Date(timeIntervalSince1970: 0)
+
     private static let transactionJSON: [String: Any] = [
         "id": "transaction-123",
         "account_id": "account-456",
@@ -60,13 +69,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
     }
 
     private func createValidAccount() -> Account {
-        struct TestAccount: Account {
-            let id: String
-            let accountType: AccountType
-            let currency: String
-            let number: String
-        }
-        return TestAccount(id: "test-account-123", accountType: .tfsa, currency: "CAD", number: "12345")
+        TestAccount(id: "test-account-123", accountType: .tfsa, currency: "CAD", number: "12345")
     }
 
     private func setupMockForSuccess(transactions: [[String: Any]], expectation: XCTestExpectation) {
@@ -112,8 +115,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
 
         MockURLProtocol.transactionsRequestHandler = response
 
-        let defaultDate = Date(timeIntervalSince1970: 0)
-        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: defaultDate) { result in
+        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: Self.startDate) { result in
             switch result {
             case .success:
                 XCTFail("Expected failure", file: file, line: line)
@@ -155,8 +157,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         let transactionJSON = Self.transactionJSON
         setupMockForSuccess(transactions: [transactionJSON], expectation: mockExpectation)
 
-        let defaultDate = Date(timeIntervalSince1970: 0)
-        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: defaultDate) { result in
+        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: Self.startDate) { result in
             switch result {
             case .success(let transactions):
                 XCTAssertEqual(transactions.count, 1)
@@ -196,8 +197,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
 
         setupMockForSuccess(transactions: [], expectation: mockExpectation)
 
-        let defaultDate = Date(timeIntervalSince1970: 0)
-        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: defaultDate) { result in
+        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: Self.startDate) { result in
             switch result {
             case .success(let transactions):
                 XCTAssertEqual(transactions.count, 0)
@@ -232,8 +232,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
 
         setupMockForSuccess(transactions: [buyTransaction, dividendTransaction, feeTransaction, paymentTransaction], expectation: mockExpectation)
 
-        let defaultDate = Date(timeIntervalSince1970: 0)
-        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: defaultDate) { result in
+        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: Self.startDate) { result in
             switch result {
             case .success(let transactions):
                 XCTAssertEqual(transactions.count, 4)
