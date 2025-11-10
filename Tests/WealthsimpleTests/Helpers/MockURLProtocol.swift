@@ -21,7 +21,6 @@ class MockURLProtocol: URLProtocol {
     static var positionsRequestHandler: ((URL, URLRequest) throws -> (URLResponse, Data)) = failTest
     static var graphQLRequestHandler: ((URL, URLRequest) throws -> (URLResponse, Data)) = failTest
 
-
     // MARK: - Static Methods
 
     override class func canInit(with request: URLRequest) -> Bool {
