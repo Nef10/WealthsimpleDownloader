@@ -107,9 +107,9 @@ public final class WealthsimpleDownloader {
     /// Get all `Transactions`s from one `Account`
     /// - Parameters:
     ///   - account: Account to retreive transactions from
-    ///   - startDate: Date from which the transactions are downloaded. If not date is provided, not date is sent to the API. The API falls back to 30 days ago from today.
+    ///   - startDate: Date from which the transactions are downloaded
     ///   - completion: Result with an array of `Transactions`s or an `Transactions.TransactionsError`
-    public func getTransactions(in account: Account, startDate: Date?, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
+    public func getTransactions(in account: Account, startDate: Date, completion: @escaping (Result<[Transaction], TransactionError>) -> Void) {
         guard let token else {
             completion(.failure(.tokenError(.noToken)))
             return

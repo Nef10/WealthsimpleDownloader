@@ -15,11 +15,13 @@ final class URLConfigurationTests: XCTestCase {
         super.setUp()
         // Reset to default base URL before each test
         URLConfiguration.shared.setBaseURL("https://api.production.wealthsimple.com/v1/")
+        URLConfiguration.shared.setGraphQLURL("https://my.wealthsimple.com/graphql")
     }
 
     func testDefaultBaseURL() {
         let config = URLConfiguration.shared
         XCTAssertEqual(config.base, "https://api.production.wealthsimple.com/v1/")
+        XCTAssertEqual(config.graphQL, "https://my.wealthsimple.com/graphql")
     }
 
     func testSetBaseURL() {
@@ -29,6 +31,15 @@ final class URLConfigurationTests: XCTestCase {
         config.setBaseURL(testURL)
 
         XCTAssertEqual(config.base, testURL)
+    }
+
+    func testSetGraphQLURL() {
+        let config = URLConfiguration.shared
+        let testURL = "https://test.example.com/graphql"
+
+        config.setGraphQLURL(testURL)
+
+        XCTAssertEqual(config.graphQL, testURL)
     }
 
     func testURLForPath() {
@@ -84,12 +95,40 @@ final class URLConfigurationTests: XCTestCase {
     func testResetBaseURL() {
         let config = URLConfiguration.shared
         let testURL = "https://mock.server.test/v1/"
+        let testGraphQLURL = "https://mock.server.test/graphql"
 
         config.setBaseURL(testURL)
         XCTAssertEqual(config.base, testURL)
 
+        config.setGraphQLURL(testGraphQLURL)
+        XCTAssertEqual(config.graphQL, testGraphQLURL)
+
         config.reset()
         XCTAssertEqual(config.base, "https://api.production.wealthsimple.com/v1/")
+        XCTAssertEqual(config.graphQL, "https://my.wealthsimple.com/graphql")
+    }
+
+    func testGraphQLURLRequest() {
+        let config = URLConfiguration.shared
+        let testGraphQLURL = "https://mock.server.test/graphql"
+        config.setGraphQLURL(testGraphQLURL)
+
+        guard let request = config.graphQLURLRequest() else {
+            XCTFail("Expected valid URLRequest")
+            return
+        }
+
+        XCTAssertEqual(request.url?.absoluteString, testGraphQLURL)
+        XCTAssertEqual(request.httpMethod, "POST")
+        XCTAssertEqual(request.allHTTPHeaderFields?["Content-Type"], "application/json")
+    }
+
+    func testInvalidGraphQLURLRequest() {
+        let config = URLConfiguration.shared
+        let testGraphQLURL = "Not a valid URL::::////"
+        config.setGraphQLURL(testGraphQLURL)
+
+        XCTAssertNil(config.graphQLURLRequest())
     }
 
 }

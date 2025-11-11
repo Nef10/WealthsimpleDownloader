@@ -343,7 +343,8 @@ final class WealthsimpleDownloaderTests: DownloaderTestCase { // swiftlint:disab
             XCTFail("Auth callback should not be called without a call to authenticate")
         }
 
-        downloader.getTransactions(in: mockAccount, startDate: nil) { result in
+        let defaultDate = Date(timeIntervalSince1970: 0)
+        downloader.getTransactions(in: mockAccount, startDate: defaultDate) { result in
             switch result {
             case .success:
                 XCTFail("Expected failure due to no token")
@@ -395,7 +396,8 @@ final class WealthsimpleDownloaderTests: DownloaderTestCase { // swiftlint:disab
             return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, try JSONSerialization.data(withJSONObject: jsonResponse, options: []))
         }
 
-        downloader.getTransactions(in: mockAccount, startDate: nil) { result in
+        let defaultDate = Date(timeIntervalSince1970: 0)
+        downloader.getTransactions(in: mockAccount, startDate: defaultDate) { result in
             switch result {
             case .success(let transactions):
                 XCTAssertEqual(transactions.count, 1)
@@ -420,7 +422,8 @@ final class WealthsimpleDownloaderTests: DownloaderTestCase { // swiftlint:disab
             throw URLError(.networkConnectionLost)
         }
 
-        downloader.getTransactions(in: mockAccount, startDate: nil) { result in
+        let defaultDate = Date(timeIntervalSince1970: 0)
+        downloader.getTransactions(in: mockAccount, startDate: defaultDate) { result in
             switch result {
             case .success:
                 XCTFail("Expected failure")

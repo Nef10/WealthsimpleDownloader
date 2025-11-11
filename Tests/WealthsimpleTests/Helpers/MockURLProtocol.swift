@@ -19,6 +19,7 @@ class MockURLProtocol: URLProtocol {
     static var accountsRequestHandler: ((URL, URLRequest) throws -> (URLResponse, Data)) = failTest
     static var transactionsRequestHandler: ((URL, URLRequest) throws -> (URLResponse, Data)) = failTest
     static var positionsRequestHandler: ((URL, URLRequest) throws -> (URLResponse, Data)) = failTest
+    static var graphQLRequestHandler: ((URL, URLRequest) throws -> (URLResponse, Data)) = failTest
 
     // MARK: - Static Methods
 
@@ -33,6 +34,7 @@ class MockURLProtocol: URLProtocol {
 
     static func setup() {
         URLConfiguration.shared.setBaseURL("http://localhost:8080/v1/")
+        URLConfiguration.shared.setGraphQLURL("http://localhost:8080/graphql")
         _ = URLProtocol.registerClass(Self.self)
     }
 
@@ -43,6 +45,7 @@ class MockURLProtocol: URLProtocol {
         accountsRequestHandler = failTest
         transactionsRequestHandler = failTest
         positionsRequestHandler = failTest
+        graphQLRequestHandler = failTest
         URLProtocol.unregisterClass(Self.self)
     }
 
@@ -65,6 +68,9 @@ class MockURLProtocol: URLProtocol {
         }
         if url.path.contains("/positions") && request.httpMethod == "GET" {
             return try positionsRequestHandler(url, request)
+        }
+        if url.path.contains("/graphql") && request.httpMethod == "POST" {
+            return try graphQLRequestHandler(url, request)
         }
 
         XCTFail("Unexpected request: \(url)")
