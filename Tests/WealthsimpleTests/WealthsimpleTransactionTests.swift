@@ -576,10 +576,9 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
                 URLConfiguration.shared.setGraphQLURL("Not a valid URL:::///")
                 mockExpectation.fulfill()
                 return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, try JSONSerialization.data(withJSONObject: response, options: []))
-            } else {
-                XCTFail("Too many GraphQL calls")
-                throw TransactionError.httpError(error: "Too many GraphQL calls")
             }
+            XCTFail("Too many GraphQL calls")
+            throw TransactionError.httpError(error: "Too many GraphQL calls")
         }
         let expectedError = TransactionError.httpError(error: "Invalid URL")
         try testGraphQLFailure(expectation: expectation, expectedError: expectedError)
@@ -599,13 +598,13 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
             if callCount == 1 {
                 let response = self.graphQLResponse(for: Self.graphQLTransactionJSON)
                 return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, try JSONSerialization.data(withJSONObject: response, options: []))
-            } else if callCount == 2 {
+            }
+            if callCount == 2 {
                 mockExpectation.fulfill()
                 return (HTTPURLResponse(url: url, statusCode: 401, httpVersion: nil, headerFields: nil)!, Data())
-            } else {
-                XCTFail("Too many GraphQL calls")
-                throw TransactionError.httpError(error: "Too many GraphQL calls")
             }
+            XCTFail("Too many GraphQL calls")
+            throw TransactionError.httpError(error: "Too many GraphQL calls")
         }
         let expectedError = TransactionError.httpError(error: "Status code 401")
         try testGraphQLFailure(expectation: expectation, expectedError: expectedError)
@@ -741,13 +740,13 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
             if callCount == 1 {
                 let response = self.graphQLResponse(for: Self.graphQLTransactionJSON)
                 return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, try JSONSerialization.data(withJSONObject: response, options: []))
-            } else if callCount == 2 {
+            }
+            if callCount == 2 {
                 mockExpectation.fulfill()
                 return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, Data("NOT VALID JSON".utf8))
-            } else {
-                XCTFail("Too many GraphQL calls")
-                throw TransactionError.httpError(error: "Too many GraphQL calls")
             }
+            XCTFail("Too many GraphQL calls")
+            throw TransactionError.httpError(error: "Too many GraphQL calls")
         }
 
         let error = TransactionError.invalidJson(json: Data("NOT VALID JSON".utf8))

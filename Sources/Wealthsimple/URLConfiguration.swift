@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// Singleton class that manages the base URL configuration for all Wealthsimple API endpoints
 final class URLConfiguration {
