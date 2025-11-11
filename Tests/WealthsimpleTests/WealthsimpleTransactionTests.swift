@@ -469,6 +469,48 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         wait(for: [expectation, mockExpectation], timeout: 10.0)
     }
 
+    func testGraphQLPaginationSuccess() throws {
+        let expectation = XCTestExpectation(description: "getTransactions completion")
+        let mockExpectation = XCTestExpectation(description: "mock server called")
+
+        var transaction2 = Self.graphQLTransactionJSON
+        transaction2["externalCanonicalId"] = "cc-transaction-page2"
+
+        // First page: hasNextPage = true
+        let responsePage1: [String: Any] = [
+            "data": [
+                "activityFeedItems": [
+                    "edges": [["node": Self.graphQLTransactionJSON]],
+                    "pageInfo": [
+                        "hasNextPage": true,
+                        "endCursor": "cursor_page2"
+                    ]
+                ]
+            ]
+        ]
+        let responsePage2 = graphQLResponse(for: transaction2)
+
+        // FX responses (same for both pages)
+        let fxResponse = graphQLFxResponse(for: Self.graphQLFxJSON)
+
+        try setupGraphQLMockForSuccess(activityResponses: [responsePage1, responsePage2], fxResponses: [fxResponse, fxResponse], expectation: mockExpectation)
+
+        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createGraphQLAccount(), startDate: Self.startDate) { result in
+            switch result {
+            case .success(let transactions):
+                // Expect two transactions (one from each page)
+                XCTAssertEqual(transactions.count, 2)
+                XCTAssertEqual(transactions[0].id, "cc-transaction-123")
+                XCTAssertEqual(transactions[1].id, "cc-transaction-page2")
+            case .failure(let error):
+                XCTFail("Expected success but got error: \(error)")
+            }
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation, mockExpectation], timeout: 10.0)
+    }
+
     // MARK: - Network Error Tests
 
 #if canImport(FoundationNetworking)
