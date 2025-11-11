@@ -561,6 +561,57 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         wait(for: [expectation], timeout: 10.0)
     }
 
+    func testInvalidGraphQLURLFx() throws {
+        let expectation = XCTestExpectation(description: "getTransactions completion")
+        let mockExpectation = XCTestExpectation(description: "mock server called")
+        var callCount = 0
+        MockURLProtocol.graphQLRequestHandler = { _, request in
+            callCount += 1
+            guard let url = request.url else {
+                XCTFail("Request URL is empty")
+                throw TransactionError.httpError(error: "Request URL is empty")
+            }
+            if callCount == 1 {
+                let response = self.graphQLResponse(for: Self.graphQLTransactionJSON)
+                URLConfiguration.shared.setGraphQLURL("Not a valid URL:::///")
+                mockExpectation.fulfill()
+                return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, try JSONSerialization.data(withJSONObject: response, options: []))
+            } else {
+                XCTFail("Too many GraphQL calls")
+                throw TransactionError.httpError(error: "Too many GraphQL calls")
+            }
+        }
+        let expectedError = TransactionError.httpError(error: "Invalid URL")
+        try testGraphQLFailure(expectation: expectation, expectedError: expectedError)
+        wait(for: [expectation, mockExpectation], timeout: 10.0)
+    }
+
+    func testGraphQLRequestErrorFx() throws {
+        let expectation = XCTestExpectation(description: "getTransactions completion")
+        let mockExpectation = XCTestExpectation(description: "mock server called")
+        var callCount = 0
+        MockURLProtocol.graphQLRequestHandler = { _, request in
+            callCount += 1
+            guard let url = request.url else {
+                XCTFail("Request URL is empty")
+                throw TransactionError.httpError(error: "Request URL is empty")
+            }
+            if callCount == 1 {
+                let response = self.graphQLResponse(for: Self.graphQLTransactionJSON)
+                return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, try JSONSerialization.data(withJSONObject: response, options: []))
+            } else if callCount == 2 {
+                mockExpectation.fulfill()
+                return (HTTPURLResponse(url: url, statusCode: 401, httpVersion: nil, headerFields: nil)!, Data())
+            } else {
+                XCTFail("Too many GraphQL calls")
+                throw TransactionError.httpError(error: "Too many GraphQL calls")
+            }
+        }
+        let expectedError = TransactionError.httpError(error: "Status code 401")
+        try testGraphQLFailure(expectation: expectation, expectedError: expectedError)
+        wait(for: [expectation, mockExpectation], timeout: 10.0)
+    }
+
     // MARK: - REST JSON Parsing Error Tests
 
     func testGetTransactionsInvalidJSON() throws {
@@ -676,21 +727,123 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         wait(for: [mockExpectation, expectation], timeout: 10.0)
     }
 
+    func testGraphQLInvalidJSONFx() throws {
+        let mockExpectation = XCTestExpectation(description: "mock server called")
+        let expectation = XCTestExpectation(description: "getTransactions completion")
+
+        var callCount = 0
+        MockURLProtocol.graphQLRequestHandler = { _, request in
+            callCount += 1
+            guard let url = request.url else {
+                XCTFail("Request URL is empty")
+                throw TransactionError.httpError(error: "Request URL is empty")
+            }
+            if callCount == 1 {
+                let response = self.graphQLResponse(for: Self.graphQLTransactionJSON)
+                return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, try JSONSerialization.data(withJSONObject: response, options: []))
+            } else if callCount == 2 {
+                mockExpectation.fulfill()
+                return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!, Data("NOT VALID JSON".utf8))
+            } else {
+                XCTFail("Too many GraphQL calls")
+                throw TransactionError.httpError(error: "Too many GraphQL calls")
+            }
+        }
+
+        let error = TransactionError.invalidJson(json: Data("NOT VALID JSON".utf8))
+        try testGraphQLFailure(expectation: expectation, expectedError: error)
+
+        wait(for: [mockExpectation, expectation], timeout: 10.0)
+    }
+
+    func testGraphQLErrorSecondPage() throws {
+        let expectation = XCTestExpectation(description: "getTransactions completion")
+        let mockExpectation = XCTestExpectation(description: "mock server called")
+
+        var transaction2 = Self.graphQLTransactionJSON
+        transaction2["externalCanonicalId"] = "cc-transaction-page2"
+
+        // First page: hasNextPage = true
+        let responsePage1: [String: Any] = [
+            "data": [
+                "activityFeedItems": [
+                    "edges": [["node": Self.graphQLTransactionJSON]],
+                    "pageInfo": [
+                        "hasNextPage": true,
+                        "endCursor": "cursor_page2"
+                    ]
+                ]
+            ]
+        ]
+
+        let fxResponse = graphQLFxResponse(for: Self.graphQLFxJSON)
+        try setupGraphQLMockForSuccess(activityResponses: [responsePage1, transaction2], fxResponses: [fxResponse], expectation: mockExpectation)
+
+        let expectedError = TransactionError.missingResultParameter(json: transaction2)
+        try testGraphQLFailure(expectation: expectation, expectedError: expectedError)
+
+        wait(for: [expectation, mockExpectation], timeout: 10.0)
+    }
+
     func testGraphQLWrongStructure() throws {
         let response1 = Self.graphQLTransactionJSON
         let error = TransactionError.missingResultParameter(json: (Self.graphQLTransactionJSON))
         try testGraphQLJSONParsingFailure(activityResponse: response1, fxResponse: nil, expectedError: error)
     }
 
+    func testGraphQLWrongInnerStructure() throws {
+        let response1 = [
+            "data": [
+                "activityFeedItems": [
+                    "edges": [
+                        ["node1": Self.graphQLTransactionJSON]
+                    ],
+                    "pageInfo": [
+                        "hasNextPage": false,
+                        "endCursor": "cursor123"
+                    ]
+                ]
+            ]
+        ]
+        let error = TransactionError.invalidResultParameter(json: (["node1": Self.graphQLTransactionJSON]))
+        try testGraphQLJSONParsingFailure(activityResponse: response1, fxResponse: nil, expectedError: error)
+    }
+
+    func testGraphQLMissingPageInfo() throws {
+        let response1 = [
+            "data": [
+                "activityFeedItems": [
+                    "edges": [
+                        ["node": Self.graphQLTransactionJSON]
+                    ]
+                ]
+            ]
+        ]
+        let error = TransactionError.invalidResultParameter(json: ["edges": [["node": Self.graphQLTransactionJSON]]])
+        try testGraphQLJSONParsingFailure(activityResponse: response1, fxResponse: nil, expectedError: error)
+    }
+
     func testGraphQLWrongStructureFx() throws {
         let response1 = graphQLResponse(for: Self.graphQLTransactionJSON)
         let response2 = Self.graphQLFxJSON
-        let error = TransactionError.missingResultParameter(json: (Self.graphQLFxJSON))
+        let error = TransactionError.missingResultParameter(json: Self.graphQLFxJSON)
 
         try testGraphQLJSONParsingFailure(activityResponse: response1, fxResponse: response2, expectedError: error)
     }
 
-    func testGraphQLMissingRequiredFields() throws {
+    func testGraphQLWrongStructureFx2() throws {
+        let response1 = graphQLResponse(for: Self.graphQLTransactionJSON)
+        let response2 = [
+            "data": [
+                "aa0": Self.graphQLFxJSON
+            ]
+        ]
+        let error = TransactionError.invalidResultParameter(json: response2["data"]!)
+
+        try testGraphQLJSONParsingFailure(activityResponse: response1, fxResponse: response2, expectedError: error)
+    }
+
+    func testGraphQLMissingRequiredField() throws {
         var transaction = Self.graphQLTransactionJSON
         transaction.removeValue(forKey: "amount")
 
@@ -699,6 +852,16 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         let error = TransactionError.missingResultParameter(json: (transaction.merging(Self.graphQLFxJSON) { $1 }))
 
         try testGraphQLJSONParsingFailure(activityResponse: response1, fxResponse: response2, expectedError: error)
+    }
+
+    func testGraphQLMissingRequiredFieldForFx() throws {
+        var transaction = Self.graphQLTransactionJSON
+        transaction.removeValue(forKey: "externalCanonicalId")
+
+        let response1 = graphQLResponse(for: transaction)
+        let error = TransactionError.missingResultParameter(json: transaction)
+
+        try testGraphQLJSONParsingFailure(activityResponse: response1, fxResponse: nil, expectedError: error)
     }
 
     func testGraphQLInvalidType() throws {

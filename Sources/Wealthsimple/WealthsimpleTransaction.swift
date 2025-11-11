@@ -184,7 +184,7 @@ struct WealthsimpleTransaction: Transaction { // swiftlint:disable:this type_bod
         var index = 0
         for result in json {
             guard let id = result["externalCanonicalId"] as? String else {
-                throw TransactionError.invalidResultParameter(json: result)
+                throw TransactionError.missingResultParameter(json: result)
             }
             queryPart1 += "$id\(index): ID!, "
             queryPart2 += "a\(index): creditCardActivity(id: $id\(index)) { ...Activity } "
