@@ -117,14 +117,14 @@
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">AccountError</span> <span class="p">:</span> <span class="kt">Error</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">AccountError</span> <span class="p">:</span> <span class="kt">Error</span><span class="p">,</span> <span class="kt">Equatable</span></code></pre>
 
                 </div>
               </div>
             <p>Errors which can happen when retrieving an Account</p>
 
               <div class="slightly-smaller">
-                <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAccount.swift#L14-L29">Show on GitHub</a>
+                <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAccount.swift#L14-L27">Show on GitHub</a>
               </div>
           </div>
         </section>
@@ -196,9 +196,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:12Wealthsimple12AccountErrorO11invalidJsonyACSS_tcACmF"></a>
-                    <a name="//apple_ref/swift/Element/invalidJson(error:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:12Wealthsimple12AccountErrorO11invalidJsonyACSS_tcACmF">invalidJson(error:<wbr>)</a>
+                    <a name="/s:12Wealthsimple12AccountErrorO11invalidJsonyAC10Foundation4DataV_tcACmF"></a>
+                    <a name="//apple_ref/swift/Element/invalidJson(json:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple12AccountErrorO11invalidJsonyAC10Foundation4DataV_tcACmF">invalidJson(json:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -213,7 +213,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">invalidJson</span><span class="p">(</span><span class="nv">error</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">invalidJson</span><span class="p">(</span><span class="nv">json</span><span class="p">:</span> <span class="kt">Data</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -226,39 +226,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:12Wealthsimple12AccountErrorO15invalidJsonTypeyACyp_tcACmF"></a>
-                    <a name="//apple_ref/swift/Element/invalidJsonType(json:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:12Wealthsimple12AccountErrorO15invalidJsonTypeyACyp_tcACmF">invalidJsonType(json:<wbr>)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>When the received JSON does not have the right type</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">invalidJsonType</span><span class="p">(</span><span class="nv">json</span><span class="p">:</span> <span class="kt">Any</span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                      <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAccount.swift#L22">Show on GitHub</a>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:12Wealthsimple12AccountErrorO23missingResultParamenteryACSDySSypG_tcACmF"></a>
+                    <a name="/s:12Wealthsimple12AccountErrorO23missingResultParamenteryACSS_tcACmF"></a>
                     <a name="//apple_ref/swift/Element/missingResultParamenter(json:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:12Wealthsimple12AccountErrorO23missingResultParamenteryACSDySSypG_tcACmF">missingResultParamenter(json:<wbr>)</a>
+                    <a class="token" href="#/s:12Wealthsimple12AccountErrorO23missingResultParamenteryACSS_tcACmF">missingResultParamenter(json:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -273,12 +243,12 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">missingResultParamenter</span><span class="p">(</span><span class="nv">json</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">])</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">missingResultParamenter</span><span class="p">(</span><span class="nv">json</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAccount.swift#L24">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAccount.swift#L22">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -286,9 +256,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:12Wealthsimple12AccountErrorO23invalidResultParamenteryACSDySSypG_tcACmF"></a>
+                    <a name="/s:12Wealthsimple12AccountErrorO23invalidResultParamenteryACSS_tcACmF"></a>
                     <a name="//apple_ref/swift/Element/invalidResultParamenter(json:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:12Wealthsimple12AccountErrorO23invalidResultParamenteryACSDySSypG_tcACmF">invalidResultParamenter(json:<wbr>)</a>
+                    <a class="token" href="#/s:12Wealthsimple12AccountErrorO23invalidResultParamenteryACSS_tcACmF">invalidResultParamenter(json:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -303,12 +273,12 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">invalidResultParamenter</span><span class="p">(</span><span class="nv">json</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">])</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">invalidResultParamenter</span><span class="p">(</span><span class="nv">json</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAccount.swift#L26">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAccount.swift#L24">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -338,7 +308,7 @@
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAccount.swift#L28">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAccount.swift#L26">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -351,8 +321,8 @@
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2025 <a class="link" href="https://github.com/Nef10" target="_blank" rel="external noopener">Nef10</a>. All rights reserved. (Last updated: 2025-06-03)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
+      <p>&copy; 2025 <a class="link" href="https://github.com/Nef10" target="_blank" rel="external noopener">Nef10</a>. All rights reserved. (Last updated: 2025-11-11)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
 </html>

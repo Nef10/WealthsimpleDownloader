@@ -142,7 +142,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">TokenError</span> <span class="p">:</span> <span class="kt">Error</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">TokenError</span> <span class="p">:</span> <span class="kt">Error</span><span class="p">,</span> <span class="kt">Equatable</span></code></pre>
 
                         </div>
                       </div>
@@ -173,13 +173,44 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">TransactionError</span> <span class="p">:</span> <span class="kt">Error</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">TransactionError</span> <span class="p">:</span> <span class="kt">Error</span><span class="p">,</span> <span class="kt">Equatable</span></code></pre>
 <pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">TransactionError</span><span class="p">:</span> <span class="kt">LocalizedError</span></code></pre>
 
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/TransactionError.swift#L11-L26">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Transaction.swift#L11-L64">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12Wealthsimple15TransactionTypeO"></a>
+                    <a name="//apple_ref/swift/Enum/TransactionType" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12Wealthsimple15TransactionTypeO">TransactionType</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Type for the transaction, e.g. buying or selling</p>
+
+                        <a href="Enums/TransactionType.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">TransactionType</span> <span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/Transaction.swift#L67-L146">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -205,12 +236,12 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">AccountError</span> <span class="p">:</span> <span class="kt">Error</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">AccountError</span> <span class="p">:</span> <span class="kt">Error</span><span class="p">,</span> <span class="kt">Equatable</span></code></pre>
 
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAccount.swift#L14-L29">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAccount.swift#L14-L27">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -243,7 +274,7 @@
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAccount.swift#L34-L57">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleAccount.swift#L32-L55">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -269,7 +300,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">AssetError</span> <span class="p">:</span> <span class="kt">Error</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">AssetError</span> <span class="p">:</span> <span class="kt">Error</span><span class="p">,</span> <span class="kt">Equatable</span></code></pre>
 
                         </div>
                       </div>
@@ -331,43 +362,12 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">PositionError</span> <span class="p">:</span> <span class="kt">Error</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">PositionError</span> <span class="p">:</span> <span class="kt">Error</span><span class="p">,</span> <span class="kt">Equatable</span></code></pre>
 
                         </div>
                       </div>
                       <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimplePosition.swift#L14-L31">Show on GitHub</a>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:12Wealthsimple15TransactionTypeO"></a>
-                    <a name="//apple_ref/swift/Enum/TransactionType" class="dashAnchor"></a>
-                    <a class="token" href="#/s:12Wealthsimple15TransactionTypeO">TransactionType</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Type for the transaction, e.g. buying or selling</p>
-
-                        <a href="Enums/TransactionType.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">TransactionType</span> <span class="p">:</span> <span class="kt">String</span></code></pre>
-
-                        </div>
-                      </div>
-                      <div class="slightly-smaller">
-                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimpleTransaction.swift#L14-L89">Show on GitHub</a>
+                        <a href="https://github.com/Nef10/WealthsimpleDownloader/blob/main/Sources/Wealthsimple/WealthsimplePosition.swift#L14-L29">Show on GitHub</a>
                       </div>
                     </section>
                   </div>
@@ -380,8 +380,8 @@
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2025 <a class="link" href="https://github.com/Nef10" target="_blank" rel="external noopener">Nef10</a>. All rights reserved. (Last updated: 2025-06-03)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
+      <p>&copy; 2025 <a class="link" href="https://github.com/Nef10" target="_blank" rel="external noopener">Nef10</a>. All rights reserved. (Last updated: 2025-11-11)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
 </html>
