@@ -35,10 +35,8 @@ struct WealthsimpleTransaction: Transaction { // swiftlint:disable:this type_bod
         return dateFormatter
     }()
 
-    private static var dateFormatterGraphQLRequest: DateFormatter = {
-        var dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
-        return dateFormatter
+    private static var dateFormatterGraphQLRequest: ISO8601DateFormatter = {
+        ISO8601DateFormatter()
     }()
 
     private static var dateFormatterGraphQLResult: DateFormatter = {
