@@ -26,6 +26,8 @@ public enum PositionError: Error, Equatable {
     case assetError(_ error: AssetError)
     /// An error with the token occured
     case tokenError(_ error: TokenError)
+    /// An error with the request parameters occured
+    case invalidRequestParameter(error: String)
 }
 
 /// A Position, like certain amount of a stock or a currency held in an account
@@ -53,6 +55,23 @@ struct WealthsimplePosition: Position {
         dateFormatter.dateFormat = "yyyy-MM-dd"
         return dateFormatter
     }()
+
+    private static let creditCardGraphQLQuery = """
+        query FetchCreditCardAccountSummary($id: ID!) { \
+            creditCardAccount(id: $id) { \
+                ...CreditCardAccountSummary \
+                __typename \
+            } \
+        } \
+        fragment CreditCardAccountSummary on CreditCardAccount { \
+            id \
+            balance { \
+                current \
+                __typename \
+            } \
+            __typename \
+        }
+        """
 
     let accountId: String
     let asset: Asset
@@ -89,7 +108,35 @@ struct WealthsimplePosition: Position {
         self.positionDate = date
     }
 
+    private init(creditCardJson json: [String: Any], account: Account) throws {
+        guard let data = json["data"] as? [String: Any],
+              let creditCardAccount = data["creditCardAccount"] as? [String: Any],
+              let balance = creditCardAccount["balance"] as? [String: Any],
+              let current = balance["current"] as? String else {
+            throw PositionError.missingResultParamenter(json: String(data: try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys]), encoding: .utf8) ?? "")
+        }
+        self.accountId = account.id
+        self.quantity = "-\(current)"
+        self.priceAmount = "1"
+        self.priceCurrency = account.currency
+        self.positionDate = Date()
+        self.asset = WealthsimpleAsset(currency: account.currency)
+    }
+
     static func getPositions(token: Token, account: Account, date: Date?, completion: @escaping (Result<[Position], PositionError>) -> Void) {
+        if account.accountType == .creditCard {
+            if date != nil {
+                // Credit card positions do not support date parameter
+                completion(.failure(.invalidRequestParameter(error: "Date parameter is not supported for credit card accounts")))
+                return
+            }
+            getCreditCardPosition(token: token, account: account, completion: completion)
+        } else {
+            getRESTPositions(token: token, account: account, date: date, completion: completion)
+        }
+    }
+
+    private static func getRESTPositions(token: Token, account: Account, date: Date?, completion: @escaping (Result<[Position], PositionError>) -> Void) {
         var url = baseUrl
         url.queryItems = [
             URLQueryItem(name: "account_id", value: account.id),
@@ -104,6 +151,30 @@ struct WealthsimplePosition: Position {
         token.authenticateRequest(request) { request in
             let task = session.dataTask(with: request) { data, response, error in
                 handleResponse(data: data, response: response, error: error, completion: completion)
+            }
+            task.resume()
+        }
+    }
+
+    private static func getCreditCardPosition(token: Token, account: Account, completion: @escaping (Result<[Position], PositionError>) -> Void) {
+        guard var request = URLConfiguration.shared.graphQLURLRequest() else {
+            completion(.failure(PositionError.httpError(error: "Invalid GraphQL URL")))
+            return
+        }
+        let body: [String: Any] = [
+            "operationName": "FetchCreditCardAccountSummary",
+            "variables": ["id": account.id],
+            "query": creditCardGraphQLQuery
+        ]
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: body, options: []) else {
+            completion(.failure(PositionError.httpError(error: "Failed to serialize GraphQL request")))
+            return
+        }
+        request.httpBody = jsonData
+        let session = URLSession.shared
+        token.authenticateRequest(request) { request in
+            let task = session.dataTask(with: request) { data, response, error in
+                handleCreditCardResponse(data: data, response: response, error: error, account: account, completion: completion)
             }
             task.resume()
         }
@@ -129,6 +200,32 @@ struct WealthsimplePosition: Position {
         completion(parse(data: data))
     }
 
+    private static func handleCreditCardResponse(
+        data: Data?,
+        response: URLResponse?,
+        error: Error?,
+        account: Account,
+        completion: (Result<[Position], PositionError>) -> Void
+    ) {
+        guard let data else {
+            if let error {
+                completion(.failure(PositionError.httpError(error: error.localizedDescription)))
+            } else {
+                completion(.failure(PositionError.noDataReceived))
+            }
+            return
+        }
+        guard let httpResponse = response as? HTTPURLResponse else {
+            completion(.failure(PositionError.httpError(error: "No HTTPURLResponse")))
+            return
+        }
+        guard httpResponse.statusCode == 200 else {
+            completion(.failure(PositionError.httpError(error: "Status code \(httpResponse.statusCode)")))
+            return
+        }
+        completion(parseCreditCard(data: data, account: account))
+    }
+
     private static func parse(data: Data) -> Result<[Position], PositionError> {
         guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
             return .failure(PositionError.invalidJson(json: data))
@@ -147,6 +244,18 @@ struct WealthsimplePosition: Position {
                 positions.append(try Self(json: result))
             }
             return .success(positions)
+        } catch {
+            return .failure(error as! PositionError) // swiftlint:disable:this force_cast
+        }
+    }
+
+    private static func parseCreditCard(data: Data, account: Account) -> Result<[Position], PositionError> {
+        guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            return .failure(PositionError.invalidJson(json: data))
+        }
+        do {
+            let position = try Self(creditCardJson: json, account: account)
+            return .success([position])
         } catch {
             return .failure(error as! PositionError) // swiftlint:disable:this force_cast
         }

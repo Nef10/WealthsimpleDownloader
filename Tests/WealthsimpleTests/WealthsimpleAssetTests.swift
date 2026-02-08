@@ -18,6 +18,24 @@ final class WealthsimpleAssetTests: XCTestCase {
         XCTAssertEqual(asset.type, .equity)
     }
 
+    func testInitWithCurrency() {
+        let asset = WealthsimpleAsset(currency: "CAD")
+        XCTAssertEqual(asset.id, "CAD")
+        XCTAssertEqual(asset.symbol, "CAD")
+        XCTAssertEqual(asset.currency, "CAD")
+        XCTAssertEqual(asset.name, "CAD")
+        XCTAssertEqual(asset.type, .currency)
+    }
+
+    func testInitWithCurrencyDifferentValue() {
+        let asset = WealthsimpleAsset(currency: "USD")
+        XCTAssertEqual(asset.id, "USD")
+        XCTAssertEqual(asset.symbol, "USD")
+        XCTAssertEqual(asset.currency, "USD")
+        XCTAssertEqual(asset.name, "USD")
+        XCTAssertEqual(asset.type, .currency)
+    }
+
     func testInitWithMissingParameterThrows() {
         let json: [String: Any] = [
             "security_id": "asset-123",

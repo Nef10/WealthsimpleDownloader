@@ -66,4 +66,13 @@ struct WealthsimpleAsset: Asset {
         self.name = name
         self.type = type
     }
+
+    init(currency: String) {
+        self.id = currency
+        self.symbol = currency
+        self.currency = currency
+        self.name = currency
+        self.type = .currency
+    }
+
 }
