@@ -108,7 +108,7 @@ final class CreditCardPositionTests: DownloaderTestCase {
             switch result {
             case .success(let positions):
                 XCTAssertEqual(positions.count, 1)
-                self.assertCreditCardPosition(positions[0], balance: "1234.56")
+                self.assertCreditCardPosition(positions[0], balance: "-1234.56")
             case .failure(let error):
                 XCTFail("Expected success but got error: \(error)")
             }
