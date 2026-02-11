@@ -177,7 +177,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         expectedError: TransactionError,
         file: StaticString = #file,
         line: UInt = #line
-    ) throws {
+    ) {
         let expectation = XCTestExpectation(description: "getTransactions completion")
 
         MockURLProtocol.transactionsRequestHandler = response
@@ -214,7 +214,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         try testRESTJSONParsingFailure(jsonData: jsonData, expectedError: expectedError, file: file, line: line)
     }
 
-    private func testGraphQLFailure(expectation: XCTestExpectation, expectedError: TransactionError, file: StaticString = #file, line: UInt = #line) throws {
+    private func testGraphQLFailure(expectation: XCTestExpectation, expectedError: TransactionError, file: StaticString = #file, line: UInt = #line) {
         WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createGraphQLAccount(), startDate: Self.startDate) { result in
             switch result {
             case .success(let transactions):
@@ -282,7 +282,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
     // MARK: - Successful REST Tests
 
     // swiftlint:disable:next function_body_length
-    func testGetTransactionsSuccess() throws {
+    func testGetTransactionsSuccess() {
         let expectation = XCTestExpectation(description: "getTransactions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 
@@ -323,7 +323,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         wait(for: [expectation, mockExpectation], timeout: 10.0)
     }
 
-    func testGetTransactionsEmptyResults() throws {
+    func testGetTransactionsEmptyResults() {
         let expectation = XCTestExpectation(description: "getTransactions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 
@@ -342,7 +342,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         wait(for: [expectation, mockExpectation], timeout: 10.0)
     }
 
-    func testGetTransactionsMultipleTransactionTypes() throws {
+    func testGetTransactionsMultipleTransactionTypes() {
         let expectation = XCTestExpectation(description: "getTransactions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 

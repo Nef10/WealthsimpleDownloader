@@ -91,7 +91,7 @@ final class WealthsimplePositionTests: DownloaderTestCase { // swiftlint:disable
         expectedError: PositionError,
         file: StaticString = #file,
         line: UInt = #line
-    ) throws {
+    ) {
         let expectation = XCTestExpectation(description: "getPositions completion")
 
         MockURLProtocol.positionsRequestHandler = response
@@ -140,7 +140,7 @@ final class WealthsimplePositionTests: DownloaderTestCase { // swiftlint:disable
 
     // MARK: - Successful getPositions Tests
 
-    func testGetPositionsSuccess() throws {
+    func testGetPositionsSuccess() {
         let expectation = XCTestExpectation(description: "getPositions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 
@@ -203,7 +203,7 @@ final class WealthsimplePositionTests: DownloaderTestCase { // swiftlint:disable
         wait(for: [expectation, mockExpectation], timeout: 10.0)
     }
 
-    func testGetPositionsSuccessMultiplePositions() throws {
+    func testGetPositionsSuccessMultiplePositions() {
         let expectation = XCTestExpectation(description: "getPositions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 

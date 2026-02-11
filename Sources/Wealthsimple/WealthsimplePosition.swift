@@ -180,7 +180,7 @@ struct WealthsimplePosition: Position {
         }
     }
 
-    private static func handleResponse(data: Data?, response: URLResponse?, error: Error?, completion: @escaping (Result<[Position], PositionError>) -> Void) {
+    private static func handleResponse(data: Data?, response: URLResponse?, error: Error?, completion: (Result<[Position], PositionError>) -> Void) {
         guard let data else {
             if let error {
                 completion(.failure(PositionError.httpError(error: error.localizedDescription)))

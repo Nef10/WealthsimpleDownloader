@@ -79,7 +79,7 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
         expectedError: AccountError,
         file: StaticString = #file,
         line: UInt = #line
-    ) throws {
+    ) {
         let expectation = XCTestExpectation(description: "getAccounts completion")
 
         MockURLProtocol.accountsRequestHandler = response
@@ -117,7 +117,7 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
 
     // MARK: - Successful getAccounts Tests
 
-    func testGetAccountsSuccess() throws {
+    func testGetAccountsSuccess() {
         let expectation = XCTestExpectation(description: "getAccounts completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 
@@ -155,7 +155,7 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
         wait(for: [expectation, mockExpectation], timeout: 10.0)
     }
 
-    func testGetAccountsEmptyResults() throws {
+    func testGetAccountsEmptyResults() {
         let expectation = XCTestExpectation(description: "getAccounts completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 

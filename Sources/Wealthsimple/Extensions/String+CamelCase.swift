@@ -13,7 +13,7 @@ extension String {
         guard !isEmpty else {
             return ""
         }
-        var parts = self.components(separatedBy: CharacterSet.alphanumerics.inverted)
+        var parts = components(separatedBy: CharacterSet.alphanumerics.inverted)
         return "\(parts.removeFirst().lowercasingFirst)\(parts.map(\.uppercasingFirst).joined())"
     }
 

@@ -81,7 +81,7 @@ final class CreditCardPositionTests: DownloaderTestCase {
         validate: @escaping (PositionError) -> Void,
         file: StaticString = #file,
         line: UInt = #line
-    ) throws {
+    ) {
         let expectation = XCTestExpectation(description: "getPositions completion")
         MockURLProtocol.graphQLRequestHandler = handler
         WealthsimplePosition.getPositions(token: try createValidToken(), account: Self.creditCardAccount, date: nil) { result in
@@ -98,7 +98,7 @@ final class CreditCardPositionTests: DownloaderTestCase {
 
     // MARK: - Successful Tests
 
-    func testGetCreditCardPositionSuccess() throws {
+    func testGetCreditCardPositionSuccess() {
         let expectation = XCTestExpectation(description: "getPositions completion")
         let mockExpectation = XCTestExpectation(description: "mock GraphQL server called")
 
@@ -209,7 +209,7 @@ final class CreditCardPositionTests: DownloaderTestCase {
         )
     }
 
-    func testGetCreditCardPositionDate() throws {
+    func testGetCreditCardPositionDate() {
         let expectation = XCTestExpectation(description: "getPositions completion")
 
         let dateFormatter = DateFormatter()
