@@ -103,7 +103,7 @@ final class CreditCardPositionTests: DownloaderTestCase {
 
     // MARK: - Successful Tests
 
-    func testGetCreditCardPositionSuccess() {
+    func testGetCreditCardPositionSuccess() throws {
         let expectation = XCTestExpectation(description: "getPositions completion")
         let mockExpectation = XCTestExpectation(description: "mock GraphQL server called")
 
@@ -214,7 +214,7 @@ final class CreditCardPositionTests: DownloaderTestCase {
         )
     }
 
-    func testGetCreditCardPositionDate() {
+    func testGetCreditCardPositionDate() throws {
         let expectation = XCTestExpectation(description: "getPositions completion")
 
         let dateFormatter = DateFormatter()

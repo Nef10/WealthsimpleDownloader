@@ -122,7 +122,7 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
 
     // MARK: - Successful getAccounts Tests
 
-    func testGetAccountsSuccess() {
+    func testGetAccountsSuccess() throws {
         let expectation = XCTestExpectation(description: "getAccounts completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 
@@ -160,7 +160,7 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
         wait(for: [expectation, mockExpectation], timeout: 10.0)
     }
 
-    func testGetAccountsEmptyResults() {
+    func testGetAccountsEmptyResults() throws {
         let expectation = XCTestExpectation(description: "getAccounts completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 

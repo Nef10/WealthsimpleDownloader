@@ -145,7 +145,7 @@ final class WealthsimplePositionTests: DownloaderTestCase { // swiftlint:disable
 
     // MARK: - Successful getPositions Tests
 
-    func testGetPositionsSuccess() {
+    func testGetPositionsSuccess() throws {
         let expectation = XCTestExpectation(description: "getPositions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 
@@ -208,7 +208,7 @@ final class WealthsimplePositionTests: DownloaderTestCase { // swiftlint:disable
         wait(for: [expectation, mockExpectation], timeout: 10.0)
     }
 
-    func testGetPositionsSuccessMultiplePositions() {
+    func testGetPositionsSuccessMultiplePositions() throws {
         let expectation = XCTestExpectation(description: "getPositions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 

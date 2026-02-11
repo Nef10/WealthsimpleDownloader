@@ -219,7 +219,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         try testRESTJSONParsingFailure(jsonData: jsonData, expectedError: expectedError, file: file, line: line)
     }
 
-    private func testGraphQLFailure(expectation: XCTestExpectation, expectedError: TransactionError, file: StaticString = #file, line: UInt = #line) {
+    private func testGraphQLFailure(expectation: XCTestExpectation, expectedError: TransactionError, file: StaticString = #file, line: UInt = #line) throws {
         WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createGraphQLAccount(), startDate: Self.startDate) { result in
             switch result {
             case .success(let transactions):
@@ -287,7 +287,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
     // MARK: - Successful REST Tests
 
     // swiftlint:disable:next function_body_length
-    func testGetTransactionsSuccess() {
+    func testGetTransactionsSuccess() throws {
         let expectation = XCTestExpectation(description: "getTransactions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 
@@ -328,7 +328,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         wait(for: [expectation, mockExpectation], timeout: 10.0)
     }
 
-    func testGetTransactionsEmptyResults() {
+    func testGetTransactionsEmptyResults() throws {
         let expectation = XCTestExpectation(description: "getTransactions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 
@@ -347,7 +347,7 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         wait(for: [expectation, mockExpectation], timeout: 10.0)
     }
 
-    func testGetTransactionsMultipleTransactionTypes() {
+    func testGetTransactionsMultipleTransactionTypes() throws {
         let expectation = XCTestExpectation(description: "getTransactions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
 

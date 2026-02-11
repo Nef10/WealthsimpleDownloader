@@ -77,7 +77,7 @@ class MockURLProtocol: URLProtocol {
         throw URLError(.unsupportedURL)
     }
 
-    static func failTest(url: URL, _: URLRequest) -> (HTTPURLResponse, Data) {
+    static func failTest(url: URL, _: URLRequest) throws -> (HTTPURLResponse, Data) {
         XCTFail("Call network request which should not have been called")
         let response = HTTPURLResponse(url: url, statusCode: 500, httpVersion: nil, headerFields: nil)!
         return (response, Data())
