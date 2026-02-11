@@ -84,17 +84,22 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
 
         MockURLProtocol.accountsRequestHandler = response
 
-        WealthsimpleAccount.getAccounts(token: try createValidToken()) { result in
-            switch result {
-            case .success:
-                XCTFail("Expected failure", file: file, line: line)
-            case .failure(let error):
-                XCTAssertEqual(error, expectedError, file: file, line: line)
+        do {
+            let token = try createValidToken()
+            WealthsimpleAccount.getAccounts(token: token) { result in
+                switch result {
+                case .success:
+                    XCTFail("Expected failure", file: file, line: line)
+                case .failure(let error):
+                    XCTAssertEqual(error, expectedError, file: file, line: line)
+                }
+                expectation.fulfill()
             }
-            expectation.fulfill()
-        }
 
-        wait(for: [expectation], timeout: 10.0)
+            wait(for: [expectation], timeout: 10.0)
+        } catch {
+            XCTFail("Failed to create token: \(error)")
+        }
     }
 
     private func testJSONParsingFailure(jsonData: Data, expectedError: AccountError, file: StaticString = #file, line: UInt = #line) throws {

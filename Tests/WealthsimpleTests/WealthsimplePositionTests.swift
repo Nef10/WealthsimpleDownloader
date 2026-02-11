@@ -96,17 +96,22 @@ final class WealthsimplePositionTests: DownloaderTestCase { // swiftlint:disable
 
         MockURLProtocol.positionsRequestHandler = response
 
-        WealthsimplePosition.getPositions(token: try createValidToken(), account: Self.mockAccount, date: nil) { result in
-            switch result {
-            case .success:
-                XCTFail("Expected failure", file: file, line: line)
-            case .failure(let error):
-                XCTAssertEqual(error, expectedError, file: file, line: line)
+        do {
+            let token = try createValidToken()
+            WealthsimplePosition.getPositions(token: token, account: Self.mockAccount, date: nil) { result in
+                switch result {
+                case .success:
+                    XCTFail("Expected failure", file: file, line: line)
+                case .failure(let error):
+                    XCTAssertEqual(error, expectedError, file: file, line: line)
+                }
+                expectation.fulfill()
             }
-            expectation.fulfill()
-        }
 
-        wait(for: [expectation], timeout: 10.0)
+            wait(for: [expectation], timeout: 10.0)
+        } catch {
+            XCTFail("Failed to create token: \(error)")
+        }
     }
 
     private func testJSONParsingFailure(
