@@ -77,6 +77,8 @@ class MockURLProtocol: URLProtocol {
         throw URLError(.unsupportedURL)
     }
 
+    // https://github.com/realm/SwiftLint/issues/6491
+    // swiftlint:disable:next unneeded_throws_rethrows
     static func failTest(url: URL, _: URLRequest) throws -> (HTTPURLResponse, Data) {
         XCTFail("Call network request which should not have been called")
         let response = HTTPURLResponse(url: url, statusCode: 500, httpVersion: nil, headerFields: nil)!
