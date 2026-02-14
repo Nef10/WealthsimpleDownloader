@@ -79,7 +79,9 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
         expectedError: AccountError,
         file: StaticString = #file,
         line: UInt = #line
-    ) {
+        // https://github.com/realm/SwiftLint/issues/6491
+        // swiftlint:disable:next unneeded_throws_rethrows
+    ) throws {
         let expectation = XCTestExpectation(description: "getAccounts completion")
 
         MockURLProtocol.accountsRequestHandler = response
@@ -117,6 +119,8 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
 
     // MARK: - Successful getAccounts Tests
 
+    // https://github.com/realm/SwiftLint/issues/6491
+    // swiftlint:disable:next unneeded_throws_rethrows
     func testGetAccountsSuccess() throws {
         let expectation = XCTestExpectation(description: "getAccounts completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
@@ -155,6 +159,8 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
         wait(for: [expectation, mockExpectation], timeout: 10.0)
     }
 
+    // https://github.com/realm/SwiftLint/issues/6491
+    // swiftlint:disable:next unneeded_throws_rethrows
     func testGetAccountsEmptyResults() throws {
         let expectation = XCTestExpectation(description: "getAccounts completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
