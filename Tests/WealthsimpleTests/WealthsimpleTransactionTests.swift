@@ -219,6 +219,8 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         try testRESTJSONParsingFailure(jsonData: jsonData, expectedError: expectedError, file: file, line: line)
     }
 
+    // https://github.com/realm/SwiftLint/issues/6491
+    // swiftlint:disable:next unneeded_throws_rethrows
     private func testGraphQLFailure(expectation: XCTestExpectation, expectedError: TransactionError, file: StaticString = #file, line: UInt = #line) throws {
         WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createGraphQLAccount(), startDate: Self.startDate) { result in
             switch result {
@@ -286,7 +288,8 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
 
     // MARK: - Successful REST Tests
 
-    // swiftlint:disable:next function_body_length
+    // https://github.com/realm/SwiftLint/issues/6491 for unneeded_throws_rethrows
+    // swiftlint:disable:next function_body_length unneeded_throws_rethrows
     func testGetTransactionsSuccess() throws {
         let expectation = XCTestExpectation(description: "getTransactions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
@@ -328,6 +331,8 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         wait(for: [expectation, mockExpectation], timeout: 10.0)
     }
 
+    // https://github.com/realm/SwiftLint/issues/6491
+    // swiftlint:disable:next unneeded_throws_rethrows
     func testGetTransactionsEmptyResults() throws {
         let expectation = XCTestExpectation(description: "getTransactions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
@@ -347,6 +352,8 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
         wait(for: [expectation, mockExpectation], timeout: 10.0)
     }
 
+    // https://github.com/realm/SwiftLint/issues/6491
+    // swiftlint:disable:next unneeded_throws_rethrows
     func testGetTransactionsMultipleTransactionTypes() throws {
         let expectation = XCTestExpectation(description: "getTransactions completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
