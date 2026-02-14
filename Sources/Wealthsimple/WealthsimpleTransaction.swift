@@ -281,7 +281,7 @@ struct WealthsimpleTransaction: Transaction { // swiftlint:disable:this type_bod
         }
     }
 
-    private static func processGraphQLTransactions(data: Data, token: Token, account: Account, startDate: Date, completion: @escaping TransactionsCompletion) {
+    private static func processGraphQLTransactions(data: Data, token: Token, account: Account, startDate: Date, completion: TransactionsCompletion) {
         do {
             let json = try parseGraphQL(data: data)
             guard let page = json["pageInfo"] as? [String: Any], let edges = json["edges"] as? [[String: Any]],

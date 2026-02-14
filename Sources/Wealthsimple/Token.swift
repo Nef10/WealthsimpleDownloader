@@ -128,7 +128,7 @@ struct Token {
         response: URLResponse?,
         error: Error?,
         credentialStorage: CredentialStorage,
-        completion: @escaping (Result<Self, TokenError>) -> Void
+        completion: (Result<Self, TokenError>) -> Void
     ) {
         guard let data else {
             if let error {
@@ -182,9 +182,9 @@ struct Token {
         }
     }
 
-    func authenticateRequest(_ request: URLRequest, completion: @escaping (URLRequest) -> Void) {
+    func authenticateRequest(_ request: URLRequest, completion: (URLRequest) -> Void) {
         var requestCopy = request
-        requestCopy.setValue("Bearer \(self.accessToken)", forHTTPHeaderField: "Authorization")
+        requestCopy.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         completion(requestCopy)
     }
 
