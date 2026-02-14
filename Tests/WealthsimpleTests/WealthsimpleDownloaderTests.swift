@@ -241,8 +241,6 @@ final class WealthsimpleDownloaderTests: DownloaderTestCase { // swiftlint:disab
         wait(for: [expectation, mockExpectation], timeout: 10.0)
     }
 
-    // https://github.com/realm/SwiftLint/issues/6491
-    // swiftlint:disable:next unneeded_throws_rethrows
     func testGetAccountsWithHttpError() throws {
         let expectation = XCTestExpectation(description: "getAccounts completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")

@@ -57,10 +57,10 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
         }
     }
 
-    private func testAccountsFailure(response: (URLResponse, Data), expectedError: AccountError, file: StaticString = #file, line: UInt = #line) {
+    private func testAccountsFailure(response: (URLResponse, Data), expectedError: AccountError, file: StaticString = #file, line: UInt = #line) throws {
         let mockExpectation = XCTestExpectation(description: "mock server called")
 
-        testAccountsFailure(
+        try testAccountsFailure(
             response: { _, _ in
                 mockExpectation.fulfill()
                 return response
@@ -102,8 +102,8 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
         }
     }
 
-    private func testJSONParsingFailure(jsonData: Data, expectedError: AccountError, file: StaticString = #file, line: UInt = #line) {
-        testAccountsFailure(response: (
+    private func testJSONParsingFailure(jsonData: Data, expectedError: AccountError, file: StaticString = #file, line: UInt = #line) throws {
+        try testAccountsFailure(response: (
                 HTTPURLResponse(url: URL(string: "http://test.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)!,
                 jsonData
             ),
@@ -112,18 +112,16 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
             line: line)
     }
 
-    private func testJSONParsingFailure(jsonObject: [String: Any], expectedError: AccountError, file: StaticString = #file, line: UInt = #line) {
+    private func testJSONParsingFailure(jsonObject: [String: Any], expectedError: AccountError, file: StaticString = #file, line: UInt = #line) throws {
         guard let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject, options: []) else {
             XCTFail("Failed to create JSON data", file: file, line: line)
             return
         }
-        testJSONParsingFailure(jsonData: jsonData, expectedError: expectedError, file: file, line: line)
+        try testJSONParsingFailure(jsonData: jsonData, expectedError: expectedError, file: file, line: line)
     }
 
     // MARK: - Successful getAccounts Tests
 
-    // https://github.com/realm/SwiftLint/issues/6491
-    // swiftlint:disable:next unneeded_throws_rethrows
     func testGetAccountsSuccess() throws {
         let expectation = XCTestExpectation(description: "getAccounts completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
@@ -162,8 +160,6 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
         wait(for: [expectation, mockExpectation], timeout: 10.0)
     }
 
-    // https://github.com/realm/SwiftLint/issues/6491
-    // swiftlint:disable:next unneeded_throws_rethrows
     func testGetAccountsEmptyResults() throws {
         let expectation = XCTestExpectation(description: "getAccounts completion")
         let mockExpectation = XCTestExpectation(description: "mock server called")
@@ -186,7 +182,7 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
     // MARK: - Network Error Tests
 
 #if canImport(FoundationNetworking)
-    func testGetAccountsNetworkFailure() {
+    func testGetAccountsNetworkFailure() throws {
         try testAccountsFailure(
             response: { _, _ in
                 throw URLError(.networkConnectionLost)
@@ -194,8 +190,8 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
         )
     }
 #else
-    func testGetAccountsNetworkFailure() {
-        testAccountsFailure(
+    func testGetAccountsNetworkFailure() throws {
+        try testAccountsFailure(
             response: { _, _ in
                 throw URLError(.networkConnectionLost)
             }, expectedError: AccountError.httpError(error: "The operation couldn’t be completed. (NSURLErrorDomain error -1005.)")
@@ -203,23 +199,23 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
     }
 #endif
 
-    func testGetAccountsInvalidJSONEmptyData() {
-        testAccountsFailure(response: (
+    func testGetAccountsInvalidJSONEmptyData() throws {
+        try testAccountsFailure(response: (
                 HTTPURLResponse(url: URL(string: "http://test.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)!,
                 Data()
             ), expectedError: AccountError.invalidJson(json: Data())
         )
     }
 
-    func testGetAccountsWrongResponseType() {
-        testAccountsFailure(response: (
+    func testGetAccountsWrongResponseType() throws {
+        try testAccountsFailure(response: (
             URLResponse(url: URL(string: "http://test.com")!, mimeType: nil, expectedContentLength: 0, textEncodingName: nil),
             Data("test".utf8)
         ), expectedError: AccountError.httpError(error: "No HTTPURLResponse"))
     }
 
-    func testGetAccountsHTTPError() {
-        testAccountsFailure(response: (
+    func testGetAccountsHTTPError() throws {
+        try testAccountsFailure(response: (
             HTTPURLResponse(url: URL(string: "http://test.com")!, statusCode: 401, httpVersion: nil, headerFields: nil)!,
             Data()
         ), expectedError: AccountError.httpError(error: "Status code 401"))
@@ -227,38 +223,38 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
 
     // MARK: - JSON Parsing Error Tests
 
-    func testGetAccountsInvalidJSON() {
+    func testGetAccountsInvalidJSON() throws {
         let data = Data("NOT VALID JSON".utf8)
-        testJSONParsingFailure(
+        try testJSONParsingFailure(
             jsonData: data,
             expectedError: AccountError.invalidJson(json: data)
         )
     }
 
-    func testGetAccountsInvalidJSONType() {
+    func testGetAccountsInvalidJSONType() throws {
         guard let jsonData = try? JSONSerialization.data(withJSONObject: ["not", "a", "dictionary"], options: []) else {
             XCTFail("Failed to create test JSON data")
             return
         }
-        testJSONParsingFailure(
+        try testJSONParsingFailure(
             jsonData: jsonData,
             expectedError: AccountError.invalidJson(json: jsonData)
         )
     }
 
-    func testGetAccountsMissingResults() {
-        testJSONParsingFailure(jsonObject: ["object": "account"], expectedError: AccountError.missingResultParamenter(json: "{\"object\":\"account\"}"))
+    func testGetAccountsMissingResults() throws {
+        try testJSONParsingFailure(jsonObject: ["object": "account"], expectedError: AccountError.missingResultParamenter(json: "{\"object\":\"account\"}"))
     }
 
-    func testGetAccountsInvalidObject() {
-        testJSONParsingFailure(
+    func testGetAccountsInvalidObject() throws {
+        try testJSONParsingFailure(
             jsonObject: ["object": "not_account", "results": []],
             expectedError: AccountError.invalidResultParamenter(json: "{\"object\":\"not_account\",\"results\":[]}")
         )
     }
 
-    func testGetAccountsMissingAccountId() {
-        testJSONParsingFailure(jsonObject: [
+    func testGetAccountsMissingAccountId() throws {
+        try testJSONParsingFailure(jsonObject: [
             "object": "account",
             "results": [
                 [
@@ -273,8 +269,8 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
         ))
     }
 
-    func testGetAccountsInvalidAccountType() {
-        testJSONParsingFailure(jsonObject: [
+    func testGetAccountsInvalidAccountType() throws {
+        try testJSONParsingFailure(jsonObject: [
             "object": "account",
             "results": [
                 [
@@ -290,8 +286,8 @@ final class WealthsimpleAccountTests: DownloaderTestCase {
         ))
     }
 
-    func testGetAccountsInvalidAccountObject() {
-        testJSONParsingFailure(jsonObject: [
+    func testGetAccountsInvalidAccountObject() throws {
+        try testJSONParsingFailure(jsonObject: [
             "object": "account",
             "results": [
                 [
