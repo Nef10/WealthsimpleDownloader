@@ -84,21 +84,16 @@ final class CreditCardPositionTests: DownloaderTestCase {
     ) {
         let expectation = XCTestExpectation(description: "getPositions completion")
         MockURLProtocol.graphQLRequestHandler = handler
-        do {
-            let token = try createValidToken()
-            WealthsimplePosition.getPositions(token: token, account: Self.creditCardAccount, date: nil) { result in
-                switch result {
-                case .success:
-                    XCTFail("Expected failure", file: file, line: line)
-                case .failure(let error):
-                    validate(error)
-                }
-                expectation.fulfill()
+        WealthsimplePosition.getPositions(token: try createValidToken(), account: Self.creditCardAccount, date: nil) { result in
+            switch result {
+            case .success:
+                XCTFail("Expected failure", file: file, line: line)
+            case .failure(let error):
+                validate(error)
             }
-            wait(for: [expectation], timeout: 10.0)
-        } catch {
-            XCTFail("Failed to create token: \(error)")
+            expectation.fulfill()
         }
+        wait(for: [expectation], timeout: 10.0)
     }
 
     // MARK: - Successful Tests

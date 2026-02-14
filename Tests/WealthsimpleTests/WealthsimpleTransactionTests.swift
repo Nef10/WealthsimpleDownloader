@@ -182,22 +182,17 @@ final class WealthsimpleTransactionTests: DownloaderTestCase { // swiftlint:disa
 
         MockURLProtocol.transactionsRequestHandler = response
 
-        do {
-            let token = try createValidToken()
-            WealthsimpleTransaction.getTransactions(token: token, account: createValidAccount(), startDate: Self.startDate) { result in
-                switch result {
-                case .success:
-                    XCTFail("Expected failure", file: file, line: line)
-                case .failure(let error):
-                    XCTAssertEqual(error, expectedError, file: file, line: line)
-                }
-                expectation.fulfill()
+        WealthsimpleTransaction.getTransactions(token: try createValidToken(), account: createValidAccount(), startDate: Self.startDate) { result in
+            switch result {
+            case .success:
+                XCTFail("Expected failure", file: file, line: line)
+            case .failure(let error):
+                XCTAssertEqual(error, expectedError, file: file, line: line)
             }
-
-            wait(for: [expectation], timeout: 10.0)
-        } catch {
-            XCTFail("Failed to create token: \(error)")
+            expectation.fulfill()
         }
+
+        wait(for: [expectation], timeout: 10.0)
     }
 
     private func testRESTJSONParsingFailure(jsonData: Data, expectedError: TransactionError, file: StaticString = #file, line: UInt = #line) throws {
