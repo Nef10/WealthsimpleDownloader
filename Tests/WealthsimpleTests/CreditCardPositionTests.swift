@@ -81,8 +81,6 @@ final class CreditCardPositionTests: DownloaderTestCase {
         validate: @escaping (PositionError) -> Void,
         file: StaticString = #file,
         line: UInt = #line
-        // https://github.com/realm/SwiftLint/issues/6491
-        // swiftlint:disable:next unneeded_throws_rethrows
     ) throws {
         let expectation = XCTestExpectation(description: "getPositions completion")
         MockURLProtocol.graphQLRequestHandler = handler
@@ -100,8 +98,6 @@ final class CreditCardPositionTests: DownloaderTestCase {
 
     // MARK: - Successful Tests
 
-    // https://github.com/realm/SwiftLint/issues/6491
-    // swiftlint:disable:next unneeded_throws_rethrows
     func testGetCreditCardPositionSuccess() throws {
         let expectation = XCTestExpectation(description: "getPositions completion")
         let mockExpectation = XCTestExpectation(description: "mock GraphQL server called")
@@ -213,8 +209,6 @@ final class CreditCardPositionTests: DownloaderTestCase {
         )
     }
 
-    // https://github.com/realm/SwiftLint/issues/6491
-    // swiftlint:disable:next unneeded_throws_rethrows
     func testGetCreditCardPositionDate() throws {
         let expectation = XCTestExpectation(description: "getPositions completion")
 
