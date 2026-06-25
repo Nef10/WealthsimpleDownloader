@@ -254,7 +254,7 @@ final class TokenTests: DownloaderTestCase { // swiftlint:disable:this type_body
             XCTAssertEqual(json?["password"] as? String, "password1")
             XCTAssertEqual(json?["grant_type"] as? String, "password")
             XCTAssertEqual(json?["client_id"] as? String, "4da53ac2b03225bed1550eba8e4611e086c7b905a3855e6ed12ea08c246758fa")
-            XCTAssertEqual(json?["scope"] as? String, "invest.read mfda.read mercer.read trade.read")
+            XCTAssertEqual(json?["scope"] as? String, "read")
             #endif
             let jsonResponse = [
                 "access_token": "atoken12345", "refresh_token": "rtoken67890", "expires_in": 3_600, "created_at": Int(Date().timeIntervalSince1970), "token_type": "Bearer"
