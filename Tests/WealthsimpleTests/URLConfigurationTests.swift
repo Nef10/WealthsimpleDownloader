@@ -68,10 +68,10 @@ final class URLConfigurationTests: XCTestCase {
 
     func testURLComponentsForPath() {
         let config = URLConfiguration.shared
-        let result = config.urlComponents(for: "oauth/token")
+        let result = config.urlComponents(for: "oauth/v2/token")
 
         XCTAssertNotNil(result)
-        XCTAssertEqual(result?.string, "https://api.production.wealthsimple.com/v1/oauth/token")
+        XCTAssertEqual(result?.string, "https://api.production.wealthsimple.com/v1/oauth/v2/token")
     }
 
     func testSingletonPattern() {
