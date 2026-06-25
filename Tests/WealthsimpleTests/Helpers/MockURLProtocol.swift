@@ -54,10 +54,10 @@ class MockURLProtocol: URLProtocol {
             throw URLError(.badURL)
         }
 
-        if url.path.contains("/oauth/token") && request.httpMethod == "POST" {
+        if url.path.contains("/oauth/v2/token") && request.httpMethod == "POST" {
             return try newTokenRequestHandler(url, request)
         }
-        if url.path.contains("/oauth/token/info") && request.httpMethod == "GET" {
+        if url.path.contains("/oauth/v2/token/info") && request.httpMethod == "GET" {
             return try tokenValidationRequestHandler(url, request)
         }
         if url.path.contains("/accounts") && request.httpMethod == "GET" {
