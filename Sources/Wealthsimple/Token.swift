@@ -34,10 +34,10 @@ struct Token {
     private static let credentialStorageKeyRefreshToken = "refreshToken"
     private static let credentialStorageKeyExpiry = "expiry"
 
-    private static var url: URL { URLConfiguration.shared.urlObject(for: "oauth/token")! }
-    private static var testUrl: URL { URLConfiguration.shared.urlObject(for: "oauth/token/info")! }
+    private static var url: URL { URLConfiguration.shared.urlObject(for: "oauth/v2/token")! }
+    private static var testUrl: URL { URLConfiguration.shared.urlObject(for: "oauth/v2/token/info")! }
     private static var clientId = "4da53ac2b03225bed1550eba8e4611e086c7b905a3855e6ed12ea08c246758fa" // From the website
-    private static var scope = "invest.read mfda.read mercer.read trade.read" // the clientId supports some write scopes, but as this library only reads we limit it for safety
+    private static var scope = "read" // the clientId supports some write scopes, but as this library only reads we limit it for safety
 
     private let accessToken: String
     private let refreshToken: String
