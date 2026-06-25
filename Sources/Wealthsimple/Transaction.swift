@@ -143,6 +143,10 @@ public enum TransactionType: String {
     case purchase
     /// Credit Card Payment
     case payment
+    /// Buy side of a currency conversion
+    case currencyConversionBuy = "currencyConversionBuySide"
+    /// Sell side of a currency conversion
+    case currencyConversionSell = "currencyConversionSellSide"
 }
 
 /// A Transaction, like buying or selling stock
